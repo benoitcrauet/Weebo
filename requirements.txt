@@ -1,0 +1,7 @@
+python-dotenv
+Flask
+flask-socketio
+Flask-WTF
+SQLAlchemy
+pillow
+flask-cors

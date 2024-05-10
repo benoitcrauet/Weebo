@@ -93,30 +93,30 @@ a.cond-insertion-adder-link:hover {
     background-color: rgb(0,170,0);
 }
 
-.cond-line-type-classic {
+.cond-line[data-type=classic] {
 
 }
-    .cond-line-type-classic .cond-line-title {
+    .cond-line[data-type=classic] .cond-line-title {
         font-size: 14pt;
         font-weight: bold;
         margin: 0px 0px 5px 0px;
     }
 
-    .cond-line-type-classic .cond-line-text {
+    .cond-line[data-type=classic] .cond-line-text {
         font-size: 10pt;
     }
 
-    .cond-line-type-classic .cond-line-desc {
+    .cond-line[data-type=classic] .cond-line-desc {
         display: none;
     }
 
-.cond-line-type-section {
+.cond-line[data-type=section] {
 }
-    body:not(.edit-mode) .cond-line-type-section .cond-line-display {
+    body:not(.edit-mode) .cond-line[data-type=section] .cond-line-display {
         position: sticky;
         top: 60px;
     }
-    body:not(.edit-mode) .cond-line-type-section .cond-line-display td {
+    body:not(.edit-mode) .cond-line[data-type=section] .cond-line-display td {
         background-color: rgba(var(--bs-dark-rgb), 0.7) !important;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
@@ -124,49 +124,49 @@ a.cond-insertion-adder-link:hover {
         -ms-backdrop-filter: blur(10px);
         -o-backdrop-filter: blur(10px);
     }
-    .cond-line-type-section .cond-line-done-checkbox {
+    .cond-line[data-type=section] .cond-line-done-checkbox {
             display: none;
     }
-    .cond-line-type-section .cond-line-title {
+    .cond-line[data-type=section] .cond-line-title {
         font-size: 26pt;
         font-weight: bolder;
         margin: 0px;
         font-variant: small-caps;
         text-align: center;
     }
-    .cond-line-type-section .cond-line-text {
+    .cond-line[data-type=section] .cond-line-text {
         display: none;
     }
-    .cond-line-type-section .cond-line-desc {
+    .cond-line[data-type=section] .cond-line-desc {
         text-align: center;
         font-size: 8pt;
     }
 
-.cond-line-type-important {
+.cond-line[data-type=important] {
 }
-    .cond-line-type-important .cond-line-title {
+    .cond-line[data-type=important] .cond-line-title {
         display: none;
     }
-    .cond-line-type-important .cond-line-text {
+    .cond-line[data-type=important] .cond-line-text {
         display: none;
     }
-    .cond-line-type-important .cond-line-desc {
+    .cond-line[data-type=important] .cond-line-desc {
         font-size: 16pt;
         color: rgb(255,255,200);
     }
-    .cond-line-type-important .cond-line-display td {
+    .cond-line[data-type=important] .cond-line-display td {
         background-color: rgb(130,130,0);
     }
 
-.cond-line-type-comment {
+.cond-line[data-type=comment] {
 }
-    .cond-line-type-comment .cond-line-title {
+    .cond-line[data-type=comment] .cond-line-title {
         display: none;
     }
-    .cond-line-type-comment .cond-line-text {
+    .cond-line[data-type=comment] .cond-line-text {
         display: none;
     }
-    .cond-line-type-comment .cond-line-desc {
+    .cond-line[data-type=comment] .cond-line-desc {
         color: gray;
         font-style: italic;
     }
@@ -185,4 +185,11 @@ body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkb
     -moz-backdrop-filter: blur(10px);
     -ms-backdrop-filter: blur(10px);
     -o-backdrop-filter: blur(10px);
+}
+
+
+@media screen and (max-width: 1000px) {
+    .toolbar-button-label {
+        display: none;
+    }
 }

@@ -1,10 +1,7 @@
-function lineStructure(id, type, name, text, done) {
+function lineStructure() {
 
     line_item = document.createElement("tbody");
     line_item.classList.add("cond-line");
-    line_item.classList.add("cond-line-type-"+type);
-    line_item.setAttribute("id", "cond-line-"+id);
-    line_item.dataset.id = id;
     
     tr_display = document.createElement("tr");
     tr_display.classList.add("cond-line-display");
@@ -33,7 +30,6 @@ function lineStructure(id, type, name, text, done) {
             checkbox_done.classList.add("form-check-input");
             checkbox_done.classList.add("cond-line-done-checkbox");
             checkbox_done.setAttribute("type", "checkbox");
-            if(done==true) checkbox_done.setAttribute("checked", "");
 
             td_done.append(checkbox_done);
         
@@ -42,15 +38,12 @@ function lineStructure(id, type, name, text, done) {
 
             h3_title = document.createElement("h3");
             h3_title.classList.add("cond-line-title");
-            h3_title.innerText = name;
 
             div_text = document.createElement("div");
             div_text.classList.add("cond-line-text");
-            div_text.innerHTML = nl2br(parseMarkdown(htmlspecialchars(text)));
 
             div_desc = document.createElement("div");
             div_desc.classList.add("cond-line-desc");
-            div_desc.innerText = text;
 
             div_medias = document.createElement("div");
             div_medias.classList.add("cond-line-medias");
@@ -71,7 +64,6 @@ function lineStructure(id, type, name, text, done) {
                 button_edit.classList.add("cond-line-action-edit");
                 button_edit.classList.add("btn");
                 button_edit.classList.add("btn-primary");
-                button_edit.dataset.id = id;
 
                     i_edit = document.createElement("i");
                     i_edit.classList.add("bi");
@@ -83,7 +75,6 @@ function lineStructure(id, type, name, text, done) {
                 button_delete.classList.add("cond-line-action-delete");
                 button_delete.classList.add("btn");
                 button_delete.classList.add("btn-danger");
-                button_delete.dataset.id = id;
 
                     i_delete = document.createElement("i");
                     i_delete.classList.add("bi");
@@ -111,7 +102,6 @@ function lineStructure(id, type, name, text, done) {
             a_adder = document.createElement("a");
             a_adder.classList.add("cond-insertion-adder-link");
             a_adder.setAttribute("href", "#");
-            a_adder.dataset.insertAfter = id;
 
                 i_adder = document.createElement("i");
                 i_adder.classList.add("bi");
@@ -131,6 +121,37 @@ function lineStructure(id, type, name, text, done) {
     
     return line_item
 }
+
+function lineSetDatas(element, line) {
+    let id = line.id;
+    let type = line.type;
+    let name = line.name;
+    let text = line.text;
+    let done = line.done;
+    let order = line.order;
+
+    // On édite le tbody principal
+    element.setAttribute("id", "cond-line-"+id);
+    element.dataset.id = id;
+    element.dataset.type = type;
+    element.dataset.order = order;
+
+    // On édite le nom de la ligne
+    element.querySelector(".cond-line-title").innerText = name;
+
+    // On édite le contenu de la ligne
+    element.querySelector(".cond-line-text").innerHTML = nl2br(parseMarkdown(htmlspecialchars(text)));
+    element.querySelector(".cond-line-desc").innerText = text;
+
+    // On édite les boutons
+    element.querySelector(".cond-line-action-edit").dataset.id = id;
+    element.querySelector(".cond-line-action-delete").dataset.id = id;
+    element.querySelector(".cond-insertion-adder-link").dataset.id = id;
+
+    // On édite la checkbox
+    element.querySelector(".cond-line-done-checkbox").checked = done;
+}
+
 
 function mediasStructure() {
     return document.createTextNode("");

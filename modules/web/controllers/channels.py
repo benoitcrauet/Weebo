@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, render_template, request, abort, redirect, url_for
 from flask_socketio import SocketIO
 from flask_wtf import FlaskForm
+from flask_cors import CORS
 import wtforms
 import wtforms.validators as validators
 
@@ -14,9 +15,12 @@ from lib.models import MediaChannel, WebChannel, Show
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
 app = None
+socketio = None
 def init(flaskapp):
-    global app, bp
+    global app, bp, socketio
     app = flaskapp
+    socketio = SocketIO(app)
+    CORS(app, origin="*")
 
     app.register_blueprint(bp)
 

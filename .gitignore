@@ -48,9 +48,6 @@ tmp_medias/*
 .coverage
 coverage*/
 
-# Fichiers de dépendances (générés par pip)
-requirements.txt
-
 
 # macOS
 .DS_Store

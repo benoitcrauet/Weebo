@@ -1,4 +1,5 @@
 from flask import Flask, send_from_directory
+from flask_cors import CORS
 import time
 import os
 
@@ -14,6 +15,7 @@ import lib.picture
 # Initialisation du serveur web
 app = Flask(__name__)
 app.config["SECRET_KEY"] = config["web_secret_key"]
+CORS(app, origins="*") # CORS from all
 
 
 # Ajouter une règle de route pour servir les fichiers statiques du dossier '/medias'

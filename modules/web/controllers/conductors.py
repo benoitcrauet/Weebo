@@ -2,6 +2,8 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
+from flask_socketio import SocketIO
+from flask_cors import CORS
 import wtforms
 import wtforms.validators as validators
 from datetime import datetime, timedelta
@@ -13,21 +15,41 @@ from lib.models import Show, Conductor, Line, Media
 from lib.guid import generate_guid
 from lib.dict import model_to_dict
 from lib.vdo import generateVdoGuestHash, generateVdoRoomID
+from lib.config import config
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
 app = None
+socketio = None
 def init(flaskapp):
-    global app, bp
+    global app, bp, socketio
     app = flaskapp
+    socketio = SocketIO(app)
+    CORS(app, origins="*")
 
     app.register_blueprint(bp)
 
 
-
-
 # Définit la locale française
 locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+
+
+
+# Génère un objet WebSocket de base pour les conducteurs
+def conductorWebSocketBase(action, conductor, data_line, data_media):
+    object = {
+        "conductor": None,
+        "action": None,
+        "data_line": {},
+        "data_media": {}
+    }
+
+    object["conductor"] = conductor
+    object["data_line"] = data_line
+    object["data_media"] = data_media
+
+    return object
+
 
 
 @bp.route("/conductors")
@@ -196,8 +218,6 @@ def conductorsView(show_guid, cond_guid=None):
             inviteParams["password"] = conductor.password
         inviteLink = "https://vdo.ninja/?"+urlencode(inviteParams)
 
-        # https://vdo.ninja/?view=5fb990&solo&room=612bd03a8932&password=5N7J7VNJdbkz
-
         # On fabrique le lien solo
         soloParams = {
             "room": vdoRoomID,
@@ -227,7 +247,7 @@ def conductorsView(show_guid, cond_guid=None):
             urlParams["password"] = conductor.password
         directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink)
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, web_base=config["web_base"])
 
 
 
@@ -265,7 +285,12 @@ def api_conductorsLineDelete(line_guid):
 
     # Maintenant on liste les lignes et on affiche
     lines = session.query(Line).filter(Line.conductor_id == line.conductor_id).order_by(Line.order).all()
-    return jsonify([model_to_dict(obj) for obj in lines])
+    lines_to_send = [model_to_dict(obj) for obj in lines]
+
+    # On envoie la liste à jour aux sockets
+    socketio.emit("conductor_command", conductorWebSocketBase(action="delete", conductor=line.conductor_id, data_line=lines_to_send, data_media={}))
+
+    return jsonify(lines_to_send)
 
 
 
@@ -282,6 +307,7 @@ def api_conductorsLinesList(cond_guid):
     lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
 
     return jsonify([model_to_dict(obj) for obj in lines])
+
 
 
 
@@ -329,7 +355,12 @@ def api_conductorsLinesListInsert(cond_guid):
 
             # Maintenant on liste les lignes et on affiche
             lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
-            return jsonify([model_to_dict(obj) for obj in lines])
+            lines_to_send = [model_to_dict(obj) for obj in lines]
+
+            # On envoie la liste en socket
+            socketio.emit("conductor_command", conductorWebSocketBase(action="insert", conductor=cond_guid, data_line=lines_to_send, data_media={}))
+
+            return jsonify(lines_to_send)
 
         else:
             abort(422, description="Clés requises : insertAfter, type, name, text.")
@@ -364,6 +395,14 @@ def api_conductorsLineEdit(line_guid):
         
         session.merge(line)
         session.commit()
+
+
+        # Maintenant on liste les lignes et on renvoie au socket
+        lines = session.query(Line).filter(Line.conductor_id == line.conductor_id).order_by(Line.order).all()
+        lines_to_send = [model_to_dict(obj) for obj in lines]
+
+        # On envoie la liste en socket
+        socketio.emit("conductor_command", conductorWebSocketBase(action="edit", conductor=line.conductor_id, data_line=lines_to_send, data_media={}))
 
         # On renvoie l'objet modifié
         return jsonify(model_to_dict(line))
@@ -403,6 +442,11 @@ def api_conductorsLinesReorder(cond_guid):
 
         # Maintenant on liste les lignes et on affiche
         lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
-        return jsonify([model_to_dict(obj) for obj in lines])
+        lines_to_send = [model_to_dict(obj) for obj in lines]
+
+        # On envoie les lignes réordonnées au socket
+        socketio.emit("conductor_command", conductorWebSocketBase(action="reorder", conductor=line.conductor_id, data_line=lines_to_send, data_media={}))
+
+        return jsonify(lines_to_send)
     else:
         abort(400, description="La requête doit être une requête JSON.")

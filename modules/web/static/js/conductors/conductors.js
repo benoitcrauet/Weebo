@@ -30,6 +30,7 @@ $(function() {
 
 var currentShowID = null;
 var currentConductorID = null;
+var currentClientID = null;
 
 
 
@@ -116,6 +117,75 @@ async function openLineEditor(id=null, insertAfter=null, type=null, name=null, t
 
 
 /**
+ * Met à jour ou ajout des lignes dans le DOM en fonction des données d'entrée
+ */
+function updateLines(data) {
+    let idToKeep = [];
+
+    // On explore les données
+    for(let k in data) {
+        let line = data[k];
+        let element = document.getElementById("cond-line-" + line.id);
+
+        // On ajoute l'ID à la liste
+        idToKeep.push(line.id);
+
+        // Si l'élément existe on le met à jour...
+        if(element !== null) {
+            lineSetDatas(element, line); // On met juste à jour les infos
+        }
+        // ...s'il n'existe pas, on le crée
+        else {
+            let newLine = lineStructure();
+            lineSetDatas(newLine, line);
+            condMainTable.append(newLine);
+        }
+    }
+
+    // On cherche aussi des éléments à supprimer
+    condMainTable.querySelectorAll(".cond-line").forEach(element => {
+        let id = element.dataset.id;
+
+        if(!idToKeep.includes(id))
+            // ID introuvable > on supprime l'élément
+            element.remove();
+    });
+}
+
+
+
+
+/**
+ * Remet les lignes du DOM dans l'ordre
+ */
+function reorderLines() {
+    let lines = condMainTable.querySelectorAll(".cond-line");
+    lines.forEach(element => {
+
+    });
+
+    // Sélectionne tous les tbody
+    const tbodyList = condMainTable.querySelectorAll('.cond-line');
+
+    // Convertit la NodeList en tableau
+    const tbodyArray = Array.from(tbodyList);
+
+    // Trie le tableau en fonction de l'attribut data-order
+    tbodyArray.sort((a, b) => {
+        const orderA = parseInt(a.getAttribute('data-order'));
+        const orderB = parseInt(b.getAttribute('data-order'));
+        return orderA - orderB;
+    });
+
+    // Réinsère les tbody triés dans l'ordre dans leur parent (table)
+    tbodyArray.forEach(tbody => condMainTable.appendChild(tbody));
+
+}
+
+
+
+
+/**
  * Calcule l'ordre des lignes actuellement dans le conducteur
  * @returns Tableau contenant les nouvelles valeurs d'ordre pour le conducteur courant
  */
@@ -169,7 +239,8 @@ function refreshAllConductor() {
                 let line = data[k];
 
                 // On crée la structure DOM et on l'ajoute
-                let elements = lineStructure(line.id, line.type, line.name, line.text, line.done);
+                let elements = lineStructure(line);
+                lineSetDatas(elements, line);
                 condMainTable.append(elements);
                 // On enregistre les eventListeners
                 lineElementsRegisterEventListeners(elements);
@@ -469,6 +540,19 @@ function lineEditUpdateDisplay(type) {
             lineModalText.value = "";
             break;
     }
+}
+
+
+
+/**
+ * Génère un hash aléatoire du nombre de caractères voulus
+ * @param {number} length Nombre de caractères du hash de sortie
+ * @returns Hash aléatoire de sortie
+ */
+function generateRandomHash(length) {
+    const array = new Uint8Array(length / 2);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join('');
 }
 
 
