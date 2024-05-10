@@ -1,0 +1,188 @@
+#toolsbar {
+    background-color: rgba(var(--bs-dark-rgb), 0.7) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    -moz-backdrop-filter: blur(10px);
+    -ms-backdrop-filter: blur(10px);
+    -o-backdrop-filter: blur(10px);
+    height: 60px;
+    padding: 0px 15px;
+    box-sizing: border-box;
+}
+
+    #toolsbar h1 {
+        margin: 0px 0px 3px 0px;
+        font-size: 13pt;
+        font-weight: bolder;
+    }
+
+    #toolsbar h2 {
+        margin: 0px 0px 3px 0px;
+        font-size: 9pt;
+        font-weight: bold;
+    }
+
+    #toolsbar h3 {
+        margin: 0px;
+        font-size: 8pt;
+        font-style: italic;
+    }
+
+    #toolsbar a.btn, #toolsbar button {
+        display: table-cell;
+        height: 50px;
+        margin: 5px 2px;
+    }
+
+
+.cond-line-dragger {
+    cursor: ns-resize;
+}
+
+body:not(.edit-mode) .cond-edit-mode {
+    display: none;
+}
+
+body.edit-mode .cond-read-mode {
+    display: none;
+}
+
+body.edit-mode #cond-main-table thead tr {
+    position: sticky;
+    top: 60px;
+    z-index: 999;
+}
+#cond-main-table thead tr th {
+    background-color: rgba(var(--bs-dark-rgb), 0.7) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    -moz-backdrop-filter: blur(10px);
+    -ms-backdrop-filter: blur(10px);
+    -o-backdrop-filter: blur(10px);
+}
+
+#cond-main-table thead th {
+    height: 50px;
+    vertical-align: middle;
+    font-size: 14pt;
+}
+
+.cond-insertion-adder td {
+    padding: 0px;
+}
+
+a.cond-insertion-adder-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: background-color .2s;
+    background-color: rgb(0,50,0);
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    font-size: 8pt;
+    padding: 2px 0px;
+}
+
+a.cond-insertion-adder-link i::after {
+    content: " ";
+}
+
+a.cond-insertion-adder-link:hover {
+    background-color: rgb(0,170,0);
+}
+
+.cond-line-type-classic {
+
+}
+    .cond-line-type-classic .cond-line-title {
+        font-size: 14pt;
+        font-weight: bold;
+        margin: 0px 0px 5px 0px;
+    }
+
+    .cond-line-type-classic .cond-line-text {
+        font-size: 10pt;
+    }
+
+    .cond-line-type-classic .cond-line-desc {
+        display: none;
+    }
+
+.cond-line-type-section {
+}
+    body:not(.edit-mode) .cond-line-type-section .cond-line-display {
+        position: sticky;
+        top: 60px;
+    }
+    body:not(.edit-mode) .cond-line-type-section .cond-line-display td {
+        background-color: rgba(var(--bs-dark-rgb), 0.7) !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        -moz-backdrop-filter: blur(10px);
+        -ms-backdrop-filter: blur(10px);
+        -o-backdrop-filter: blur(10px);
+    }
+    .cond-line-type-section .cond-line-done-checkbox {
+            display: none;
+    }
+    .cond-line-type-section .cond-line-title {
+        font-size: 26pt;
+        font-weight: bolder;
+        margin: 0px;
+        font-variant: small-caps;
+        text-align: center;
+    }
+    .cond-line-type-section .cond-line-text {
+        display: none;
+    }
+    .cond-line-type-section .cond-line-desc {
+        text-align: center;
+        font-size: 8pt;
+    }
+
+.cond-line-type-important {
+}
+    .cond-line-type-important .cond-line-title {
+        display: none;
+    }
+    .cond-line-type-important .cond-line-text {
+        display: none;
+    }
+    .cond-line-type-important .cond-line-desc {
+        font-size: 16pt;
+        color: rgb(255,255,200);
+    }
+    .cond-line-type-important .cond-line-display td {
+        background-color: rgb(130,130,0);
+    }
+
+.cond-line-type-comment {
+}
+    .cond-line-type-comment .cond-line-title {
+        display: none;
+    }
+    .cond-line-type-comment .cond-line-text {
+        display: none;
+    }
+    .cond-line-type-comment .cond-line-desc {
+        color: gray;
+        font-style: italic;
+    }
+
+body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkbox]:checked) td {
+    background-color: rgb(30,30,30) !important;
+    color: rgb(100,100,100) !important;
+    text-decoration: line-through;
+}
+
+
+
+#editLineFormModal, #vdoModal {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    -moz-backdrop-filter: blur(10px);
+    -ms-backdrop-filter: blur(10px);
+    -o-backdrop-filter: blur(10px);
+}

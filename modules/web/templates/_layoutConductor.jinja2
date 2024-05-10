@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}Weebo{% endblock %}</title>
+
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap-icons.min.css">
+
+        <link rel="stylesheet" type="text/css" href="/static/css/conductors/conductors.css">
+
+        <link rel="icon" type="image/png" sizes="64x64" href="/static/img/favicon64.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon16.png">
+    </head>
+    <body>
+        {% block content %}{% endblock %}
+        
+
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 px-4 my-4 border-top">
+            <div class="col-md-4 d-flex align-items-center">
+                <a href="/" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1">
+                    <img src="/static/img/logo.svg" alt="" class="bi me-2" width="30" height="24">
+                </a>
+                <span class="mb-3 mb-md-0 text-body-secondary">Weebo par Benoît Crauet</span>
+            </div>
+
+            <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+                <li class="ms-3"><a class="text-body-secondary" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#twitter"/></svg></a></li>
+                <li class="ms-3"><a class="text-body-secondary" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#instagram"/></svg></a></li>
+                <li class="ms-3"><a class="text-body-secondary" href="#"><svg class="bi" width="24" height="24"><use xlink:href="#facebook"/></svg></a></li>
+            </ul>
+        </footer>
+
+        <script src="/static/js/jquery.min.js"></script>
+        <script src="/static/js/jquery-ui.min.js"></script>
+        <script src="/static/js/bootstrap.bundle.min.js"></script>
+
+        <script type="text/javascript" src="/static/js/conductors/conductors.structure.js"></script>
+        <script type="text/javascript" src="/static/js/conductors/conductors.js"></script>
+        {% block endbody %}{% endblock %}
+    </body>
+</html>

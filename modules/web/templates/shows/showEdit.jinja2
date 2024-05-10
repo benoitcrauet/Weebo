@@ -1,0 +1,92 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    {% if guid == None %}
+        Créer une émission
+    {% else %}
+        Modifier une émission - {{ show.name }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                {% if show.id == None %}
+                    <h1>Nouvelle émission</h1>
+                {% else %}
+                    <h1>Modifier une émission</h1>
+                    <h2>{{ show.name }}</h2>
+                {% endif %}
+            </div>
+            <div class="col-6 text-end">
+                <a href="{{ url_for("shows.shows") }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+
+        <form action="" method="post" enctype="multipart/form-data">
+
+            {% if form.errors.values() %}
+                <div class="alert alert-danger">
+                    Pas si vite ! Les erreurs suivantes ont été détectées :
+                    <ul class="mt-2">
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li>{{ form[field].label.text }} : {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <fieldset>
+                <legend>Général</legend>
+
+                <div class="mb-3 row">
+                    {{ form.name.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.name(class="form-control") }}
+                        {% if form.name.description %}<div class="form-text">{{ form.name.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.description.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.description(class="form-control") }}
+                        {% if form.description.description %}<div class="form-text">{{ form.description.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.logo.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.logo(class="form-control") }}
+                        {% if form.logo.description %}<div class="form-text">{{ form.logo.description }}</div>{% endif %}
+                    </div>
+                </div>
+                {% if show.logo!=None and show.logo!="" %}
+                    <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-9 text-center">
+                            <img src="/images/{{ show.logo }}" class="img-thumbnail" alt="" style="width: 100px; height: 100px; object-fit: cover;">
+                            <br>
+                            {{ form.logo_delete() }}
+                            {{ form.logo_delete.label }}
+                        </div>
+                    </div>
+                {% endif %}
+
+            </fieldset>
+
+            <div class="col-12">
+                {{ form.hidden_tag() }}
+                {{ form.id }}
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+
+
+        
+    </div>
+{% endblock %}

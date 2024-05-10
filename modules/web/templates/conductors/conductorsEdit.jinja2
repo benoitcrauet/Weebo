@@ -1,0 +1,137 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    {% if conductor.id == None %}
+        Nouveau conducteur
+    {% else %}
+        Modifier un conducteur
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                {% if conductor.id == None %}
+                    <h1>Nouveau conducteur</h1>
+                {% else %}
+                    <h1>Modifier un conducteur</h1>
+                    <h2>{{ conductor.name }}</h2>
+                {% endif %}
+            </div>
+            <div class="col-2 text-end">
+                <a href="{{ url_for("conductors.conductorsList", show_guid=show.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+        {% if conductor.id == None %}
+            <p class="lead">
+                Entrez ici les paramètres de ce nouveau conducteur.
+            </p>
+        {% else %}
+
+            <p class="lead">
+                Ici, vous pouvez modifier les paramètres du conducteur "{{ conductor.name }}" de l'émission "{{ show.name }}".
+            </p>
+        
+        {% endif %}
+
+
+        <form action="" method="post">
+
+            {% if form.errors.values() %}
+                <div class="alert alert-danger">
+                    Pas si vite ! Les erreurs suivantes ont été détectées :
+                    <ul class="mt-2">
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li>{{ form[field].label.text }} : {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <fieldset>
+                <legend>Général</legend>
+
+                <div class="mb-3 row">
+                    {{ form.day.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        <div class="input-group">
+                            {{ form.day(class="form-control") }}
+                            <span class="input-group-text">/</span>
+                            {{ form.month(class="form-control") }}
+                            <span class="input-group-text">/</span>
+                            {{ form.year(class="form-control") }}
+                        </div>
+                        {% if form.day.description %}<div class="form-text">{{ form.day.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.name.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.name(class="form-control") }}
+                        {% if form.name.description %}<div class="form-text">{{ form.name.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.guests.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.guests(class="form-control", rows="6", style="resize: none;") }}
+                        {% if form.guests.description %}<div class="form-text">{{ form.guests.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.vdoEnable.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.vdoEnable(class="form-check-input") }}
+                        {{ form.vdoEnable.label(class="form-check-label") }}
+                        {% if form.vdoEnable.description %}<div class="form-text">{{ form.vdoEnable.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.password.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        <div class="input-group">
+                            {{ form.password(class="form-control", autocomplete="off") }}
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('password').value = generatePassword();">
+                                <i class="bi bi-key-fill"></i>
+                                Générer
+                            </button>
+                        </div>
+                        {% if form.password.description %}<div class="form-text">{{ form.password.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <div class="col-12">
+                {{ form.hidden_tag() }}
+                {{ form.id }}
+                {{ form.type }}
+                {{ form.show_id }}
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+
+        <script>
+            function generatePassword() {
+                const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                const guidLength = 12; // Longueur du GUID
+                let guid = '';
+
+                for (let i = 0; i < guidLength; i++) {
+                    const randomIndex = Math.floor(Math.random() * chars.length);
+                    guid += chars[randomIndex];
+                }
+
+                return guid;
+            }
+        </script>
+        
+    </div>
+{% endblock %}

@@ -1,0 +1,408 @@
+import os
+from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired, FileAllowed
+import wtforms
+import wtforms.validators as validators
+from datetime import datetime, timedelta
+from urllib.parse import urlencode
+import locale
+
+from lib.db import session
+from lib.models import Show, Conductor, Line, Media
+from lib.guid import generate_guid
+from lib.dict import model_to_dict
+from lib.vdo import generateVdoGuestHash, generateVdoRoomID
+
+bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
+
+app = None
+def init(flaskapp):
+    global app, bp
+    app = flaskapp
+
+    app.register_blueprint(bp)
+
+
+
+
+# Définit la locale française
+locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+
+
+@bp.route("/conductors")
+def showsList():
+    shows = session.query(Show).all()
+    return render_template("conductors/showsList.jinja2", shows=shows)
+
+
+
+@bp.route("/conductors/<string:show_guid>")
+def conductorsList(show_guid):
+    # On check si l'émission existe
+    show = session.query(Show).filter(Show.id == show_guid).first()
+    if show==None:
+        abort(404)
+
+    # On liste les conducteurs
+    conductors = session.query(Conductor).filter(Conductor.type == "operational").filter(Conductor.show_id == show.id).all()
+
+    # Trier les résultats par la propriété virtuelle date en utilisant Python
+    conductors = sorted(conductors, key=lambda x: x.date, reverse=True)
+
+    return render_template("conductors/conductorsList.jinja2", show=show, conductors=conductors)
+
+
+
+# Classe de formulaire d'édition CONDUCTEUR
+class FormConductorEdit(FlaskForm):
+    id = wtforms.HiddenField("id", validators=[])
+    name = wtforms.StringField("Nom", description="Donnez un nom à ce conducteur.", validators=[validators.DataRequired()])
+    day = wtforms.IntegerField("Diffusion", description="Entrez ici la date de diffusion de l'émission.", validators=[validators.NumberRange(min=1, max=31)])
+    month = wtforms.IntegerField("mois", validators=[validators.NumberRange(min=1, max=12)])
+    year = wtforms.IntegerField("année", validators=[validators.NumberRange(min=datetime.now().year-1, max=datetime.now().year+2)])
+    guests = wtforms.TextAreaField("Participants", description="Saisissez un nom par ligne, vous compris", validators=[])
+    vdoEnable = wtforms.BooleanField("Activer VDO", description="Permet d'activer la génération automatique des liens VDO.", validators=[], default=True)
+    password = wtforms.StringField("Mot de passe", description="Facultatif. Si vous voulez protéger la room VDO.ninja. Le mot de passe sera déjà inclus dans les liens d'invitation générés.", validators=[])
+    type = wtforms.HiddenField("type", validators=[validators.DataRequired()])
+
+    show_id = wtforms.HiddenField("show_id")
+
+    submit = wtforms.SubmitField("Valider")
+
+@bp.route("/conductors/<string:show_guid>/create", methods=["GET", "POST"])
+@bp.route("/conductors/<string:show_guid>/<string:cond_guid>/edit", methods=["GET", "POST"])
+def conductorsEdit(show_guid, cond_guid=None):
+    # On check si l'émission existe
+    show = session.query(Show).filter(Show.id == show_guid).first()
+    if show==None:
+        abort(404)
+
+    if cond_guid!=None:
+        # On check si le conducteur existe
+        conductor = session.query(Conductor).filter(Conductor.id == cond_guid).filter(Conductor.show == show).first()
+        if conductor==None:
+            abort(404)
+    else:
+        today = datetime.now()+timedelta(hours=5)
+        conductor = Conductor(year=today.year, month=today.month, day=today.day)
+    
+    form = FormConductorEdit(obj=conductor)
+
+
+
+    # Validation du formulaire
+    if form.validate_on_submit():
+        # Si on a un ID on récupère l'objet
+        if form.id.data!="":
+            conductor = session.query(Conductor).filter(Conductor.id == form.id.data).first()
+            if conductor==None:
+                return "Invalid conductor ID"
+        else:
+            conductor = Conductor()
+        
+        conductor.name = form.name.data
+        conductor.day = form.day.data
+        conductor.month = form.month.data
+        conductor.year = form.year.data
+        conductor.guests = form.guests.data
+        conductor.password = form.password.data.strip()
+        conductor.vdoEnable = form.vdoEnable.data
+        conductor.show = show
+
+
+        guests_cleaner = [l.strip() for l in conductor.guests.splitlines() if l.strip()]
+        conductor.guests = '\n'.join(guests_cleaner)
+
+
+        if form.id.data=="":
+            session.add(conductor)
+        else:
+            session.merge(conductor)
+        session.commit()
+
+        return redirect(url_for("conductors.conductorsList", show_guid=show_guid))
+    
+    return render_template("conductors/conductorsEdit.jinja2", show=show, conductor=conductor, form=form)
+
+
+
+# Classe de formulaire de suppression
+class FormDelete(FlaskForm):
+    delete = wtforms.SelectField("Supprimer ?", choices=[("n", "Non"), ("y", "Oui")], validators=[validators.DataRequired()])
+
+    submit = wtforms.SubmitField("Supprimer")
+
+
+@bp.route("/conductors/<string:show_guid>/<string:cond_guid>/delete", methods=["GET", "POST"])
+def conductorsDelete(show_guid, cond_guid=None):# On check si l'émission existe
+    show = session.query(Show).filter(Show.id == show_guid).first()
+    if show==None:
+        abort(404)
+
+    if cond_guid!=None:
+        # On check si le conducteur existe
+        conductor = session.query(Conductor).filter(Conductor.id == cond_guid).filter(Conductor.show == show).first()
+        if conductor==None:
+            abort(404)
+    
+    form = FormDelete()
+
+    # Validation du formulaire
+    if form.validate_on_submit():
+        conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+        if show==None:
+            return "ID invalide"
+        
+        if form.delete.data == "y":
+            session.delete(conductor)
+            session.commit()
+
+        return redirect(url_for("conductors.conductorsList", show_guid=show.id))
+    
+    return render_template("conductors/conductorsDelete.jinja2", show=show, conductor=conductor, form=form)
+
+
+
+
+@bp.route("/conductors/<string:show_guid>/<string:cond_guid>")
+def conductorsView(show_guid, cond_guid=None):
+    # On check si l'émission existe
+    show = session.query(Show).filter(Show.id == show_guid).first()
+    if show==None:
+        abort(404)
+
+    if cond_guid!=None:
+        # On check si le conducteur existe
+        conductor = session.query(Conductor).filter(Conductor.id == cond_guid).filter(Conductor.show == show).first()
+        if conductor==None:
+            abort(404)
+    
+    # On prépare la liste des liens
+    vdoLinks = []
+    vdoRoomID = generateVdoRoomID(show.id)
+
+    for k,guestName in enumerate(conductor.guests.split("\n")):
+        # On fabrique le hash de l'utilisateur
+        push = generateVdoGuestHash(show.id, k)
+        
+        # On fabrique le lien d'invitation
+        inviteParams = {
+            "room": vdoRoomID,
+            "push": push,
+            "label": guestName
+        }
+        if conductor.password != "":
+            inviteParams["password"] = conductor.password
+        inviteLink = "https://vdo.ninja/?"+urlencode(inviteParams)
+
+        # https://vdo.ninja/?view=5fb990&solo&room=612bd03a8932&password=5N7J7VNJdbkz
+
+        # On fabrique le lien solo
+        soloParams = {
+            "room": vdoRoomID,
+            "view": push,
+            "solo": ""
+        }
+        if conductor.password != "":
+            soloParams["password"] = conductor.password
+        soloLink = "https://vdo.ninja/?"+urlencode(soloParams)
+
+        # On compile le tout et on ajoute à la liste
+        obj = {
+            "name": guestName,
+            "push": push,
+            "cam_number": k,
+            "link_invite": inviteLink,
+            "link_solo": soloLink
+        }
+        vdoLinks.append(obj)
+    
+
+        # On fabrique le lien director
+        urlParams = {
+            "director": vdoRoomID,
+        }
+        if conductor.password != "":
+            urlParams["password"] = conductor.password
+        directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
+    
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink)
+
+
+
+
+
+
+
+
+
+
+
+
+@bp.route("/api/conductor/line/<string:line_guid>", methods=["GET"])
+def api_conductorsLineGet(line_guid):
+    # On check si la ligne existe
+    line = session.query(Line).filter(Line.id == line_guid).first()
+    if line==None:
+        abort(404)
+    
+    # On renvoie la ligne
+    return jsonify(model_to_dict(line))
+
+
+
+@bp.route("/api/conductor/line/<string:line_guid>", methods=["DELETE"])
+def api_conductorsLineDelete(line_guid):
+    # On check si la ligne existe
+    line = session.query(Line).filter(Line.id == line_guid).first()
+    if line==None:
+        abort(404)
+    
+    # On supprime la ligne
+    session.delete(line)
+    session.commit()
+
+    # Maintenant on liste les lignes et on affiche
+    lines = session.query(Line).filter(Line.conductor_id == line.conductor_id).order_by(Line.order).all()
+    return jsonify([model_to_dict(obj) for obj in lines])
+
+
+
+
+
+@bp.route("/api/conductor/<string:cond_guid>/lines", methods=["GET"])
+def api_conductorsLinesList(cond_guid):
+    # On check si le conducteur existe
+    conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if conductor==None:
+        abort(404)
+    
+    # On récupère les lignes
+    lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
+
+    return jsonify([model_to_dict(obj) for obj in lines])
+
+
+
+@bp.route("/api/conductor/<string:cond_guid>/lines", methods=["PUT"])
+def api_conductorsLinesListInsert(cond_guid):
+    # On check si le conducteur existe
+    conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if conductor==None:
+        abort(404)
+    
+    if request.is_json:
+        data = request.json
+
+        if "insertAfter" in data and "type" in data and "name" in data and "text" in data:
+            # On récupère les lignes
+            lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
+
+            # On décale de 1 l'ordre de tous les autres
+            previousFound = False
+            previousOrder = 0
+            lastOrder = 0
+            for line in lines:
+                if previousFound or data["insertAfter"]=="":
+                    line.order += 1
+                    session.merge(line)
+
+                if line.id == data["insertAfter"]:
+                    previousFound = True
+                    previousOrder = line.order
+                
+                lastOrder = line.order
+            
+            # On défini le nouvel ordre sur le précédent sauf s'il est introuvable
+            newOrder = previousOrder+1 if previousFound else lastOrder+1
+
+            # Si pas de insertAfter, on le place au début
+            if data["insertAfter"]=="":
+                newOrder = 1
+
+
+            # Maintenant on ajoute la nouvelle ligne
+            newLine = Line(type=data["type"], name=data["name"], text=data["text"], order=newOrder, conductor=conductor, done=False)
+            session.add(newLine)
+            session.commit()
+
+            # Maintenant on liste les lignes et on affiche
+            lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
+            return jsonify([model_to_dict(obj) for obj in lines])
+
+        else:
+            abort(422, description="Clés requises : insertAfter, type, name, text.")
+    else:
+        abort(400, description="La requête doit-être une requête JSON.")
+
+
+
+
+@bp.route("/api/conductor/line/<string:line_guid>", methods=["PATCH"])
+def api_conductorsLineEdit(line_guid):
+    # On check si la ligne existe
+    line = session.query(Line).filter(Line.id == line_guid).first()
+    if line==None:
+        abort(404)
+        
+    if request.is_json:
+        data = request.json
+
+        if "type" in data:
+            line.type = data["type"];
+        if "name" in data:
+            line.name = data["name"];
+        if "text" in data:
+            line.text = data["text"];
+        if "order" in data:
+            line.order = data["order"];
+        if "done" in data:
+            line.done = data["done"];
+        
+        print(data);
+        
+        session.merge(line)
+        session.commit()
+
+        # On renvoie l'objet modifié
+        return jsonify(model_to_dict(line))
+    else:
+        abort(400, description="La requête doit être une requête JSON.")
+
+
+
+
+@bp.route("/api/conductor/<string:cond_guid>/orders", methods=["PATCH"])
+def api_conductorsLinesReorder(cond_guid):
+    # On check si le conducteur existe
+    conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if conductor==None:
+        abort(404)
+        
+    if request.is_json:
+        data = request.json
+        
+        compiledOrder = {}
+
+        for l in data:
+            if not "id" in l or not "order" in l:
+                abort(400, description="L'objet JSON doit-être une liste d'objets étants uniquement constitués de valeurs id et order.")
+            else:
+                compiledOrder[l["id"]] = l["order"]
+        
+        # On liste les lignes
+        lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
+
+        for line in lines:
+            if line.id in compiledOrder:
+                line.order = compiledOrder[line.id]
+                session.merge(line)
+        
+        session.commit()
+
+        # Maintenant on liste les lignes et on affiche
+        lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
+        return jsonify([model_to_dict(obj) for obj in lines])
+    else:
+        abort(400, description="La requête doit être une requête JSON.")

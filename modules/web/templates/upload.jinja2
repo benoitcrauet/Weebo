@@ -1,0 +1,17 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Upload test
+{% endblock title %}
+
+{% block content %}
+    <h1>Upload test</h1>
+    <form action="" method="post" enctype="multipart/form-data">
+        <p>
+            <label>
+                Upload : <input type="file" name="lala">
+                <button>Envoyer</button>
+            </label>
+        </p>
+    </form>
+{% endblock content %}

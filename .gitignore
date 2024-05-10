@@ -1,0 +1,59 @@
+# Exclure tous les dossiers __pycache__
+__pycache__/
+
+# Fichiers de compilation
+*.pyc
+*.pyo
+*.pyd
+
+# Fichiers de cache
+.cache/
+
+# Dossiers de virtualenv ou d'environnement virtuel
+venv/
+env/
+ENV/
+
+# Configuration du script
+config.env
+
+# Base de données
+database.sqlite
+
+# Fichiers de log
+*.log
+
+# Fichiers temporaires
+*~
+
+# Dossiers et fichiers de configuration spécifiques à l'IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Fichiers de sauvegarde
+*.bak
+*.swp
+
+# Fichiers de sortie (ex: .coverage, coverage/)
+.coverage
+coverage*/
+
+# Fichiers de dépendances (générés par pip)
+requirements.txt
+
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Desktop.ini
+Thumbs.db

@@ -1,0 +1,322 @@
+{% extends "_layoutConductor.jinja2" %}
+
+{% block title %}
+    {{ conductor.name }}
+{% endblock %}
+
+{% block content %}
+    <header class="sticky-top">
+        <div id="toolsbar" class="border-bottom">
+            <div class="row">
+                <div class="col-4 d-flex flex-wrap justify-content-begin align-items-center gap-1">
+                    <ul class="nav gap-1">
+                        <li>
+                            <button class="btn btn-sm btn-outline-light text-center px-3" onclick="document.body.classList.toggle('edit-mode'); this.classList.toggle('btn-outline-light'); this.classList.toggle('btn-success');">
+                                <i class="bi bi-pen-fill"></i>
+                                Mode édition
+                            </a>
+                        </li>
+                        {% if conductor.vdoEnable %}
+                            <li>
+                                <button class="btn btn-sm btn-outline-info text-center px-3" data-bs-toggle="modal" data-bs-target="#vdoModal">
+                                    <i class="bi bi-webcam-fill"></i>
+                                    Paramètres VDO
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-4 text-center d-flex flex-column justify-content-center">
+                    <h1>{{ conductor.name }}</h1>
+                    <h2>{{ show.name }}</h2>
+                    <h3>Diffusion le {{ conductor.date.strftime("%A %d %B %Y") | lower }}</h3>
+                </div>
+                <div class="col-4 d-flex flex-wrap justify-content-end align-items-center gap-1">
+                        <ul class="nav gap-1">
+                            <li>
+                                <a href="{{ url_for("conductors.conductorsList", show_guid=show.id) }}" class="btn btn-sm btn-outline-danger text-center px-3" data-bs-toggle="tooltip" data-bs-title="Default tooltip">
+                                    <i class="bi bi-door-open-fill"></i>
+                                    Quitter
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="px-4">
+        <table class="table table-hover" id="cond-main-table">
+            <thead>
+                <tr>
+                    <th scope="col" class="cond-edit-mode" width="15">
+                        <i class="bi bi-grip-vertical"></i>
+                    </th>
+                    <th scope="col" class="cond-read-mode" width="15">
+                        <i class="bi bi-check-lg"></i>
+                    </th>
+                    <th scope="col">
+                        Contenu
+                    </th>
+                    <th scope="col" class="cond-edit-mode" width="150">
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="cond-edit-mode">
+                <tr class="cond-edit-mode cond-insertion-adder">
+                    <td colspan="3">
+                        <a class="cond-insertion-adder-link" href="#" onclick="clickLineEdit(); return false;">
+                            <i class="bi bi-plus-square"></i> Insérer une ligne
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+            {% for _ in range(10) %}
+                {% set id = generator() %}
+                <tbody class="cond-line cond-line-type-classic" id="cond-line-{{id}}">
+                    <tr class="cond-line-display">
+                        <td class="cond-edit-mode h5 text-center align-middle">
+                        </td>
+                        <td class="cond-line-done cond-read-mode h5 text-center">
+                        </td>
+                        <td class="cond-line-content placeholder-wave">
+                            
+                            <h3 class="cond-line-title">
+                                <span class="placeholder col-1 placeholder-lg"></span>
+                                <span class="placeholder col-3 placeholder-lg"></span>
+                            </h3>
+                            <div class="cond-line-text">
+                                <span class="placeholder col-3 placeholder-sm"></span>
+                                <span class="placeholder col-1 placeholder-sm"></span>
+                                <span class="placeholder col-4 placeholder-sm"></span>
+                                <span class="placeholder col-2 placeholder-sm"></span><br>
+                                <span class="placeholder col-2 placeholder-sm"></span>
+                                <span class="placeholder col-4 placeholder-sm"></span>
+                                <span class="placeholder col-1 placeholder-sm"></span>
+                            </div>
+                            <div class="cond-line-medias">
+                                <table class="table table-striped">
+                                    <tbody>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                        <td class="cond-line-actions cond-edit-mode text-end">
+                        </td>
+                    </tr>
+                    <tr class="cond-edit-mode cond-insertion-adder">
+                    </tr>
+                </tbody>
+            {% endfor %}
+        </table>
+
+
+        <!-- Line edit form modal -->
+        <div class="modal fade" id="editLineFormModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="editLineFormModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <form id="formEditLine">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="editLineFormModalTitle">Modal title</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <div class="container-fluid">
+                                <div id="fTypeContainer">
+                                    <div class="row mb-3">
+                                        <label class="col-form-label col-sm-3" for="fType">
+                                            Type
+                                        </label>
+                                        <div class="col-9">
+                                            <select id="fType" name="type" class="form-select">
+                                                <option value="classic">Contenu classique</option>
+                                                <option value="section">Rubrique</option>
+                                                <option value="comment">Commentaire</option>
+                                                <option value="important">Remarque importante</option>
+                                            </select>
+                                            <span class="form-text">
+                                                Définit le type de ligne qui sera inséré dans le conducteur.<br>
+                                                <b>Attention : cette option ne pourra plus être changée par la suite.</b>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="fNameContainer">
+                                    <div class="row mb-3">
+                                        <label class="col-form-label col-sm-3" for="fName">
+                                            Nom
+                                        </label>
+                                        <div class="col-9">
+                                            <input type="text" id="fName" name="name" class="form-control">
+                                            <span class="form-text">
+                                                Permet de donner un nom à votre ligne.
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="fTextContainer">
+                                    <div class="row mb-3">
+                                        <label class="col-form-label col-sm-3" for="fText">
+                                            Texte
+                                        </label>
+                                        <div class="col-9">
+                                            <textarea id="fText" name="text" rows="7" class="form-control" style="resize: none;"></textarea>
+                                            <span class="form-text">
+                                                Entrez ici un texte décrivant votre contenu.<br>
+                                                <span class="text-info">Astuce : dans les lignes classiques, vous pouvez mettre en forme votre texte avec du Markdown !</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <input type="hidden" name="id" id="fId" value="">
+                            <input type="hidden" name="insertAfter" id="fInsertAfter" value="">
+                            <button type="submit" class="btn btn-primary" id="fSubmit">Valider</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        {% if conductor.vdoEnable %}
+            <!-- VDO.ninja modal -->
+            <div class="modal fade" id="vdoModal" tabindex="-1" aria-labelledby="vdoModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="vdoModalTitle">Paramètres VDO</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>
+                                Formidable ! Weebo a déjà configuré pour vous VDO !<br>
+                                Vous trouverez ci-dessous l'ensemble de vos liens.
+                            </p>
+
+                            <div class="alert alert-warning" role="alert">
+                                Pour éviter de mélanger les caméras, merci de bien vous assurer d'utiliser <strong>votre</strong> lien et pas celui de quelqu'un d'autre !
+                            </div>
+
+                            <nav>
+                                <div class="nav nav-tabs" id="nav-vdo-modal-tabs" role="tablist">
+                                    <button class="nav-link active" id="nav-vdo-modal-users-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-users" type="button" role="tab" aria-controls="nav-vdo-modal-users" aria-selected="true">
+                                        Liens d'invitation
+                                    </button>
+                                    <button class="nav-link" id="nav-vdo-modal-obs-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-obs" type="button" role="tab" aria-controls="nav-vdo-modal-obs" aria-selected="false">
+                                        Liens pour OBS
+                                    </button>
+                                </div>
+                            </nav>
+                            <div class="tab-content" id="nav-vdo-modal-contents">
+                                <div class="tab-pane show active" id="nav-vdo-modal-users" role="tabpanel" aria-labelledby="nav-vdo-modal-users-tab" tabindex="0">
+
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" width="25%">Participant</th>
+                                                <th scope="col">Lien</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for l in vdoLinks %}
+                                                <tr>
+                                                    <th scope="row">
+                                                        {{ l.name }}
+                                                    </th>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" readonly value="{{ l.link_invite }}" onclick="this.select();">
+                                                            <a href="{{ l.link_invite }}" class="btn btn-primary" onclick="window.open(this.href); return false;">
+                                                                <i class="bi bi-box-arrow-up-right"></i>
+                                                                Accéder
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+
+
+                                </div>
+                                <div class="tab-pane" id="nav-vdo-modal-obs" role="tabpanel" aria-labelledby="nav-vdo-modal-obs-tab" tabindex="0">
+                                
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" width="25%">Participant</th>
+                                                <th scope="col">Caméra</th>
+                                                <th scope="col">Lien</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for l in vdoLinks %}
+                                                <tr>
+                                                    <th scope="row">
+                                                        {{ l.name }}
+                                                    </th>
+                                                    <td>
+                                                        <code>CAM {{ l.cam_number + 1 }}</code>
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" readonly value="{{ l.link_solo }}" onclick="this.select();">
+                                                            <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                                <i class="bi bi-copy"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                            </div>
+
+
+
+                            <h3>Accès réalisateur</h3>
+
+                            <p>
+                                Weebo a également généré un lien pour le réalisateur.<br>
+                                <span class="text-danger">Attention : une seule personne à la fois peut accéder à cette interface.<br>
+                                Si vous n'en n'avez pas besoin, ne l'utilisez pas, merci !</span>
+                            </p>
+
+                            <div class="input-group">
+                                <input type="text" class="form-control" readonly value="{{ directorLink }}" onclick="this.select();">
+                                <a href="{{ directorLink }}" class="btn btn-primary" onclick="window.open(this.href); return false;">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                    Accéder
+                                </a>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block endbody %}
+    <script>
+        currentShowID = "{{ show.id }}";
+        currentConductorID = "{{ conductor.id }}";
+    </script>
+{% endblock %}

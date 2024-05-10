@@ -1,0 +1,68 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Émissions
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Émissions</h1>
+
+        <p class="lead">Déclarez ici vos différentes émissions.</p>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a class="btn btn-primary" href="{{ url_for("shows.showEdit") }}">
+                <i class="bi bi-plus-square-fill"></i> Créer une émission
+            </a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Émission</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Canaux</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in shows %}
+                    <tr>
+                        <td class="h4">
+                            {{s.name}}
+                        </td>
+                        <td>
+                            {{s.description}}
+                        </td>
+                        <td class="text-center">
+                                <a href="{{ url_for("channels.channelsMedias", show_guid=s.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-film"></i> Canaux médias
+                                    <span class="badge text-bg-light">
+                                        {{ s.mediasChannels | length }}
+                                    </span>
+                                </a>
+                                <a href="{{ url_for("channels.channelsWeb", show_guid=s.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-globe-europe-africa"></i> Canaux web
+                                    <span class="badge text-bg-light">
+                                        {{ s.webChannels | length }}
+                                    </span>
+                                </a>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for("shows.showEdit", guid=s.id) }}" class="btn btn-secondary" title="Modifier"><i class="bi bi-pen-fill"></i></a>
+                                <a href="{{ url_for("shows.showDelete", guid=s.id) }}" class="btn btn-danger" title="Supprimer"><i class="bi bi-trash-fill"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center fst-italic">
+                            Aucune émission n'a été créée pour le moment.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

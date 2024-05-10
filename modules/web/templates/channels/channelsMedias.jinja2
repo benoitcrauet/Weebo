@@ -1,0 +1,76 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Canaux médias - {{ show.name }}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <h1>Canaux médias</h1>
+                <h2>{{ show.name }}</h2>
+            </div>
+            <div class="col-2 text-end">
+                <a href="{{ url_for("shows.shows") }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+
+        <p class="lead">
+            Les canaux vidéos permettent d'afficher les médias des conducteurs sur OBS.<br>
+            Ces endpoints sont indispensables pour pouvoir diffuser des médias sur votre programme.
+        </p>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a class="btn btn-primary" href="{{ url_for("channels.channelsMediasEdit", show_guid=show.id) }}">
+                <i class="bi bi-plus-square-fill"></i> Créer un canal médias
+            </a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Canal</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Résolution</th>
+                    <th scope="col">CSS</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in channels %}
+                    <tr>
+                        <td class="h4">
+                            {{c.name}}
+                        </td>
+                        <td>
+                            {{c.description}}
+                        </td>
+                        <td>
+                            {{c.width}}x{{c.height}}
+                        </td>
+                        <td>
+                            {% if c.customCSS|trim() == "" %}
+                                Non
+                            {% else %}
+                                Oui
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for("channels.channelsMediasEdit", show_guid=show.id, channel_guid=c.id) }}" class="btn btn-secondary"><i class="bi bi-pen-fill"></i></a>
+                                <a href="{{ url_for("channels.channelsMediasDelete", show_guid=show.id, channel_guid=c.id) }}" class="btn btn-danger"><i class="bi bi-trash-fill"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center fst-italic">
+                            Aucun canal n'a été créé pour le moment.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

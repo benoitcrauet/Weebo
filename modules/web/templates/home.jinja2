@@ -1,0 +1,100 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Bienvenue
+{% endblock title %}
+
+{% block content %}
+    <div class="px-4 py-5 my-3 text-center border-bottom">
+        <img class="d-block mx-auto mb-4" src="/static/img/logo.svg" alt="" style="height: 120px; width: auto; object-fit: contains;">
+            <h1 class="display-5 fw-bold">
+                <span id="typeWriterText">Bonjour, je suis Weebo !</span><span id="typeWriterCursor">_</span>
+            </h1>
+            <div class="col-lg-6 mx-auto">
+            <p class="lead mb-4">
+                Je vous facilite la vie lors de vos live !<br>
+                De la conduite jusqu'aux médias en passant par la gestion des caméras VDO, je centralise la gestion de vos
+                émissions.
+            </p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{{ url_for("conductors.showsList") }}" class="btn btn-primary btn-lg px-4 gap-3">
+                    Commencer maintenant
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Dernier conducteurs</h1>
+
+        <p class="lead">
+            Ces conducteurs pourraient vous intéresser...
+        </p>
+
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">
+                        Conducteur
+                    </th>
+                    <th scope="col">
+                        Date
+                    </th>
+                    <th scope="col">
+                        Émission
+                    </th>
+                    <th scope="col">
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in conductors %}
+                    <tr>
+                        <td class="h5">
+                            {{ c.name }}
+                        </td>
+                        <td>
+                            {{ c.date.strftime("%A %d %B %Y") }}
+                        </td>
+                        <td>
+                            {{ c.show.name }}
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for("conductors.conductorsView", show_guid=c.show.id, cond_guid=c.id)}}" class="btn btn-primary">
+                                <i class="bi bi-folder2-open"></i>
+                                Ouvrir
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+    <script>
+        const lead = document.getElementById("typeWriterText");
+        const leadCursor = document.getElementById("typeWriterCursor");
+        leadCursor.style.opacity = 1;
+        var tmpText = lead.innerText;
+        var nbrLead = tmpText.length;
+        var cursor = 1;
+        lead.innerText = "";
+
+        var typeWriterInterval = window.setInterval(function() {
+            lead.innerText = tmpText.substring(0, cursor++);
+            if(cursor == nbrLead+1) {
+                clearInterval(typeWriterInterval);
+                window.setInterval(function() {
+                    if(leadCursor.style.opacity == 0)
+                        leadCursor.style.opacity = 1;
+                    else
+                        leadCursor.style.opacity = 0;
+                }, 500)
+            }
+        }, 75);
+    </script>
+    
+{% endblock content %}

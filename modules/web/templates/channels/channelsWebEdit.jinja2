@@ -1,0 +1,180 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    {% if channel.id == None %}
+        Créer un canal web
+    {% else %}
+        Modifier un canal web
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                {% if channel.id == None %}
+                    <h1>Nouveau canal web</h1>
+                {% else %}
+                    <h1>Modifier un canal web</h1>
+                    <h2>{{ channel.name }}</h2>
+                {% endif %}
+            </div>
+            <div class="col-2 text-end">
+                <a href="{{ url_for("channels.channelsWeb", show_guid=show.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+        {% if channel.id == None %}
+            <p class="lead">
+                Entrez ici les détails de ce tout nouveau canal.<br>
+                Vous pourrez ensuite revenir sur cette page pour visualiser les détails d'intégration de ce canal.
+            </p>
+        {% else %}
+
+            <p class="lead">
+                Ici, vous pouvez consulter et modifier les détails du canal web {{ channel.name }}.
+            </p>
+
+            <div class="accordion mb-3" id="accordionDetails">
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#channelDetails" aria-expanded="false" aria-controls="collapseOne">
+                            Comment intégrer ce canal à mon navigateur ?
+                        </button>
+                    </div>
+                    <div id="channelDetails" class="accordion-collapse collapse" data-bs-parent="#accordionDetails">
+                        <div class="accordion-body">
+                            <p>
+                                Vous pouvez intégrer ce canal à tout navigateur basé sur Chromium (Google Chrome, Brave, Arc...).<br>
+                                Afin de finaliser l'intégration, vous devrez entrer les paramètres suivants dans l'extension Chrome :
+                            </p>
+
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">
+                                            URL
+                                        </th>
+                                        <td>
+                                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ web_base }}" onclick="this.select();">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            ID du canal
+                                        </th>
+                                        <td>
+                                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ channel.id }}" onclick="this.select();">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <form action="" method="post">
+
+            {% if form.errors.values() %}
+                <div class="alert alert-danger">
+                    Pas si vite ! Les erreurs suivantes ont été détectées :
+                    <ul class="mt-2">
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li>{{ form[field].label.text }} : {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <fieldset>
+                <legend>Général</legend>
+
+                <div class="mb-3 row">
+                    {{ form.name.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.name(class="form-control") }}
+                        {% if form.name.description %}<div class="form-text">{{ form.name.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.description.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.description(class="form-control") }}
+                        {% if form.description.description %}<div class="form-text">{{ form.description.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <div class="col-12">
+                {{ form.hidden_tag() }}
+                {{ form.id }}
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+
+
+
+
+        <script>
+        // Récupérer l'élément textarea
+        var textarea = document.getElementById("customCSS");
+
+        // Ajouter un écouteur d'événement pour intercepter la pression de touche
+        textarea.addEventListener("keydown", function(event) {
+            // Vérifier si la touche pressée est la touche Tab
+            if (event.key === "Tab") {
+                // Empêcher le comportement par défaut de la touche Tab
+                event.preventDefault();
+                
+                // Insérer quatre espaces dans le texte du textarea à la position actuelle du curseur
+                var start = this.selectionStart;
+                var end = this.selectionEnd;
+                var text = this.value;
+                var newText = text.substring(0, start) + "    " + text.substring(end);
+                
+                // Mettre à jour le texte du textarea avec les espaces insérées
+                this.value = newText;
+                
+                // Déplacer le curseur après les espaces insérées
+                this.selectionStart = this.selectionEnd = start + 4;
+            } else if (event.key === "Enter") {
+                // Empêcher le comportement par défaut de la touche Entrée
+                event.preventDefault();
+                
+                // Récupérer la position du curseur
+                var start = this.selectionStart;
+                
+                // Récupérer le texte avant et après la position du curseur
+                var textBeforeCursor = this.value.substring(0, start);
+                var textAfterCursor = this.value.substring(start);
+                
+                // Trouver le niveau de tabulation du texte avant le curseur
+                var tabLevel = 0;
+                var lines = textBeforeCursor.split("\n");
+                var lastLine = lines[lines.length - 1];
+                for (var i = 0; i < lastLine.length; i++) {
+                    if (lastLine[i] === " ") {
+                        tabLevel++;
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Insérer une nouvelle ligne avec le même niveau de tabulation
+                var newLine = "\n" + " ".repeat(tabLevel);
+                
+                // Mettre à jour le texte du textarea avec la nouvelle ligne et déplacer le curseur
+                this.value = textBeforeCursor + newLine + textAfterCursor;
+                this.selectionStart = this.selectionEnd = start + newLine.length;
+            }
+        });
+</script>
+
+        
+    </div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Supprimer un canal médias - {{ channel.name }}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <h1>Supprimer un canal médias</h1>
+                <h2>{{ channel.name }}</h2>
+            </div>
+            <div class="col-2 text-end">
+                <a href="{{ url_for("channels.channelsMedias", show_guid=show.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+
+        <p class="lead text-danger">
+            Attention : la suppression d'un canal médias est irréversible et impactera la diffusion de tous vos médias actuels.
+        </p>
+
+        <form action="" method="post">
+
+            {% if form.errors.values() %}
+                <div class="alert alert-danger">
+                    Pas si vite ! Les erreurs suivantes ont été détectées :
+                    <ul class="mt-2">
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li>{{ form[field].label.text }} : {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <fieldset>
+
+                <div class="mb-3 row">
+                    {{ form.delete.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.delete(class="form-select") }}
+                        {% if form.delete.description %}<div class="form-text">{{ form.delete.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <div class="col-12">
+                {{ form.hidden_tag() }}
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+
+
+        
+    </div>
+{% endblock %}

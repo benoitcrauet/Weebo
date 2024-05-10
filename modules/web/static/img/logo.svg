@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 2481 2481" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
+    <g transform="matrix(2.66804,0,0,2.27971,-578.149,-2986.07)">
+        <path d="M1116.9,2036.35L1116.9,2198.55C1116.9,2243.3 1085.85,2279.64 1047.6,2279.64L315.43,2279.64C277.185,2279.64 246.135,2243.3 246.135,2198.55L246.135,2036.35C246.135,1991.59 277.185,1955.25 315.43,1955.25L1047.6,1955.25C1085.85,1955.25 1116.9,1991.59 1116.9,2036.35Z" style="fill:rgb(255,212,0);stroke:black;stroke-width:53.73px;"/>
+    </g>
+    <g transform="matrix(0.863131,0,0,0.863131,-1475.55,342.407)">
+        <circle cx="2271.31" cy="1742.32" r="46.404" style="fill:rgb(61,255,0);stroke:black;stroke-width:24.14px;"/>
+    </g>
+    <g transform="matrix(0.863131,0,0,0.863131,-1475.55,213.02)">
+        <circle cx="2271.31" cy="1742.32" r="46.404" style="fill:rgb(255,0,0);stroke:black;stroke-width:24.14px;"/>
+    </g>
+    <g transform="matrix(2.49448,0,0,2.66804,-459.866,-3876.11)">
+        <path d="M1047.02,1699.2L1047.02,1993.77C1047.02,1997.21 1046.91,2000.62 1046.67,2004.01L316.358,2004.01C316.125,2000.62 316.007,1997.21 316.007,1993.77L316.007,1699.2C316.007,1617.92 392.698,1551.92 473.986,1551.92L889.045,1551.92C970.333,1551.92 1047.02,1617.92 1047.02,1699.2Z" style="fill:rgb(127,103,0);stroke:black;stroke-width:48.4px;"/>
+    </g>
+    <g transform="matrix(3.12988,0,0,3.12988,-874.531,-4738.55)">
+        <path d="M594.751,1665L800.761,1803.26L594.751,1934.01L594.751,1665Z" style="fill:white;stroke:black;stroke-width:26.63px;"/>
+    </g>
+    <g transform="matrix(0.958144,0,0,0.958144,-428.368,99.7108)">
+        <path d="M1320.19,1904.65L2162.64,1904.65" style="fill:none;stroke:black;stroke-width:86.97px;"/>
+    </g>
+</svg>
