@@ -18,7 +18,15 @@ ENV/
 config.env
 
 # Base de données
-database.sqlite
+database.db
+
+# Dossiers de contenu
+images/*
+!images/.gitkeep
+medias/*
+!medias/.gitkeep
+tmp_medias/*
+!tmp_medias/.gitkeep
 
 # Fichiers de log
 *.log
