@@ -49,7 +49,7 @@
     <div class="px-4">
         <table class="table table-hover" id="cond-main-table">
             <thead>
-                <tr>
+                <tr class="cond-headers">
                     <th scope="col" class="cond-edit-mode" width="15">
                         <i class="bi bi-grip-vertical"></i>
                     </th>
@@ -63,8 +63,6 @@
                         Actions
                     </th>
                 </tr>
-            </thead>
-            <tbody class="cond-edit-mode">
                 <tr class="cond-edit-mode cond-insertion-adder">
                     <td colspan="3">
                         <a class="cond-insertion-adder-link" href="#" onclick="clickLineEdit(); return false;">
@@ -72,6 +70,8 @@
                         </a>
                     </td>
                 </tr>
+            </thead>
+            <tbody class="cond-edit-mode cond-fakeline">
             </tbody>
             {% for _ in range(10) %}
                 {% set id = generator() %}

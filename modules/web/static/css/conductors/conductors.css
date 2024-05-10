@@ -47,7 +47,7 @@ body.edit-mode .cond-read-mode {
     display: none;
 }
 
-body.edit-mode #cond-main-table thead tr {
+body.edit-mode #cond-main-table thead tr.cond-headers {
     position: sticky;
     top: 60px;
     z-index: 999;
