@@ -2,6 +2,7 @@ from moviepy.editor import VideoFileClip
 from proglog import ProgressBarLogger
 import math
 import os
+import time
 
 from lib.picture import ResizeMaximal
 
@@ -34,11 +35,15 @@ Args:
     output (str): path du fichier de sortie
     maxborder (int): bord le plus large de la vidéo de sortie. False pour désactiver le redimensionnement.
     progressCallback (Callable)
+    transcodeParams (dict): paramètres additionnels de transcodage (cutBegin [secondes], cutEnd [secondes], rotate [0, 90, 180, 270])
 """
-def convertVideo(input, output, maxborder, progressCallback):
+def convertVideo(input, output, maxborder, progressCallback, transcodeParams={}):
     try:
         # Charger la vidéo
         with VideoFileClip(input) as video:
+
+            # On récupère la durée
+            videoDuration = video.duration
         
             # On récupère la taille actuelle
             currentSize = video.size
@@ -53,6 +58,47 @@ def convertVideo(input, output, maxborder, progressCallback):
                 newSize = (currentWidth, currentHeight)
 
 
+            # On demande un extrait ?
+            newBegin = 0
+            newEnd = videoDuration
+            if "cutBegin" in transcodeParams and "cutEnd" in transcodeParams:
+
+                if transcodeParams["cutBegin"]=="":
+                    cutBegin = 0
+                else:
+                    cutBegin = int(transcodeParams["cutBegin"])
+                
+                if transcodeParams["cutEnd"]=="":
+                    cutEnd = videoDuration
+                else:
+                    cutEnd = int(transcodeParams["cutEnd"])
+
+                if cutBegin < cutEnd and cutBegin < videoDuration and cutEnd < videoDuration:
+                    newBegin = cutBegin
+                    newEnd = cutEnd
+            
+            # Si on a un rotate
+            rotateDeg = 0
+            if "rotate" in transcodeParams:
+                rotateParam = 0
+                try:
+                    rotateParam = int(transcodeParams["rotate"])
+                except Exception as e:
+                    pass
+                
+                if rotateParam==0 or rotateParam==90 or rotateParam==180 or rotateParam==270:
+                    rotateDeg = rotateParam
+            
+            # On crée un extrait
+            subclip = video.subclip(newBegin, newEnd)
+
+            # On initialise le logger qui permettra de suivre l'avancement
+            logger = VideoLogger()
+            logger.setCbk(progressCallback)
+
+            # On échange width et height en cas de rotate de 90 et 270
+            if rotateDeg==90 or rotateDeg==270:
+                newSize = (newSize[1], newSize[0])
 
             # Personnaliser les options de l'encodeur FFmpeg
             ffmpeg_params = [
@@ -65,12 +111,9 @@ def convertVideo(input, output, maxborder, progressCallback):
                 "-vf", f"scale={newSize[0]}:{newSize[1]}"   # Redimensionner la vidéo
             ];
 
-            # On initialise le logger qui permettra de suivre l'avancement
-            logger = VideoLogger()
-            logger.setCbk(progressCallback)
 
             # Lancement du transcodage avec un redimensionnement
-            video.write_videofile(output, codec="libvpx", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
+            subclip.rotate(rotateDeg).write_videofile(output, codec="libvpx", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
 
     except Exception as e:
         print("Error occured: {}".format(e))
@@ -78,6 +121,7 @@ def convertVideo(input, output, maxborder, progressCallback):
     finally:
         try:
             video.close()
+            subclip.close()
         except Exception as e:
             pass
     

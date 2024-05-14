@@ -541,6 +541,11 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
         media.loop = data["loop"]
         media.volume = data["volume"]
         media.progress = -1
+        
+        # On récupère l'objet transcode
+        transcode = {}
+        if data.get("transcode"):
+            transcode = data.get("transcode")
 
         # On stocke l'objet du fichier
         file = request.files["file"]
@@ -605,7 +610,8 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
 
                 # On crée le fichier méta
                 metadata = {
-                    "media_id": media.id
+                    "media_id": media.id,
+                    "transcode": transcode
                 }
                 meta_path = "tmp_medias/" + filename + ".meta.txt"
                 with open(meta_path, "w") as meta_file:

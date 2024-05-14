@@ -46,6 +46,11 @@ def main():
 
                     # On stocke l'ID
                     media_guid = meta["media_id"]
+
+                    # On récupère les paramètres de transcodage
+                    transcode = {}
+                    if "transcode" in meta:
+                        transcode = meta["transcode"]
                     
                     # On vérifie si le média existe
                     media = session.query(Media).filter(Media.id == media_guid).first()
@@ -92,7 +97,7 @@ def main():
                                 updateMediaWeb()
                         
                         # On lance la conversion
-                        videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, 1280, progressCallback)
+                        videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, 1280, progressCallback, transcode)
 
                         if videoConversion:
                             print("Conversion succeeded for media ID {}.".format(media.id))
@@ -100,7 +105,7 @@ def main():
                             print("Extracting gif thumbnail for {}...".format(media.id))
                             time.sleep(1)
 
-                            thumbnailExtraction = getThumbnailPicture(dirTmpMedias+"/"+filename, dirMedias+"/"+tmb_filename, 70);
+                            thumbnailExtraction = getThumbnailPicture(dirMedias+"/"+final_filename, dirMedias+"/"+tmb_filename, 70);
                         
                             if thumbnailExtraction:
                                 print("Conversion complete for media ID {}".format(media.id))

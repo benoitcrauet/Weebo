@@ -79,7 +79,7 @@
                                     <input type="checkbox" id="gLoop" name="loop" class="form-check-input">
                                     <label for="gLoop">Lecture en boucle</label>
                                     <div class="form-text">
-                                        Seulement pour les vidéos. Indique si la vidéo doit-être lue en boucle ou non.
+                                        <u>Seulement pour les vidéos.</u> Indique si la vidéo doit-être lue en boucle ou non.
                                     </div>
                                 </div>
                             </div>
@@ -100,7 +100,7 @@
                                         </div>
                                     </div>
                                     <span class="form-text">
-                                        Seulement pour les vidéos. Spécifiez le volume de lecture du média.<br>
+                                        <u>Seulement pour les vidéos.</u> Spécifiez le volume de lecture du média.<br>
                                         <b>Attention : veillez à bien mettre le son uniquement quand c'est nécessaire.</b>
                                     </span>
                                 </div>
@@ -165,6 +165,132 @@
                             </div>
                         </div>
 
+                        <div id="gTranscodeSettingsContainer">
+                            <div class="accordion mb-3" id="accordionTranscodeSettings">
+                                <div class="accordion-item">
+                                    <div class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionTranscodeSettingsPan" aria-expanded="false" aria-controls="collapseOne">
+                                            <i class="bi bi-film"></i>&nbsp;
+                                            Paramètres avancés de transcodage vidéo
+                                        </button>
+                                    </div>
+                                    <div id="accordionTranscodeSettingsPan" class="accordion-collapse collapse" data-bs-parent="#accordionTranscodeSettings">
+                                        <div class="accordion-body">
+
+                                            <div id="gCutContainer">
+                                                <div class="row mb-3">
+                                                    <label class="col-form-label col-sm-3" for="gCutBegin">
+                                                        Couper la vidéo
+                                                    </label>
+                                                    <div class="col-9">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text"><i class="bi bi-chevron-bar-left"></i></span>
+                                                            <span class="input-group-text">Début :</span>
+                                                            <input type="text" id="gCutBegin" name="cutBegin" class="form-control">
+                                                            <span class="input-group-text">Fin :</span>
+                                                            <input type="text" id="gCutEnd" name="cutEnd" class="form-control">
+                                                            <span class="input-group-text"><i class="bi bi-chevron-bar-right"></i></span>
+                                                        </div>
+                                                        <div class="form-text">
+                                                            <u>Seulement pour les vidéos.</u> Indiquez des points de coupe d'entrée et de sortie en format X:XX.<br>
+                                                            Laissez vide pour convertir toute la longueur de la vidéo.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <script>
+                                                    $(function() {
+                                                        let _fieldCutBegin = document.getElementById("gCutBegin");
+                                                        let _fieldCutEnd = document.getElementById("gCutEnd");
+
+                                                        _fieldCutBegin.addEventListener("change", function(e) {
+                                                            let secondsBegin = getSecondsFromString(e.target.value);
+                                                            let secondsEnd = getSecondsFromString(_fieldCutEnd.value);
+
+                                                            // On vérifie le format
+                                                            if(secondsBegin!==false) {
+                                                                // Si on est au moins à 0 secondes
+                                                                if(secondsBegin >= 0) {
+                                                                    // Si secondsEnd est false, on le set à begin+30
+                                                                    if(secondsEnd === false) {
+                                                                        _fieldCutEnd.value = getStringFromSeconds(secondsBegin + 30);
+                                                                    }
+                                                                    // Si on est > ou = à cutEnd, on remet 1 seconde avant
+                                                                    else if(secondsEnd >= secondsEnd) {
+                                                                        e.target.value = getStringFromSeconds(Math.max(0, secondsEnd - 1));
+                                                                    }
+                                                                }
+                                                                else {
+                                                                    e.target.value = getStringFromSeconds(0);
+                                                                }
+                                                            }
+                                                            else {
+                                                                e.target.value = "";
+                                                            }
+                                                        });
+
+                                                        _fieldCutEnd.addEventListener("change", function(e) {
+                                                            let secondsBegin = getSecondsFromString(_fieldCutBegin.value);
+                                                            let secondsEnd = getSecondsFromString(e.target.value);
+
+                                                            // On vérifie le format
+                                                            if(secondsEnd!==false) {
+                                                                // Si on est au moins à 1 seconde
+                                                                if(secondsEnd >= 1) {
+                                                                    // Si secondsBegin est false, on le set à 0
+                                                                    if(secondsBegin === false) {
+                                                                        _fieldCutBegin.value = getStringFromSeconds(0);
+                                                                    }
+                                                                    // Si secondsBegin est > ou = à secondsEnd, on remet 1 seconde avant
+                                                                    else if(secondsBegin >= secondsEnd) {
+                                                                        e.target.value = getStringFromSeconds(secondsBegin + 1);
+                                                                    }
+                                                                }
+                                                                else {
+                                                                    e.target.value = getStringFromSeconds(1);
+                                                                }
+                                                            }
+                                                            else {
+                                                                e.target.value = "";
+                                                            }
+                                                        });
+                                                    });
+                                                </script>
+                                            </div>
+
+                                            <div id="gRotateContainer">
+                                                <div class="row mb-3">
+                                                    <label class="col-form-label col-sm-3" for="gRotate">
+                                                        Pivoter la vidéo
+                                                    </label>
+                                                    <div class="col-9">
+                                                        <select id="gRotate" name="rotate" class="form-control">
+                                                            <option value="0" selected>0°</option>
+                                                            <option value="90">90°</option>
+                                                            <option value="180">180°</option>
+                                                            <option value="270">270°</option>
+                                                        </select>
+                                                        <div class="form-text">
+                                                            <u>Seulement pour les vidéos.</u> Vous permet de pivoter la vidéo lors de son transcodage.<br>
+                                                            La rotation sera toujours faite dans le sens <b>horaire</b>.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3 text-center">
+                                                    <div class="col-3">
+                                                    </div>
+                                                    <div class="col-9" id="previewFrameContainer" data-rotate="0">
+                                                        <span class="previewFrame"><span>A</span></span>
+                                                        <span class="previewFrame"><span>A</span></span>
+                                                        <span class="previewFrame"><span>A</span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="alert alert-warning text-center">
@@ -174,12 +300,94 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="reset" id="gCancel" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <input type="hidden" name="id" id="gId" value="">
                     <input type="hidden" name="line" id="gLine" value="">
-                    <button type="submit" class="btn btn-primary" id="gSubmit">Valider</button>
+                    <button type="submit" class="btn btn-primary" id="gSubmit">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Valider
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+
+<script>
+    $(function() {
+        function _changeRotatePreview(e) {
+            let rotate = document.getElementById("gRotate").value;
+            document.getElementById("previewFrameContainer").dataset.rotate = rotate;    
+        }
+
+        document.getElementById("gRotate").addEventListener("change", _changeRotatePreview);
+        window.setInterval(_changeRotatePreview, 1000);
+    });
+</script>
+<style>
+    #previewFrameContainer {
+        height: 120px;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .previewFrame {
+        position: relative;
+        width: 120px;
+        line-height: 67.5px;
+        height: 67.5px;
+        margin: 20px auto 0px auto;
+        border: 1px solid white;
+        font-size: 40px;
+        text-align: center;
+        transform-origin: center;
+    }
+    .previewFrame:nth-child(2) span {
+        display: block;
+        transform-origin: center;
+        transform: rotate(90deg);
+    }
+    .previewFrame:nth-child(3) span {
+        display: block;
+        transform-origin: center;
+        transform: rotate(270deg);
+    }
+
+    #previewFrameContainer[data-rotate="0"] .previewFrame {
+        animation: none;
+    }
+
+    #previewFrameContainer[data-rotate="90"] .previewFrame {
+        animation: anim90deg 3s ease-in-out infinite normal;
+    }
+
+    #previewFrameContainer[data-rotate="180"] .previewFrame {
+        animation: anim180deg 3.5s ease-in-out infinite normal;
+    }
+
+    #previewFrameContainer[data-rotate="270"] .previewFrame {
+        animation: anim270deg 4s ease-in-out infinite normal;
+    }
+
+    @keyframes anim90deg {
+        0%,25% { transform: rotate(0deg); }
+        75%,100% { transform: rotate(90deg); }
+    }
+    @keyframes anim180deg {
+        0%,25% { transform: rotate(0deg); }
+        75%,100% { transform: rotate(180deg); }
+    }
+    @keyframes anim270deg {
+        0%,25% { transform: rotate(0deg); }
+        75%,100% { transform: rotate(270deg); }
+    }
+
+
+    #gSubmit .spinner-border {
+        display: none;
+    }
+    #gSubmit:disabled .spinner-border {
+        display: inline-block;
+    }
+</style>

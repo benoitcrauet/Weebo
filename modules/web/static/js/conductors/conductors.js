@@ -148,18 +148,31 @@ const mediaModalUrl = document.getElementById("gUrl");
 const mediaModalMediaChannel = document.getElementById("gMediaChannel");
 const mediaModalWebChannel = document.getElementById("gWebChannel");
 const mediaModalSubmit = document.getElementById("gSubmit");
+const mediaModalCancel = document.getElementById("gCancel");
+
+const mediaModalCutBegin = document.getElementById("gCutBegin");
+const mediaModalCutEnd = document.getElementById("gCutEnd");
+const mediaModalRotate = document.getElementById("gRotate");
+
 const mediaId = document.getElementById("gId");
 const mediaLine = document.getElementById("gLine");
+
 
 const mediaModalTypeContainer = document.getElementById("gTypeContainer");
 const mediaModalNameContainer = document.getElementById("gNameContainer");
 const mediaModalSourceContainer = document.getElementById("gSourceContainer");
 const mediaModalFileContainer = document.getElementById("gFileContainer");
+const mediaModalRotateContainer = document.getElementById("gRotateContainer");
 const mediaModalLoopContainer = document.getElementById("gLoopContainer");
 const mediaModalVolumeContainer = document.getElementById("gVolumeContainer");
 const mediaModalUrlContainer = document.getElementById("gUrlContainer");
 const mediaModalMediaChannelContainer = document.getElementById("gMediaChannelContainer");
 const mediaModalWebChannelContainer = document.getElementById("gWebChannelContainer");
+
+const mediaModalTranscodeSettingsContainer = document.getElementById("gTranscodeSettingsContainer");
+const mediaModalTranscodeSettingsAccordion = document.getElementById("accordionTranscodeSettings");
+const mediaModalCutBeginContainer = document.getElementById("gCutBeginContainer");
+const mediaModalCutEndContainer = document.getElementById("gCutEndContainer");
 
 
 /**
@@ -208,6 +221,9 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
 
             mediaEditUpdateDisplay(mediaModalType.value);
 
+            // On affiche le transcode settings
+            mediaModalTranscodeSettingsContainer.style.display = "none";
+
             // On cache le champ file
             mediaModalFileContainer.style.display = "none";
 
@@ -228,6 +244,9 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
         mediaModalName.value = "";
         mediaModalSource.value = "";
         mediaModalFile.value = "";
+        mediaModalCutBegin.value = "";
+        mediaModalCutEnd.value = "";
+        mediaModalRotate.selectedIndex = 0;
         mediaModalLoop.checked = false;
         mediaModalVolume.value = 0;
         mediaModalUrl.value = "";
@@ -237,14 +256,32 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
 
         mediaEditUpdateDisplay(mediaModalType.value);
 
+        // On cache le transcode settings
+        mediaModalTranscodeSettingsContainer.style.display = "block";
+
         mediaModal.show();
     }
 
     // On réactive le submit
     mediaModalSubmit.disabled = false;
+    mediaModalCancel.disabled = false;
 }
 
 
+
+function getSecondsFromString(input) {
+    if(!/^\d+:\d{2}$/.test(input))
+        return false;
+    const timeArray = input.split(":").map(Number);
+    let [minutes, seconds] = timeArray;
+    return minutes * 60 + seconds;
+}
+
+function getStringFromSeconds(input) {
+    const minutes = Math.floor(input / 60);
+    const seconds = input % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+}
 
 
 /**
@@ -1046,6 +1083,7 @@ function mediaEditUpdateDisplay(type) {
             mediaModalVolumeContainer.style.display = "block";
             mediaModalMediaChannelContainer.style.display = "block";
             mediaModalWebChannelContainer.style.display = "none";
+            mediaModalTranscodeSettingsAccordion.style.display = "block";
             // mediaModalSource.value = "";
             // mediaModalFile.value = "";
             mediaModalUrl.value = "";
@@ -1062,6 +1100,7 @@ function mediaEditUpdateDisplay(type) {
             mediaModalVolumeContainer.style.display = "none";
             mediaModalMediaChannelContainer.style.display = "none";
             mediaModalWebChannelContainer.style.display = "block";
+            mediaModalTranscodeSettingsAccordion.style.display = "none";
             mediaModalSource.value = "";
             mediaModalFile.value = "";
             // mediaModalUrl.value = "";
@@ -1078,6 +1117,7 @@ function mediaEditUpdateDisplay(type) {
             mediaModalVolumeContainer.style.display = "none";
             mediaModalMediaChannelContainer.style.display = "none";
             mediaModalWebChannelContainer.style.display = "none";
+            mediaModalTranscodeSettingsAccordion.style.display = "none";
             mediaModalSource.value = "";
             mediaModalFile.value = "";
             mediaModalUrl.value = "";
@@ -1224,7 +1264,6 @@ formEditLine.addEventListener("submit", function(e) {
         });
 });
 
-
 formEditMedia.addEventListener("submit", function(e) {
     e.preventDefault();
 
@@ -1242,12 +1281,18 @@ formEditMedia.addEventListener("submit", function(e) {
         source: mediaModalSource.value,
         loop: mediaModalLoop.checked,
         volume: parseFloat(mediaModalVolume.value),
+        transcode: {
+            cutBegin: getSecondsFromString(mediaModalCutBegin.value),
+            cutEnd: getSecondsFromString(mediaModalCutEnd.value),
+            rotate: parseInt(mediaModalRotate.value) ?? 0
+        },
         mediaChannel: multiSelectGetValues(mediaModalMediaChannel),
         webChannel: multiSelectGetValues(mediaModalWebChannel)
     };
     
-    // On désactive le submit
+    // On désactive le submit et le cancel
     mediaModalSubmit.disabled = true;
+    mediaModalCancel.disabled = true;
 
     // Fichier local indiqué par le client
     localUploadedFile = mediaModalFile.value;
@@ -1329,6 +1374,9 @@ formEditMedia.addEventListener("submit", function(e) {
         .finally(function() {
             // Fermeture de la modale
             mediaModal.hide();
+
+            mediaModalSubmit.disabled = false;
+            mediaModalCancel.disabled = false;
 
             // Refresh du conducteur
             refreshAllConductor();

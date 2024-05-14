@@ -287,7 +287,7 @@ function mediaLineStructure() {
 
                 let iOnAir = document.createElement("i");
                 iOnAir.classList.add("bi");
-                iOnAir.classList.add("bi-cast");
+                iOnAir.classList.add("bi-caret-right-fill");
 
                 btnOnAir.append(iOnAir);
 
