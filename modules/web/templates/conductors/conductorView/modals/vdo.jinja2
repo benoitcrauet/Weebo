@@ -1,0 +1,119 @@
+<!-- VDO.ninja modal -->
+<div class="modal fade" id="vdoModal" tabindex="-1" aria-labelledby="vdoModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="vdoModalTitle">Paramètres VDO</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Formidable ! Weebo a déjà configuré pour vous VDO !<br>
+                    Vous trouverez ci-dessous l'ensemble de vos liens.
+                </p>
+
+                <div class="alert alert-warning" role="alert">
+                    Pour éviter de mélanger les caméras, merci de bien vous assurer d'utiliser <strong>votre</strong> lien et pas celui de quelqu'un d'autre !
+                </div>
+
+                <nav>
+                    <div class="nav nav-tabs" id="nav-vdo-modal-tabs" role="tablist">
+                        <button class="nav-link active" id="nav-vdo-modal-users-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-users" type="button" role="tab" aria-controls="nav-vdo-modal-users" aria-selected="true">
+                            Liens d'invitation
+                        </button>
+                        <button class="nav-link" id="nav-vdo-modal-obs-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-obs" type="button" role="tab" aria-controls="nav-vdo-modal-obs" aria-selected="false">
+                            Liens pour OBS
+                        </button>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-vdo-modal-contents">
+                    <div class="tab-pane show active" id="nav-vdo-modal-users" role="tabpanel" aria-labelledby="nav-vdo-modal-users-tab" tabindex="0">
+
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col" width="25%">Participant</th>
+                                    <th scope="col">Lien</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for l in vdoLinks %}
+                                    <tr>
+                                        <th scope="row">
+                                            {{ l.name }}
+                                        </th>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" readonly value="{{ l.link_invite }}" onclick="this.select();">
+                                                <a href="{{ l.link_invite }}" class="btn btn-primary" onclick="window.open(this.href); return false;">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                    Accéder
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                    <div class="tab-pane" id="nav-vdo-modal-obs" role="tabpanel" aria-labelledby="nav-vdo-modal-obs-tab" tabindex="0">
+                    
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col" width="25%">Participant</th>
+                                    <th scope="col">Caméra</th>
+                                    <th scope="col">Lien</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for l in vdoLinks %}
+                                    <tr>
+                                        <th scope="row">
+                                            {{ l.name }}
+                                        </th>
+                                        <td>
+                                            <code>CAM {{ l.cam_number + 1 }}</code>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" readonly value="{{ l.link_solo }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+
+
+                <h3>Accès réalisateur</h3>
+
+                <p>
+                    Weebo a également généré un lien pour le réalisateur.<br>
+                    <span class="text-danger">Attention : une seule personne à la fois peut accéder à cette interface.<br>
+                    Si vous n'en n'avez pas besoin, ne l'utilisez pas, merci !</span>
+                </p>
+
+                <div class="input-group">
+                    <input type="text" class="form-control" readonly value="{{ directorLink }}" onclick="this.select();">
+                    <a href="{{ directorLink }}" class="btn btn-primary" onclick="window.open(this.href); return false;">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                        Accéder
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

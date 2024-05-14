@@ -9,6 +9,9 @@ import wtforms.validators as validators
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 import locale
+import json
+from io import BytesIO
+from PIL import Image
 
 from lib.db import session
 from lib.models import Show, Conductor, Line, Media
@@ -16,6 +19,7 @@ from lib.guid import generate_guid
 from lib.dict import model_to_dict
 from lib.vdo import generateVdoGuestHash, generateVdoRoomID
 from lib.config import config
+from lib.picture import ResizeMaximal
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -38,17 +42,19 @@ locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 # Génère un objet WebSocket de base pour les conducteurs
 def conductorWebSocketBase(action, conductor, data_line, data_media):
     object = {
-        "conductor": None,
         "action": None,
+        "conductor": None,
         "data_line": {},
         "data_media": {}
     }
 
+    object["action"] = action
     object["conductor"] = conductor
     object["data_line"] = data_line
     object["data_media"] = data_media
 
     return object
+
 
 
 
@@ -288,12 +294,9 @@ def api_conductorsLineDelete(line_guid):
     lines_to_send = [model_to_dict(obj) for obj in lines]
 
     # On envoie la liste à jour aux sockets
-    socketio.emit("conductor_command", conductorWebSocketBase(action="delete", conductor=line.conductor_id, data_line=lines_to_send, data_media={}))
+    socketio.emit("conductor_command", conductorWebSocketBase(action="delete", conductor=line.conductor_id, data_line=lines_to_send, data_media=None))
 
     return jsonify(lines_to_send)
-
-
-
 
 
 @bp.route("/api/conductor/<string:cond_guid>/lines", methods=["GET"])
@@ -307,8 +310,6 @@ def api_conductorsLinesList(cond_guid):
     lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
 
     return jsonify([model_to_dict(obj) for obj in lines])
-
-
 
 
 @bp.route("/api/conductor/<string:cond_guid>/lines", methods=["PUT"])
@@ -351,23 +352,24 @@ def api_conductorsLinesListInsert(cond_guid):
             # Maintenant on ajoute la nouvelle ligne
             newLine = Line(type=data["type"], name=data["name"], text=data["text"], order=newOrder, conductor=conductor, done=False)
             session.add(newLine)
+
+            # On stocke les objets modifiés pour le websocket
+            modified_objects = [model_to_dict(obj) for obj in session.dirty]
+
+            # Stockage en bdd
             session.commit()
+
+            # On envoie la liste des objets modifés en socket
+            socketio.emit("conductor_command", conductorWebSocketBase(action="insert", conductor=cond_guid, data_line=modified_objects, data_media=None))
 
             # Maintenant on liste les lignes et on affiche
             lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
-            lines_to_send = [model_to_dict(obj) for obj in lines]
-
-            # On envoie la liste en socket
-            socketio.emit("conductor_command", conductorWebSocketBase(action="insert", conductor=cond_guid, data_line=lines_to_send, data_media={}))
-
-            return jsonify(lines_to_send)
+            return jsonify([model_to_dict(obj) for obj in lines])
 
         else:
             abort(422, description="Clés requises : insertAfter, type, name, text.")
     else:
         abort(400, description="La requête doit-être une requête JSON.")
-
-
 
 
 @bp.route("/api/conductor/line/<string:line_guid>", methods=["PATCH"])
@@ -391,8 +393,6 @@ def api_conductorsLineEdit(line_guid):
         if "done" in data:
             line.done = data["done"];
         
-        print(data);
-        
         session.merge(line)
         session.commit()
 
@@ -402,14 +402,12 @@ def api_conductorsLineEdit(line_guid):
         lines_to_send = [model_to_dict(obj) for obj in lines]
 
         # On envoie la liste en socket
-        socketio.emit("conductor_command", conductorWebSocketBase(action="edit", conductor=line.conductor_id, data_line=lines_to_send, data_media={}))
+        socketio.emit("conductor_command", conductorWebSocketBase(action="edit", conductor=line.conductor_id, data_line=lines_to_send, data_media=None))
 
         # On renvoie l'objet modifié
         return jsonify(model_to_dict(line))
     else:
         abort(400, description="La requête doit être une requête JSON.")
-
-
 
 
 @bp.route("/api/conductor/<string:cond_guid>/orders", methods=["PATCH"])
@@ -445,8 +443,327 @@ def api_conductorsLinesReorder(cond_guid):
         lines_to_send = [model_to_dict(obj) for obj in lines]
 
         # On envoie les lignes réordonnées au socket
-        socketio.emit("conductor_command", conductorWebSocketBase(action="reorder", conductor=line.conductor_id, data_line=lines_to_send, data_media={}))
+        socketio.emit("conductor_command", conductorWebSocketBase(action="reorder", conductor=line.conductor_id, data_line=lines_to_send, data_media=None))
 
         return jsonify(lines_to_send)
     else:
         abort(400, description="La requête doit être une requête JSON.")
+
+
+
+
+
+
+
+
+@bp.route("/api/conductor/<string:cond_guid>/medias", methods=["GET"])
+def api_conductorsMediasList(cond_guid):
+    # On check si le conducteur existe
+    conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if conductor==None:
+        abort(404)
+
+    lines = []
+    for l in conductor.lines:
+        lines.append(l.id)
+    
+    # On récupère les médias
+    medias = session.query(Media).filter(Media.line_id.in_(lines)).order_by(Media.line_id).order_by(Media.order).all()
+
+    return jsonify([model_to_dict(obj) for obj in medias])
+
+
+@bp.route("/api/conductor/<string:cond_guid>/line/<string:line_guid>/medias", methods=["PUT"])
+def api_conductorsLineMediaAdd(cond_guid, line_guid):
+    # On check si la ligne existe et que l'ID du conducteur correspond
+    line = session.query(Line).filter(Line.id == line_guid).first()
+    if line==None:
+        abort(404, description="Cette ligne de conducteur n'existe pas")
+    elif line.conductor_id != cond_guid:
+        abort(404, description="Ce conducteur n'existe pas");
+    
+    # On récupère les données
+    data_raw = request.form.get("data")
+
+    try:
+        # Conversion du json
+        data = json.loads(data_raw)
+    except json.JSONDecodeError as e:
+        abort(400, decription="Impossible de décoder le JSON dans le champ data.")
+
+    # On vérifie les champs
+    if data.get("type") is None:
+        abort(400, description="Le champ type est requis.")
+    
+    if data.get("type")=="media":
+        if data.get("name") is None or data.get("name").strip()=="":
+            abort(400, description="Le champ name est requis")
+        
+        if request.files["file"] is None:
+            abort(400, description="Le champ file est requis")
+        
+        if data.get("mediaChannel") is None or not isinstance(data.get("mediaChannel"), list):
+            abort(400, description="Le champ mediaChannel est requis et doit-être un tableau de valeurs")
+    
+    elif data.get("type")=="web":
+        if data.get("name") is None or data.get("name").strip()=="":
+            abort(400, description="Le champ name est requis")
+        
+        if data.get("url") is None or data.get("url").strip()=="":
+            abort(400, description="Le champ url est requis")
+        
+        if data.get("webChannel") is None or not isinstance(data.get("webChannel"), list):
+            abort(400, description="Le champ webChannel est requis et doit-être un tableau de valeurs")
+
+    else:
+        abort(400, description="Type de média invalide")
+    
+    # A partir d'ici les données sont correctes
+
+    # On crée le nouvel objet
+    media = Media()
+
+    # On récupère l'ordre le plus fort
+    maxOrderQuery = session.query(Media).filter(Media.line_id == line_guid).order_by(Media.order.desc()).first()
+    newOrder = 1
+    if maxOrderQuery:
+        newOrder = maxOrderQuery.order + 1
+    
+    media.type = data["type"]
+    media.line = line
+    media.order = newOrder
+    media.name = data["name"]
+    
+    # On traite selon le type
+    if media.type=="media":
+        media.channel = ",".join(data["mediaChannel"]);
+        media.source = data["source"]
+        media.loop = data["loop"]
+        media.volume = data["volume"]
+        media.progress = -1
+
+        # On stocke l'objet du fichier
+        file = request.files["file"]
+
+        # On génère un nom de fichier temporaire
+        extension = file.filename.rsplit(".")[-1].lower()
+
+        # On génère un nom de fichier pour notre média
+        filename = generate_guid()
+        
+        # On check les extensions
+        if extension=="jpg" or extension=="jpeg" or extension=="png" or extension=="bmp" or extension=="webp":
+            try:
+                # On ouvre l'image
+                picture_bytes = file.read()
+                image = Image.open(BytesIO(picture_bytes))
+
+                # On redimensionne l'image pour le main et pour la miniature
+                w,h = image.size
+                main_w,main_h = ResizeMaximal(w, h, 2000)
+                tmb_w,tmb_h = ResizeMaximal(w, h, 120)
+
+                imgMain = image.resize((main_w,main_h))
+                imgTmb = image.resize((tmb_w,tmb_h))
+
+                # On enregistre l'image
+                filename_main = filename + ".webp"
+                filename_tmb = filename + ".tmb.webp"
+                imgMain.save("medias/"+filename_main, quality=65)
+                imgTmb.save("medias/"+filename_tmb, quality=55)
+
+                image.close()
+                imgMain.close()
+                imgTmb.close()
+            except Exception as e:
+                abort(500, description=e)
+            finally:
+                media.path = filename_main
+                media.tmb = filename_tmb
+                media.progress = 100 # L'image est déjà convertie
+
+                # On crée le fichier méta
+                metadata = {
+                    "media_id": media.id
+                }
+                meta_path = "medias/" + filename + ".meta.txt"
+                with open(meta_path, "w") as meta_file:
+                    json.dump(metadata, meta_file, indent=4)
+
+        elif extension=="mov" or extension=="mp4" or extension=="mkv" or extension=="avi" or extension=="webm":
+            try:
+                # On sauvegarde le fichier renommé avec son extension
+                filename_main = filename + "." + extension
+                file.save("tmp_medias/"+filename_main)
+
+            except Exception as e:
+                abort(500, description=e)
+            finally:
+                media.path = filename_main
+                media.tmb = None
+                media.progress = -1 # L'image est en attente de conversion
+
+                # On crée le fichier méta
+                metadata = {
+                    "media_id": media.id
+                }
+                meta_path = "tmp_medias/" + filename + ".meta.txt"
+                with open(meta_path, "w") as meta_file:
+                    json.dump(metadata, meta_file, indent=4)
+                
+        else:
+            abort(400, description="Mauvaise extension de fichier pour le fichier média.")
+
+    elif media.type=="web":
+        media.channel = ",".join(data["webChannel"]);
+        media.path = data["url"]
+        media.progress = 100 # Pas de traitement pour les médias
+
+    # On ajoute le média à la base
+    session.add(media)
+
+    # On stocke les objets modifiés pour le websocket
+    modified_objects = [model_to_dict(obj) for obj in session.dirty]
+
+    # Stockage en bdd
+    session.commit()
+
+    # On envoie la liste des objets modifés en socket
+    socketio.emit("conductor_command", conductorWebSocketBase(action="insert", conductor=cond_guid, data_line=None, data_media=modified_objects))
+
+    # On renvoie le média
+    return jsonify(model_to_dict(media))
+
+
+@bp.route("/api/conductor/<string:cond_guid>/medias/<string:media_guid>", methods=["PATCH"])
+def api_conductorsMediaEdit(cond_guid, media_guid):
+    # On check si le conducteur existe
+    conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if conductor==None:
+        abort(404, description="Le conducteur n'existe pas")
+    
+    # On check si le media existe
+    media = session.query(Media).filter(Media.id == media_guid).first()
+    if media==None:
+        abort(404, description="Le média n'existe pas")
+        
+    if request.is_json:
+        data = request.json
+
+        if "type" in data:
+            media.type = data["type"];
+        if "name" in data:
+            media.name = data["name"];
+        if media.type=="web" and "url" in data:
+            media.path = data["url"];
+        if "source" in data:
+            media.source = data["source"];
+        if "loop" in data:
+            media.loop = data["loop"];
+        if "volume" in data:
+            media.volume = data["volume"];
+        if "channel" in data:
+            media.channel = ",".join(data["mediaChannel"]) if media.type=="media" else ",".join(data["webChannel"]);
+        
+        session.merge(media)
+
+        session.commit()
+
+        # On envoie le média modifié en socket
+        socketio.emit("conductor_command", conductorWebSocketBase(action="edit", conductor=conductor.id, data_line=None, data_media=[model_to_dict(media)]))
+
+        # On renvoie l'objet modifié
+        return jsonify(model_to_dict(media))
+    else:
+        abort(400, description="La requête doit être une requête JSON.")
+
+
+@bp.route("/api/conductor/media/<string:media_guid>", methods=["GET"])
+def api_conductorsLineMediaGet(media_guid):
+    # On check si la ligne existe
+    media = session.query(Media).filter(Media.id == media_guid).first()
+    if media==None:
+        abort(404)
+    
+    # On renvoie la ligne
+    return jsonify(model_to_dict(media))
+
+
+@bp.route("/api/conductor/media/update/<string:media_guid>", methods=["GET"])
+def api_conductorsMediasUpdate(media_guid):
+    # On vérifie que le média existe
+    media = session.query(Media).filter(Media.id == media_guid).first()
+    if media==None:
+        abort(404, description="Media introuvable")
+    
+    # On envoie le média en websocket
+    # On envoie le média modifié en socket
+    socketio.emit("conductor_command", conductorWebSocketBase(action="edit", conductor=media.line.conductor_id, data_line=None, data_media=[model_to_dict(media)]))
+
+    # On retourne le média
+    return jsonify(model_to_dict(media))
+
+
+@bp.route("/api/conductor/medias/<string:line_guid>/orders", methods=["PATCH"])
+def api_conductorsMediasReorder(line_guid):
+    # On check si la ligne de conducteur existe
+    line = session.query(Line).filter(Line.id == line_guid).first()
+    if line==None:
+        abort(404, description="Cette ligne n'existe pas")
+        
+    if request.is_json:
+        data = request.json
+        
+        compiledOrder = {}
+
+        for l in data:
+            if not "id" in l or not "order" in l:
+                abort(400, description="L'objet JSON doit-être une liste d'objets étants uniquement constitués de valeurs id et order.")
+            else:
+                compiledOrder[l["id"]] = l["order"]
+        
+        # On liste les médias
+        medias = session.query(Media).filter(Media.line_id == line_guid).order_by(Media.order).all()
+
+        for media in medias:
+            if media.id in compiledOrder:
+                media.order = compiledOrder[media.id]
+                session.merge(media)
+        
+        session.commit()
+
+        # Maintenant on liste les lignes et on affiche
+        medias = session.query(Media).filter(Media.line_id == line_guid).order_by(Media.order).all()
+        medias_to_send = [model_to_dict(obj) for obj in medias]
+
+        # On envoie les lignes réordonnées au socket
+        socketio.emit("conductor_command", conductorWebSocketBase(action="reorder", conductor=line.conductor_id, data_line=None, data_media=medias_to_send))
+
+        return jsonify(medias_to_send)
+    else:
+        abort(400, description="La requête doit être une requête JSON.")
+
+
+@bp.route("/api/conductor/<string:cond_guid>/media/<string:media_guid>", methods=["DELETE"])
+def api_conductorsMediaDelete(cond_guid, media_guid):
+    # On check si le conducteur existe
+    cond = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if cond==None:
+        abort(404, description="Ce conducteur n'existe pas.")
+    
+    # On check si le média existe
+    media = session.query(Media).filter(Media.id == media_guid).first()
+    if media==None:
+        abort(404, description="Ce média n'existe pas.")
+    
+    # On supprime la ligne
+    session.delete(media)
+
+    # Maintenant on renvoie le média supprimé
+    media_to_send = [model_to_dict(media)]
+
+    session.commit()
+
+    # On envoie le média supprimé
+    socketio.emit("conductor_command", conductorWebSocketBase(action="delete", conductor=cond.id, data_line=None, data_media=media_to_send))
+    return jsonify(media_to_send)

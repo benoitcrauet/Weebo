@@ -1,0 +1,139 @@
+<!-- preview modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="previewModalTitle">Prévisualiser</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="preview-modal-container-picture">
+                    <img src="" alt="">
+                </div>
+
+                <div class="preview-modal-container-video">
+                    <video src="" controls></video>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let previewModalInstance = null;
+    $(function() {
+        previewModalInstance = new bootstrap.Modal("#previewModal");
+
+        // Si on ferme le modal, on décharge tout
+        $("#previewModal").on("hidden.bs.modal", function(e) {
+            console.debug("Closing preview modal");
+
+            // On retire le titre
+            document.getElementById("previewModalTitle").innerText = "";
+
+            // On retire les classes
+            previewModal.querySelector(".modal-body").classList.remove("video", "picture");
+
+            // On stoppe la vidéo
+            previewModal.querySelector("video").pause();
+
+            // On décharge l'image
+            previewModal.querySelector("img").src = "";
+        });
+    });
+
+    previewModal = document.getElementById("previewModal");
+
+    /**
+     * Ouvre une modale de prévisualisation
+     */
+    function showPreview(type, name, path, loop, volume) {
+        // On supprime les 3 classes du conteneur
+        previewModal.querySelector(".modal-body").classList.remove("video", "picture");
+
+        // On set le titre
+        document.getElementById("previewModalTitle").innerText = "Prévisualisation du média \""+name+"\"";
+
+        if(type=="web") {
+            const newWindow = window.open(path, "conductorPreview", "width=1280,height=720,toolbar=no,location=no,status=no,menubar=no");
+            newWindow.document.title = "Prévisualisation de \""+name+"\"";
+        }
+        else if(type=="media") {
+            // On récupère l'extension
+            let extension = getFileExtension(path);
+
+            if(extension=="webp" || extension=="jpg" || extension=="jpeg" || extension=="png") {
+                // Image
+                previewModal.querySelector(".modal-body").classList.add("picture");
+
+                // On set le src
+                previewModal.querySelector("img").src = path;
+
+                // On affiche le modal
+                previewModalInstance.show();
+            }
+            else if(extension=="webm" || extension=="mp4" || extension=="mov" || extension=="avi") {
+                // Vidéo
+                previewModal.querySelector(".modal-body").classList.add("video");
+
+                // Objet vidéo
+                videoElement = previewModal.querySelector("video");
+
+                // On set le src
+                videoElement.src = path;
+
+                // On set le loop et le volume
+                videoElement.loop = loop;
+                videoElement.volume = volume;
+
+                // On lance la lecture
+                videoElement.play();
+
+                // On affiche le modal
+                previewModalInstance.show();
+            }
+        }
+    }
+
+
+    function getFileExtension(filename) {
+        return filename.split('.').pop();
+    }
+</script>
+
+<style>
+    #previewModal .preview-modal-container-picture,
+    #previewModal .preview-modal-container-video {
+        display: none;
+        position: relative;
+        width: inherit;
+        height: 0;
+        padding-bottom: 56.25%; /* Ratio 16:9 (9 / 16 * 100) */
+        overflow: hidden;
+    }
+
+    #previewModal img,
+    #previewModal video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    #previewModal .picture .preview-modal-container-picture {
+        display: block;
+    }
+
+    #previewModal .video .preview-modal-container-video {
+        display: block;
+    }
+</style>

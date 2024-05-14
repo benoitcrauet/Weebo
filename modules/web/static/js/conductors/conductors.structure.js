@@ -24,7 +24,6 @@ function lineStructure() {
         td_done.classList.add("cond-read-mode");
         td_done.classList.add("h5");
         td_done.classList.add("text-center");
-        td_done.classList.add("align-middle");
 
             checkbox_done = document.createElement("input");
             checkbox_done.classList.add("form-check-input");
@@ -82,15 +81,11 @@ function lineStructure() {
 
                     button_delete.append(i_delete);
 
-
                 div_btngroup.append(button_edit, button_delete);
-
 
             td_actions.append(div_btngroup);
 
-
         tr_display.append(td_dragger, td_done, td_content, td_actions);
-
 
     tr_adder = document.createElement("tr");
     tr_adder.classList.add("cond-edit-mode");
@@ -121,6 +116,188 @@ function lineStructure() {
     
     return line_item
 }
+
+
+function mediasStructure() {
+    let table = document.createElement("table");
+    table.classList.add("table");
+    table.classList.add("table-hover");
+    table.classList.add("table-sm");
+    table.classList.add("cond-line-medias-table");
+
+        let tbody = document.createElement("tbody");
+
+    let tfoot = document.createElement("tfoot");
+
+        let trAdder = document.createElement("tr");
+        trAdder.classList.add("cond-edit-mode");
+        trAdder.classList.add("cond-medias-adder");
+
+            let tdAdder = document.createElement("td");
+            tdAdder.setAttribute("colspan", "5");
+
+                let aAdder = document.createElement("a");
+                aAdder.classList.add("cond-medias-adder-link");
+                aAdder.setAttribute("href", "#");
+                
+                    let iAdder = document.createElement("i");
+                    iAdder.classList.add("bi");
+                    iAdder.classList.add("bi-file-earmark-plus");
+
+                    let textAdder = document.createTextNode("Ajouter un média");
+                
+                aAdder.append(iAdder, textAdder);
+
+            tdAdder.append(aAdder);
+
+        trAdder.append(tdAdder);
+    
+    tfoot.append(trAdder);
+
+    table.append(tbody, tfoot);
+
+
+    return table;
+}
+
+
+function mediaLineStructure() {
+    let tr = document.createElement("tr");
+    tr.classList.add("cond-medias-line");
+        
+        let td1 = document.createElement("td");
+        td1.classList.add("cond-medias-line-dragger");
+        td1.classList.add("text-center");
+        td1.classList.add("cond-edit-mode");
+        td1.classList.add("vertical-align-middle");
+        
+            let i1 = document.createElement("i");
+            i1.classList.add("bi");
+            i1.classList.add("bi-grip-vertical");
+
+        td1.append(i1);
+        
+        let td2 = document.createElement("td");
+        td2.classList.add("cond-medias-line-thumbnail");
+        td2.classList.add("text-center");
+        
+            let imgThumbnail = document.createElement("img");
+            imgThumbnail.classList.add("cond-media-thumbnail-img");
+            imgThumbnail.setAttribute("src", "");
+            imgThumbnail.setAttribute("alt", "");
+            
+            let iThumbnail = document.createElement("i");
+            iThumbnail.classList.add("cond-media-thumbnail-web-icon");
+            iThumbnail.classList.add("bi");
+            iThumbnail.classList.add("bi-link-45deg");
+            
+            let spinnerLoad = document.createElement("div");
+            spinnerLoad.classList.add("cond-media-convert-spinner");
+            spinnerLoad.classList.add("spinner-border");
+            spinnerLoad.classList.add("spinner-border-sm");
+            spinnerLoad.classList.add("text-light");
+            
+                let spinnerHidden = document.createElement("div");
+                spinnerHidden.classList.add("visually-hidden");
+                spinnerHidden.innerText = "Transcodage..."
+
+            spinnerLoad.append(spinnerHidden);
+
+        td2.append(imgThumbnail, iThumbnail, spinnerLoad);
+        
+        let td3 = document.createElement("td");
+        td3.classList.add("cond-medias-line-name");
+        
+            let nameText = document.createElement("span");
+            nameText.classList.add("cond-media-name");
+        
+            let progress = document.createElement("div");
+            progress.classList.add("progress");
+            progress.setAttribute("role", "progressbar");
+
+                let progressBar = document.createElement("div");
+                progressBar.classList.add("progress-bar");
+                progressBar.classList.add("progress-bar-striped");
+                progressBar.classList.add("progress-bar-animated");
+                progressBar.classList.add("cond-media-progressbar");
+                progressBar.style.width = "0%";
+            
+            progress.append(progressBar)
+
+        td3.append(nameText, progress);
+        
+        let td4 = document.createElement("td");
+        td4.classList.add("cond-medias-line-credits");
+        td4.classList.add("text-muted");
+        td4.classList.add("text-end");
+        td4.innerText = "Disneyland Paris";
+        
+        let td5 = document.createElement("td");
+        td5.classList.add("cond-medias-line-actions");
+        td5.classList.add("text-end");
+
+            let btnEdit = document.createElement("a");
+            btnEdit.classList.add("cond-medias-line-action-edit");
+            btnEdit.classList.add("cond-edit-mode");
+            btnEdit.classList.add("btn");
+            btnEdit.classList.add("btn-sm");
+            btnEdit.classList.add("btn-outline-primary");
+            btnEdit.setAttribute("title", "Modifier");
+
+                let iEdit = document.createElement("i");
+                iEdit.classList.add("bi");
+                iEdit.classList.add("bi-pen-fill");
+
+            btnEdit.append(iEdit);
+
+            let btnDelete = document.createElement("a");
+            btnDelete.classList.add("cond-medias-line-action-delete");
+            btnDelete.classList.add("cond-edit-mode");
+            btnDelete.classList.add("btn");
+            btnDelete.classList.add("btn-sm");
+            btnDelete.classList.add("btn-outline-danger");
+            btnDelete.setAttribute("title", "Supprimer le média");
+
+                let iDelete = document.createElement("i");
+                iDelete.classList.add("bi");
+                iDelete.classList.add("bi-trash3-fill");
+
+            btnDelete.append(iDelete);
+
+            let btnPreview = document.createElement("a");
+            btnPreview.classList.add("cond-medias-line-action-preview");
+            btnPreview.classList.add("btn");
+            btnPreview.classList.add("btn-sm");
+            btnPreview.classList.add("btn-dark");
+            btnPreview.setAttribute("title", "Prévisualiser");
+
+                let iPreview = document.createElement("i");
+                iPreview.classList.add("bi");
+                iPreview.classList.add("bi-eye-fill");
+
+            btnPreview.append(iPreview);
+
+            let btnOnAir = document.createElement("a");
+            btnOnAir.classList.add("cond-medias-line-action-onair");
+            btnOnAir.classList.add("cond-read-mode");
+            btnOnAir.classList.add("btn");
+            btnOnAir.classList.add("btn-sm");
+            btnOnAir.classList.add("btn-outline-danger");
+            btnOnAir.setAttribute("title", "Diffuser le média à l'antenne");
+
+                let iOnAir = document.createElement("i");
+                iOnAir.classList.add("bi");
+                iOnAir.classList.add("bi-cast");
+
+                btnOnAir.append(iOnAir);
+
+        td5.append(btnPreview, btnEdit, btnDelete, btnOnAir);
+
+    tr.append(td1, td2, td3, td4, td5);
+    
+    return tr;
+}
+
 
 function lineSetDatas(element, line) {
     let id = line.id;
@@ -153,6 +330,47 @@ function lineSetDatas(element, line) {
 }
 
 
-function mediasStructure() {
-    return document.createTextNode("");
+function mediaLineSetDatas(element, media) {
+    let id = media.id;
+    let order = media.order;
+    let type = media.type;
+    let name = media.name;
+    let url = media.url;
+    let path = media.path;
+    let tmb = media.tmb;
+    let source = media.source;
+    let loop = media.loop;
+    let volume = media.volume;
+    let channel = media.channel;
+    let progress = media.progress;
+    let line_id = media.line_id;
+
+    // On édite le tr principal
+    element.setAttribute("id", "cond-media-line-"+id);
+    element.dataset.id = id;
+    element.dataset.type = type;
+    element.dataset.name = name;
+    element.dataset.order = order;
+    element.dataset.url = url;
+    element.dataset.path = path;
+    element.dataset.tmb = tmb;
+    element.dataset.source = source;
+    element.dataset.loop = loop;
+    element.dataset.volume = volume;
+    element.dataset.channel = channel;
+    element.dataset.progress = progress;
+    element.dataset.inprogress = progress<100;
+    element.dataset.lineId = line_id;
+    
+    // On édite le thumbnail
+    element.querySelector(".cond-media-thumbnail-img").src = "/medias/" + tmb;
+
+    // On édite le nom
+    element.querySelector(".cond-media-name").innerText = name;
+
+    // On édite la progression
+    element.querySelector(".cond-media-progressbar").style.width = Math.max(0, progress) + "%";
+
+    // On édite la source
+    element.querySelector(".cond-medias-line-credits").innerText = source;
 }

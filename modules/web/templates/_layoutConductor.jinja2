@@ -13,6 +13,11 @@
         <link rel="icon" type="image/png" sizes="64x64" href="/static/img/favicon64.png">
         <link rel="icon" type="image/png" sizes="32x32" href="/static/img/favicon32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="/static/img/favicon16.png">
+
+        <script src="/static/js/jquery.min.js"></script>
+        <script src="/static/js/jquery-ui.min.js"></script>
+        <script src="/static/js/bootstrap.bundle.min.js"></script>
+        <script src="/static/js/socket/socket.io.min.js"></script>
     </head>
     <body>
         {% block content %}{% endblock %}
@@ -33,12 +38,9 @@
             </ul>
         </footer>
 
-        <script src="/static/js/jquery.min.js"></script>
-        <script src="/static/js/jquery-ui.min.js"></script>
-        <script src="/static/js/bootstrap.bundle.min.js"></script>
-
-        <script type="text/javascript" src="/static/js/conductors/conductors.structure.js"></script>
-        <script type="text/javascript" src="/static/js/conductors/conductors.js"></script>
+        <script src="/static/js/conductors/conductors.structure.js"></script>
+        <script src="/static/js/conductors/conductors.js"></script>
+        <script src="/static/js/conductors/conductorsWebSocket.js"></script>
         {% block endbody %}{% endblock %}
     </body>
 </html>

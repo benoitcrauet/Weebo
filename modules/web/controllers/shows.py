@@ -99,6 +99,8 @@ def showEdit(guid=None):
 
                         new_image.save("images/" + filename)
 
+                        image.close()
+
                         show.logo = filename
 
         except Exception as e:

@@ -1,0 +1,39 @@
+
+    <header class="sticky-top">
+        <div id="toolsbar" class="border-bottom">
+            <div class="row">
+                <div class="col-4 d-flex flex-wrap justify-content-begin align-items-center gap-1">
+                    <ul class="nav gap-1">
+                        <li>
+                            <button class="btn btn-sm btn-outline-light text-center px-3" onclick="document.body.classList.toggle('edit-mode'); this.classList.toggle('btn-outline-light'); this.classList.toggle('btn-danger');">
+                                <i class="bi bi-pen-fill"></i>
+                                <span class="toolbar-button-label">Mode édition</span>
+                            </a>
+                        </li>
+                        <li>
+                            <button {{ "disabled" if not conductor.vdoEnable or conductor.guests.strip()=="" }} class="btn btn-sm btn-outline-light text-center px-3" data-bs-toggle="modal" data-bs-target="#vdoModal">
+                                <i class="bi bi-webcam-fill"></i>
+                                <span class="toolbar-button-label">Paramètres VDO</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-4 text-center d-flex flex-column justify-content-center">
+                    <h1>{{ conductor.name }}</h1>
+                    <h2>{{ show.name }}</h2>
+                    <h3>Diffusion le {{ conductor.date.strftime("%A %d %B %Y") | lower }}</h3>
+                </div>
+                <div class="col-4 d-flex flex-wrap justify-content-end align-items-center gap-1">
+                        <ul class="nav gap-1">
+                            <li>
+                                <a href="{{ url_for("conductors.conductorsList", show_guid=show.id) }}" class="btn btn-sm btn-outline-danger text-center px-3" data-bs-toggle="tooltip" data-bs-title="Default tooltip">
+                                    <i class="bi bi-door-open-fill"></i>
+                                    <span class="toolbar-button-label">Quitter</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>

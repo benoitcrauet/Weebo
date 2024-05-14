@@ -27,12 +27,12 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th scope="col">Nom</th>
+                    <th scope="col" width="40%">Nom</th>
                     <th scope="col">Date</th>
                     <th scope="col"><abbr title="Participants" class="abbr">Part.</abbr></th>
                     <th scope="col">VDO actif</th>
                     <th scope="col"><abbr title="Mot de passe" class="abbr">MDP</abbr></th>
-                    <th scope="col">Actions</th>
+                    <th scope="col" class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,7 +47,7 @@
                             {{ c.date.strftime("%d %B %Y") }}
                         </td>
                         <td>
-                            {{ c.guests.split("\n") | length }}
+                            {{ c.guests.split("\n") | length if c.guests.strip()!="" else "Aucun" }}
                         </td>
                         <td>
                             {{ "Oui" if c.vdoEnable else "Non" }}
@@ -55,7 +55,7 @@
                         <td>
                             {{ "Oui" if c.password!="" else "Non" }}
                         </td>
-                        <td class="text-center">
+                        <td class="text-end">
                             <a href="{{ url_for("conductors.conductorsView", show_guid=show.id, cond_guid=c.id) }}" class="btn btn-primary" title="Ouvrir le conducteur"><i class="bi bi-folder2-open"></i> Ouvrir</a>
                             <div class="btn-group" role="group">
                                 <a href="{{ url_for("conductors.conductorsEdit", show_guid=show.id, cond_guid=c.id) }}" class="btn btn-secondary" title="Modifier"><i class="bi bi-pen-fill"></i></a>

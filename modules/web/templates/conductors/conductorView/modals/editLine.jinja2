@@ -1,0 +1,74 @@
+<!-- Line edit form modal -->
+<div class="modal fade" id="editLineFormModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="editLineFormModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <form id="formEditLine">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editLineFormModalTitle">Ligne</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="container-fluid">
+                        <div id="fTypeContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="fType">
+                                    Type
+                                </label>
+                                <div class="col-9">
+                                    <select id="fType" name="type" class="form-select">
+                                        <option value="classic">Contenu classique</option>
+                                        <option value="section">Rubrique</option>
+                                        <option value="comment">Commentaire</option>
+                                        <option value="important">Remarque importante</option>
+                                    </select>
+                                    <span class="form-text">
+                                        Définit le type de ligne qui sera inséré dans le conducteur.<br>
+                                        <b>Attention : cette option ne pourra plus être changée par la suite.</b>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="fNameContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="fName">
+                                    Nom
+                                </label>
+                                <div class="col-9">
+                                    <input type="text" id="fName" name="name" class="form-control">
+                                    <span class="form-text">
+                                        Permet de donner un nom à votre ligne.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="fTextContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="fText">
+                                    Texte
+                                </label>
+                                <div class="col-9">
+                                    <textarea id="fText" name="text" rows="7" class="form-control" style="resize: none;"></textarea>
+                                    <span class="form-text">
+                                        Entrez ici un texte décrivant votre contenu.<br>
+                                        <span class="text-info">Astuce : dans les lignes classiques, vous pouvez mettre en forme votre texte avec du Markdown !</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <input type="hidden" name="id" id="fId" value="">
+                    <input type="hidden" name="insertAfter" id="fInsertAfter" value="">
+                    <button type="submit" class="btn btn-primary" id="fSubmit">Valider</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

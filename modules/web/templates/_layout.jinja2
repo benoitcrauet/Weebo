@@ -35,6 +35,11 @@
                 -ms-backdrop-filter: blur(10px);
                 -o-backdrop-filter: blur(10px);
             }
+            @media (prefers-color-scheme: dark) {
+                #main-header {
+                    background-color: rgba(var(--bs-dark-rgb), 0.8) !important;
+                }
+            }
             .dropdown-menu li {
                 position: relative;
             }

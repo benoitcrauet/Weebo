@@ -5,3 +5,8 @@ Flask-WTF
 SQLAlchemy
 pillow
 flask-cors
+moviepy
+setuptools
+proglog
+requests
+colorama

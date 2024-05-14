@@ -5,6 +5,7 @@ from datetime import datetime
 
 from lib.db import engine, Base, session
 from lib.guid import generate_guid
+from lib.config import config
 
 
 class Show(Base):
@@ -57,6 +58,7 @@ class WebChannel(Base):
 
     show_id = Column(String, ForeignKey('Shows.id'))
     show = relationship("Show", back_populates="webChannels")
+
 
 
 class Conductor(Base):
@@ -112,11 +114,50 @@ class Media(Base):
     id = Column(String, primary_key=True, default=lambda: str(generate_guid()))
     order = Column(Integer)
     type = Column(Enum("media", "picture", "web", name="type_enum"))
+    name = Column(String)
     channel = Column(String)
     path = Column(String)
+    tmb = Column(String)
     source = Column(String)
     loop = Column(Boolean, default=True)
     volume = Column(Float)
+    progress = Column(Integer)
 
     line_id = Column(String, ForeignKey('Lines.id'))
     line = relationship("Line", back_populates="medias")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.id:
+            self.id = generate_guid()
+
+def delete_media_files(mapper, connection, target):
+    if target.type == "media":
+        filename = target.path
+
+        # On sépare nom et extension
+        basename, extension = filename.split(".")
+
+        # Paths pour les différents fichiers
+        pathFinal = config["medias_dir"] + "/" + str(filename)
+        pathThumbnail = config["medias_dir"] + "/" + str(target.tmb)
+        pathTemporary = config["medias_tmp"] + "/" + str(target.path)
+        pathMeta1 = config["medias_tmp"] + "/" + str(basename) + ".meta.txt"
+        pathMeta2 = config["medias_dir"] + "/" + str(basename) + ".meta.txt"
+
+        # On supprime chaque fichier s'il existe
+        try:
+            if os.path.exists(pathFinal):
+                os.remove(pathFinal)
+            if os.path.exists(pathThumbnail):
+                os.remove(pathThumbnail)
+            if os.path.exists(pathTemporary):
+                os.remove(pathTemporary)
+            if os.path.exists(pathMeta1):
+                os.remove(pathMeta1)
+            if os.path.exists(pathMeta2):
+                os.remove(pathMeta2)
+        except Exception as e:
+            print("ERROR WHILE DELETING MEDIA FILES FOR ID {}:\n{}".format(target.id, e))
+        
+event.listen(Media, "before_delete", delete_media_files)

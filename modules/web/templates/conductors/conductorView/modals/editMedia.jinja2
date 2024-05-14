@@ -1,0 +1,185 @@
+<!-- Media edit form modal -->
+<div class="modal fade" id="editMediaFormModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="editMediaFormModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <form id="formEditMedia" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="editMediaFormModalTitle">Média</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="container-fluid">
+
+                        <div id="gTypeContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gType">
+                                    Type
+                                </label>
+                                <div class="col-9">
+                                    <select id="gType" name="type" class="form-select">
+                                        <option value="media">Média</option>
+                                        <option value="web">Lien web</option>
+                                    </select>
+                                    <span class="form-text">
+                                        Choisissez quel type de média vous souhaitez ajouter.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="gNameContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gName">
+                                    Nom
+                                </label>
+                                <div class="col-9">
+                                    <input type="text" id="gName" name="name" class="form-control">
+                                    <span class="form-text">
+                                        Donnez un nom simple à votre média.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="gSourceContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gSource">
+                                    Source
+                                </label>
+                                <div class="col-9">
+                                    <input type="text" id="gSource" name="source" class="form-control">
+                                    <span class="form-text">
+                                        Optionnel. Vous pouvez spécifier une source pour votre média.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="gFileContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gFile">
+                                    Fichier
+                                </label>
+                                <div class="col-9">
+                                    <input type="file" id="gFile" name="file" class="form-control">
+                                    <span class="form-text">
+                                        Indiquez ici le fichier à téléverser.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="gLoopContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gLoop">
+                                    Lecture en boucle
+                                </label>
+                                <div class="col-9">
+                                    <input type="checkbox" id="gLoop" name="loop" class="form-check-input">
+                                    <label for="gLoop">Lecture en boucle</label>
+                                    <div class="form-text">
+                                        Seulement pour les vidéos. Indique si la vidéo doit-être lue en boucle ou non.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="gVolumeContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gVolume">
+                                    Volume
+                                </label>
+                                <div class="col-9">
+                                    <div class="row">
+                                        <div class="col-10">
+                                            <input type="range" id="gVolume" name="volume" class="form-range col-8" min="0" max="1" step="0.02" value="0">
+                                        </div>
+                                        <div class="col-auto text-center">
+                                            <span id="editMediaVolumeValue">0 %</span>
+                                        </div>
+                                    </div>
+                                    <span class="form-text">
+                                        Seulement pour les vidéos. Spécifiez le volume de lecture du média.<br>
+                                        <b>Attention : veillez à bien mettre le son uniquement quand c'est nécessaire.</b>
+                                    </span>
+                                </div>
+                            </div>
+                            <script>
+                                function _updateMediaVolumeDisplay(source) {
+                                    document.getElementById('editMediaVolumeValue').innerText =  Math.round(source.value*100) + ' %';
+                                }
+
+                                const _gVolume = document.getElementById("gVolume");
+                                gVolume.addEventListener("change", function() { _updateMediaVolumeDisplay(_gVolume); });
+                                gVolume.addEventListener("input", function() { _updateMediaVolumeDisplay(_gVolume); });
+                                window.setInterval(function() { _updateMediaVolumeDisplay(_gVolume); }, 500);
+                            </script>
+                        </div>
+
+                        <div id="gUrlContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gUrl">
+                                    URL
+                                </label>
+                                <div class="col-9">
+                                    <input type="text" id="gUrl" name="url" class="form-control">
+                                    <span class="form-text">
+                                        Spécifiez l'URL de la page web à intégrer.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="gMediaChannelContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gMediaChannel">
+                                    Canaux
+                                </label>
+                                <div class="col-9">
+                                    <select id="gMediaChannel" name="mediaChannel" multiple class="form-select">
+                                        <option value="media1">Canal media 1</option>
+                                        <option value="media2">Canal media 2</option>
+                                    </select>
+                                    <span class="form-text">
+                                        Choisissez dans quels canaux envoyer ce média.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="gWebChannelContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gWebChannel">
+                                    Canaux
+                                </label>
+                                <div class="col-9">
+                                    <select id="gWebChannel" name="webChannel" multiple class="form-select">
+                                        <option value="web1">Canal web 1</option>
+                                        <option value="web2">Canal web 2</option>
+                                    </select>
+                                    <span class="form-text">
+                                        Choisissez dans quels canaux envoyer ce média.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="alert alert-warning text-center">
+                        N'oubliez pas de prévisualiser vos médias une fois téléchargés !
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <input type="hidden" name="id" id="gId" value="">
+                    <input type="hidden" name="line" id="gLine" value="">
+                    <button type="submit" class="btn btn-primary" id="gSubmit">Valider</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
