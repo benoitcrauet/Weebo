@@ -2,7 +2,6 @@
  * Reste à faire :
  * - Channels par défaut
  * - Templates
- * / Améliorer le preview avec notamment un viewer modal (+ controle du volume et du loop)
  * - Gestion de l'upload de fichier côté client (blocage bouton + spinner + annuler l'envoi ?)
  * - Gestion des timecodes (chaque channel doit pouvoir avoir un paramètre de s'il faut enregistrer ou non les médias qui y passent)
  * - Revoir tous les points medias/ de l'app pour les passer via la config. Back ET front.
@@ -463,6 +462,22 @@ function lineElementsRegisterEventListeners(elements) {
     // Évènement quand on coche la case d'une ligne
     const lineDone = elements.querySelector(".cond-line-done-checkbox");
     lineDone.addEventListener("click", function(e) {
+        let checked = e.target.checked;
+        let linesToEdit = checkContinuousDone(lineID, checked);
+
+        if(checked && linesToEdit.length>0) {
+            if(!confirm("Certains éléments sont restés décochés plus haut dans le conducteur...\nÊtes-vous sûr de vouloir cocher celui-ci ?")) {
+                e.preventDefault();
+                return false;
+            }
+        }
+        if(!checked && linesToEdit.length>0) {
+            if(!confirm("Certains éléments sont restés cochés plus bas dans le conducteur...\nÊtes-vous sûr de vouloir décocher celui-ci ?")) {
+                e.preventDefault();
+                return false;
+            }
+        }
+
         lineSendEdit(lineID, null, null, null, e.target.checked, null);
     });
 
@@ -556,6 +571,49 @@ function mediaElementsRegisterEventListeners(elements) {
             mediaSendDelete(mediaID);
     });
 }
+
+
+/**
+ * Vérifie si toutes les checkboxes jusqu'à une ligne donnée sont cochées
+ * @param {string} lineTarget ID de la ligne à vérifier
+ * @param {boolean} done Permet de vérifier si les cases sont toutes cochées depuis le début (true) ou décochées jusqu'à la fin (false)
+ */
+function checkContinuousDone(lineTarget, done) {
+    let lines = condMainTable.querySelectorAll(".cond-line");
+
+    let lineFound = false;
+
+    let linesToEdit = [];
+
+    lines.forEach(lineElement => {
+        let checkbox = lineElement.querySelector(".cond-line-done-checkbox");
+        let checked = checkbox.checked;
+        let lineID = lineElement.dataset.id;
+        let lineType = lineElement.dataset.type;
+
+        if(lineID == lineTarget)
+            lineFound = true;
+
+        if(lineType == "classic") {
+
+            if(done && !lineFound) {
+                console.log(lineID, checked);
+                if(!checked)
+                    linesToEdit.push(lineID);
+            }
+
+            if(!done && lineFound) {
+                console.log(lineID, checked);
+                if(checked)
+                    linesToEdit.push(lineID);
+            }
+
+        }
+    });
+
+    return linesToEdit;
+}
+
 
 /**
  * Insert ou update le média automatiquement dans le bon tableau
