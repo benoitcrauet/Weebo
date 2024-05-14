@@ -48,7 +48,7 @@ def main():
     #app.run(debug=(arguments.debug), host=config["web_host"], port=config["web_port"]) #, ssl_context="adhoc")
 
 
-    server = pywsgi.WSGIServer(('127.0.0.1', 8000), app, handler_class=WebSocketHandler)
+    server = pywsgi.WSGIServer((config["web_host"], config["web_port"]), app, handler_class=WebSocketHandler)
     server.serve_forever()
 
 

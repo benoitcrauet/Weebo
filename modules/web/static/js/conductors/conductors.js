@@ -3,7 +3,7 @@
  * - Channels par défaut
  * - Templates
  * - Gestion de l'upload de fichier côté client (blocage bouton + spinner + annuler l'envoi ?)
- * - Gestion des timecodes (chaque channel doit pouvoir avoir un paramètre de s'il faut enregistrer ou non les médias qui y passent)
+ * - ?? PEUT ETRE ?? Gestion des timecodes (chaque channel doit pouvoir avoir un paramètre de s'il faut enregistrer ou non les médias qui y passent)
  * - Revoir tous les points medias/ de l'app pour les passer via la config. Back ET front.
  */
 
