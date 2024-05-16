@@ -110,6 +110,15 @@
 
             </fieldset>
 
+            <div class="mb-3 row">
+                {{ form.defaultEnable.label(class="col-form-label col-sm-3") }}
+                <div class="col-sm-9">
+                    {{ form.defaultEnable(class="form-check-input") }}
+                    {{ form.defaultEnable.label(class="form-check-label") }}
+                    {% if form.defaultEnable.description %}<div class="form-text">{{ form.defaultEnable.description }}</div>{% endif %}
+                </div>
+            </div>
+
             <div class="col-12">
                 {{ form.hidden_tag() }}
                 {{ form.id }}

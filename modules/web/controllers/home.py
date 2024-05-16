@@ -31,7 +31,7 @@ def home():
     threshold_date = datetime.now() - timedelta(days=14)
 
     # On récupère les derniers conducteurs en date
-    conductors = session.query(Conductor).order_by(
+    conductors = session.query(Conductor).filter(Conductor.type == "operational").order_by(
         desc(Conductor.year),
         desc(Conductor.month),
         desc(Conductor.day)

@@ -72,5 +72,47 @@
                 {% endfor %}
             </tbody>
         </table>
+
+
+        <hr>
+
+        <h1>Modèles</h1>
+
+        <p class="lead">
+            Les modèles vous permettent d'avoir des conducteurs types à dupliquer lors de la création de conducteurs.
+        </p>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col" width="70%">Nom</th>
+                    <th scope="col" class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in templates %}
+                    <tr>
+                        <td class="h4">
+                            <a href="{{ url_for("conductors.conductorsView", show_guid=show.id, cond_guid=c.id) }}">
+                                {{ c.name }}
+                            </a>
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for("conductors.conductorsView", show_guid=show.id, cond_guid=c.id) }}" class="btn btn-primary" title="Ouvrir le template"><i class="bi bi-folder2-open"></i> Ouvrir le template</a>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for("conductors.conductorsEdit", show_guid=show.id, cond_guid=c.id) }}" class="btn btn-secondary" title="Modifier"><i class="bi bi-pen-fill"></i></a>
+                                <a href="{{ url_for("conductors.conductorsDelete", show_guid=show.id, cond_guid=c.id) }}" class="btn btn-danger" title="Supprimer"><i class="bi bi-trash-fill"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center fst-italic">
+                            Aucun template n'a été créé pour le moment.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 {% endblock %}

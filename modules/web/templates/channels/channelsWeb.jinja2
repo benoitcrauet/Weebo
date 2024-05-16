@@ -31,6 +31,7 @@
                 <tr>
                     <th scope="col">Canal</th>
                     <th scope="col">Description</th>
+                    <th scope="col">Par défaut</th>
                     <th scope="col">Actions</th>
                 </tr>
             </thead>
@@ -43,6 +44,13 @@
                         <td>
                             {{c.description}}
                         </td>
+                        <td>
+                            {% if c.defaultEnable %}
+                                Oui
+                            {% else %}
+                                Non
+                            {% endif %}
+                        </td>
                         <td class="text-center">
                             <div class="btn-group" role="group">
                                 <a href="{{ url_for("channels.channelsWebEdit", show_guid=show.id, channel_guid=c.id) }}" class="btn btn-secondary"><i class="bi bi-pen-fill"></i></a>
@@ -52,7 +60,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="text-center fst-italic">
+                        <td colspan="6" class="text-center fst-italic">
                             Aucun canal n'a été créé pour le moment.
                         </td>
                     </tr>

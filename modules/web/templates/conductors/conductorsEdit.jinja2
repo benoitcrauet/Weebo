@@ -50,23 +50,21 @@
                     </ul>
                 </div>
             {% endif %}
+
+            <div id="typeFieldContainer">
+                <div class="mb-3 row">
+                    {{ form.type.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        <div class="input-group">
+                            {{ form.type(class="form-control") }}
+                        </div>
+                        {% if form.type.description %}<div class="form-text">{{ form.type.description }}</div>{% endif %}
+                    </div>
+                </div>
+            </div>
             
             <fieldset>
                 <legend>Général</legend>
-
-                <div class="mb-3 row">
-                    {{ form.day.label(class="col-form-label col-sm-3") }}
-                    <div class="col-sm-9">
-                        <div class="input-group">
-                            {{ form.day(class="form-control") }}
-                            <span class="input-group-text">/</span>
-                            {{ form.month(class="form-control") }}
-                            <span class="input-group-text">/</span>
-                            {{ form.year(class="form-control") }}
-                        </div>
-                        {% if form.day.description %}<div class="form-text">{{ form.day.description }}</div>{% endif %}
-                    </div>
-                </div>
 
                 <div class="mb-3 row">
                     {{ form.name.label(class="col-form-label col-sm-3") }}
@@ -76,35 +74,47 @@
                     </div>
                 </div>
 
-                <div class="mb-3 row">
-                    {{ form.guests.label(class="col-form-label col-sm-3") }}
-                    <div class="col-sm-9">
-                        {{ form.guests(class="form-control", rows="6", style="resize: none;") }}
-                        {% if form.guests.description %}<div class="form-text">{{ form.guests.description }}</div>{% endif %}
-                    </div>
-                </div>
+                <div id="showFieldsContainer">
 
-                <div class="mb-3 row">
-                    {{ form.vdoEnable.label(class="col-form-label col-sm-3") }}
-                    <div class="col-sm-9">
-                        {{ form.vdoEnable(class="form-check-input") }}
-                        {{ form.vdoEnable.label(class="form-check-label") }}
-                        {% if form.vdoEnable.description %}<div class="form-text">{{ form.vdoEnable.description }}</div>{% endif %}
-                    </div>
-                </div>
-
-                <div class="mb-3 row">
-                    {{ form.password.label(class="col-form-label col-sm-3") }}
-                    <div class="col-sm-9">
-                        <div class="input-group">
-                            {{ form.password(class="form-control", autocomplete="off") }}
-                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('password').value = generatePassword();">
-                                <i class="bi bi-key-fill"></i>
-                                Générer
-                            </button>
+                    <div class="mb-3 row">
+                        {{ form.fromTemplate.label(class="col-form-label col-sm-3") }}
+                        <div class="col-sm-9">
+                            {{ form.fromTemplate(class="form-control") }}
+                            {% if form.fromTemplate.description %}<div class="form-text">{{ form.fromTemplate.description }}</div>{% endif %}
                         </div>
-                        {% if form.password.description %}<div class="form-text">{{ form.password.description }}</div>{% endif %}
                     </div>
+
+                    <div class="mb-3 row">
+                        {{ form.day.label(class="col-form-label col-sm-3") }}
+                        <div class="col-sm-9">
+                            <div class="input-group">
+                                {{ form.day(class="form-control") }}
+                                <span class="input-group-text">/</span>
+                                {{ form.month(class="form-control") }}
+                                <span class="input-group-text">/</span>
+                                {{ form.year(class="form-control") }}
+                            </div>
+                            {% if form.day.description %}<div class="form-text">{{ form.day.description }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        {{ form.guests.label(class="col-form-label col-sm-3") }}
+                        <div class="col-sm-9">
+                            {{ form.guests(class="form-control", rows="6", style="resize: none;") }}
+                            {% if form.guests.description %}<div class="form-text">{{ form.guests.description }}</div>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        {{ form.vdoEnable.label(class="col-form-label col-sm-3") }}
+                        <div class="col-sm-9">
+                            {{ form.vdoEnable(class="form-check-input") }}
+                            {{ form.vdoEnable.label(class="form-check-label") }}
+                            {% if form.vdoEnable.description %}<div class="form-text">{{ form.vdoEnable.description }}</div>{% endif %}
+                        </div>
+                    </div>
+
                 </div>
 
             </fieldset>
@@ -112,7 +122,6 @@
             <div class="col-12">
                 {{ form.hidden_tag() }}
                 {{ form.id }}
-                {{ form.type }}
                 {{ form.show_id }}
                 {{ form.submit(class="btn btn-primary") }}
             </div>
@@ -131,6 +140,29 @@
 
                 return guid;
             }
+
+            function updateView(type, edit=false) {
+                let showContainer = document.getElementById("showFieldsContainer");
+                let typeContainer = document.getElementById("typeFieldContainer");
+                if(type == "operational")
+                    showContainer.style.display = "block";
+                else
+                    showContainer.style.display = "none";
+
+                if(edit)
+                    typeContainer.style.display = "none";
+                else
+                    typeContainer.style.display = "block";
+            }
+
+            const editMode = {{ "true" if editMode else "false" }};
+            const typeField = document.getElementById("{{ form.type.id }}");
+
+            typeField.addEventListener("change", function(e) {
+                updateView(e.target.value);
+            });
+
+            updateView(typeField.value, editMode);
         </script>
         
     </div>

@@ -111,7 +111,6 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={})
                 "-vf", f"scale={newSize[0]}:{newSize[1]}"   # Redimensionner la vidéo
             ];
 
-
             # Lancement du transcodage avec un redimensionnement
             subclip.rotate(rotateDeg).write_videofile(output, codec="libvpx", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
 
@@ -167,7 +166,7 @@ def getThumbnailPicture(input, output, maxborder):
             clip = clip.resize(newSize)
 
             # On enregistre le GIF
-            clip.write_gif(os.getcwd()+"/"+output, fps=8, fuzz=40)
+            clip.write_gif(os.getcwd()+"/"+output, fps=8, fuzz=40, program="ffmpeg")
 
             clip.close()
 

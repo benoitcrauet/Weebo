@@ -1,4 +1,4 @@
-function lineStructure() {
+function lineStructure(integrateMedias=true) {
 
     line_item = document.createElement("tbody");
     line_item.classList.add("cond-line");
@@ -47,6 +47,7 @@ function lineStructure() {
             div_medias = document.createElement("div");
             div_medias.classList.add("cond-line-medias");
             
+            if(integrateMedias)
                 div_medias.append(mediasStructure());
 
             td_content.append(h3_title, div_text, div_desc, div_medias);
@@ -208,8 +209,34 @@ function mediaLineStructure() {
         let td3 = document.createElement("td");
         td3.classList.add("cond-medias-line-name");
         
-            let nameText = document.createElement("span");
-            nameText.classList.add("cond-media-name");
+            let mediaName = document.createElement("div");
+            mediaName.classList.add("cond-media-name");
+
+
+                let audioIcon0 = document.createElement("i");
+                audioIcon0.classList.add("cond-media-volume-icon");
+                audioIcon0.classList.add("cond-media-volume-icon-mute");
+                audioIcon0.classList.add("bi");
+                audioIcon0.classList.add("bi-volume-mute");
+                audioIcon0.classList.add("text-muted");
+
+                let audioIcon1 = document.createElement("i");
+                audioIcon1.classList.add("cond-media-volume-icon");
+                audioIcon1.classList.add("cond-media-volume-icon-low");
+                audioIcon1.classList.add("bi");
+                audioIcon1.classList.add("bi-volume-down");
+
+                let audioIcon2 = document.createElement("i");
+                audioIcon2.classList.add("cond-media-volume-icon");
+                audioIcon2.classList.add("cond-media-volume-icon-high");
+                audioIcon2.classList.add("bi");
+                audioIcon2.classList.add("bi-volume-up-fill");
+                audioIcon2.classList.add("text-warning");
+
+                let mediaNameText = document.createElement("span");
+                mediaNameText.classList.add("cond-media-name-text");
+
+            mediaName.append(audioIcon0, audioIcon1, audioIcon2, mediaNameText);
         
             let progress = document.createElement("div");
             progress.classList.add("progress");
@@ -224,7 +251,7 @@ function mediaLineStructure() {
             
             progress.append(progressBar)
 
-        td3.append(nameText, progress);
+        td3.append(mediaName, progress);
         
         let td4 = document.createElement("td");
         td4.classList.add("cond-medias-line-credits");
@@ -365,8 +392,13 @@ function mediaLineSetDatas(element, media) {
     // On édite le thumbnail
     element.querySelector(".cond-media-thumbnail-img").src = "/medias/" + tmb;
 
+    // On édite le mode de volume
+    if(volume == 0) element.dataset.volumeMode = "mute";
+    else if(volume < 0.6) element.dataset.volumeMode = "low";
+    else if(volume >= 0.6) element.dataset.volumeMode = "high";
+
     // On édite le nom
-    element.querySelector(".cond-media-name").innerText = name;
+    element.querySelector(".cond-media-name-text").innerText = name;
 
     // On édite la progression
     element.querySelector(".cond-media-progressbar").style.width = Math.max(0, progress) + "%";

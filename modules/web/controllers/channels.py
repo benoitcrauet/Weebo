@@ -45,6 +45,7 @@ class FormMediaChannelEdit(FlaskForm):
     description = wtforms.StringField("Description", description="Une simple description, juste pour vous, pour vous y retrouver.", validators=[], render_kw={"maxlength": 150})
     width = wtforms.IntegerField("Résolution", description="Indiquez ici la résolution qui sera utilisée pour ce canal média. Dans la plupart des cas, 1920x1080 convient.", validators=[validators.NumberRange(200, 6000)])
     height = wtforms.IntegerField("Hauteur", validators=[validators.NumberRange(200, 6000)])
+    defaultEnable = wtforms.BooleanField("Par défaut", description="Permet de définir si le canal est coché par défaut pour cette émission.")
     customCSS = wtforms.TextAreaField("CSS personnalisé", description="Vous permet de personnaliser le rendu. Moldus, passez votre chemin.")
 
     submit = wtforms.SubmitField("Valider")
@@ -89,11 +90,13 @@ def channelsMediasEdit(show_guid, channel_guid=None):
         channel.width = form.width.data
         channel.height = form.height.data
         channel.customCSS = form.customCSS.data
-
+        channel.defaultEnable = form.defaultEnable.data
         if edit:
             session.merge(channel)
         else:
             session.add(channel)
+        
+        session.commit()
         
         return redirect(url_for("channels.channelsMedias", show_guid=show_guid))
 
@@ -164,6 +167,7 @@ class FormWebChannelEdit(FlaskForm):
     id = wtforms.HiddenField("ID", validators=[])
     name = wtforms.StringField("Nom du canal", validators=[validators.DataRequired()], render_kw={"maxlength": 30})
     description = wtforms.StringField("Description", description="Une simple description, juste pour vous, pour vous y retrouver.", validators=[], render_kw={"maxlength": 150})
+    defaultEnable = wtforms.BooleanField("Par défaut", description="Permet de définir si le canal est coché par défaut pour cette émission.")
 
     submit = wtforms.SubmitField("Valider")
 
@@ -204,11 +208,14 @@ def channelsWebEdit(show_guid, channel_guid=None):
         channel.show_id = show_guid
         channel.name = form.name.data
         channel.description = form.description.data
+        channel.defaultEnable = form.defaultEnable.data
 
         if edit:
             session.merge(channel)
         else:
             session.add(channel)
+        
+        session.commit()
         
         return redirect(url_for("channels.channelsWeb", show_guid=show_guid))
     

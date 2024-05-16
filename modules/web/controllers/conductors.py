@@ -78,21 +78,25 @@ def conductorsList(show_guid):
     # Trier les résultats par la propriété virtuelle date en utilisant Python
     conductors = sorted(conductors, key=lambda x: x.date, reverse=True)
 
-    return render_template("conductors/conductorsList.jinja2", show=show, conductors=conductors)
+
+    # On liste les templates
+    templates = session.query(Conductor).filter(Conductor.type == "template").filter(Conductor.show_id == show.id).order_by(Conductor.name).all()
+
+    return render_template("conductors/conductorsList.jinja2", show=show, conductors=conductors, templates=templates)
 
 
 
 # Classe de formulaire d'édition CONDUCTEUR
 class FormConductorEdit(FlaskForm):
     id = wtforms.HiddenField("id", validators=[])
+    type = wtforms.SelectField("Type de conducteur", choices=[("operational", "Émission"),("template","Modèle")], description="Est-ce que ce conducteur est une émission ou un modèle ?", validators=[validators.DataRequired()])
     name = wtforms.StringField("Nom", description="Donnez un nom à ce conducteur.", validators=[validators.DataRequired()])
     day = wtforms.IntegerField("Diffusion", description="Entrez ici la date de diffusion de l'émission.", validators=[validators.NumberRange(min=1, max=31)])
     month = wtforms.IntegerField("mois", validators=[validators.NumberRange(min=1, max=12)])
     year = wtforms.IntegerField("année", validators=[validators.NumberRange(min=datetime.now().year-1, max=datetime.now().year+2)])
     guests = wtforms.TextAreaField("Participants", description="Saisissez un nom par ligne, vous compris", validators=[])
     vdoEnable = wtforms.BooleanField("Activer VDO", description="Permet d'activer la génération automatique des liens VDO.", validators=[], default=True)
-    password = wtforms.StringField("Mot de passe", description="Facultatif. Si vous voulez protéger la room VDO.ninja. Le mot de passe sera déjà inclus dans les liens d'invitation générés.", validators=[])
-    type = wtforms.HiddenField("type", validators=[validators.DataRequired()])
+    fromTemplate = wtforms.SelectField("Template", choices=[("","- Aucun modèle -")], description="Depuis quel modèle souhaitez-vous créer votre conducteur ?")
 
     show_id = wtforms.HiddenField("show_id")
 
@@ -106,7 +110,9 @@ def conductorsEdit(show_guid, cond_guid=None):
     if show==None:
         abort(404)
 
+    editMode = False
     if cond_guid!=None:
+        editMode = True
         # On check si le conducteur existe
         conductor = session.query(Conductor).filter(Conductor.id == cond_guid).filter(Conductor.show == show).first()
         if conductor==None:
@@ -117,6 +123,11 @@ def conductorsEdit(show_guid, cond_guid=None):
     
     form = FormConductorEdit(obj=conductor)
 
+
+    # On récupère les templates de l'émission et on les ajoute au champ template
+    templates = session.query(Conductor).filter(Conductor.type == "template").filter(Conductor.show_id == show.id).order_by(Conductor.name).all()
+    templateList = [(t.id, t.name) for t in templates]
+    form.fromTemplate.choices += templateList
 
 
     # Validation du formulaire
@@ -129,12 +140,12 @@ def conductorsEdit(show_guid, cond_guid=None):
         else:
             conductor = Conductor()
         
+        conductor.type = form.type.data
         conductor.name = form.name.data
         conductor.day = form.day.data
         conductor.month = form.month.data
         conductor.year = form.year.data
         conductor.guests = form.guests.data
-        conductor.password = form.password.data.strip()
         conductor.vdoEnable = form.vdoEnable.data
         conductor.show = show
 
@@ -149,9 +160,19 @@ def conductorsEdit(show_guid, cond_guid=None):
             session.merge(conductor)
         session.commit()
 
+
+        # Si c'est une création et qu'on a un fromTemplate
+        if not editMode and form.fromTemplate.data!="":
+            lines = session.query(Line).filter(Line.conductor_id == form.fromTemplate.data).all()
+            # On insert toutes les lignes
+            for l in lines:
+                newLine = Line(type=l.type, name=l.name, text=l.text, order=l.order, conductor=conductor, done=False)
+                session.add(newLine)
+            session.commit()
+
         return redirect(url_for("conductors.conductorsList", show_guid=show_guid))
     
-    return render_template("conductors/conductorsEdit.jinja2", show=show, conductor=conductor, form=form)
+    return render_template("conductors/conductorsEdit.jinja2", show=show, conductor=conductor, form=form, editMode=editMode)
 
 
 
@@ -206,6 +227,19 @@ def conductorsView(show_guid, cond_guid=None):
         if conductor==None:
             abort(404)
     
+    # On récupère la liste des canaux par défaut...
+    # MEDIA
+    defaultMediaChannels = [c.id for c in show.mediasChannels if c.defaultEnable==True]
+    # WEB
+    defaultWebChannels = [c.id for c in show.webChannels if c.defaultEnable==True]
+
+
+    # On récupère la liste des canaux tout court...
+    # MEDIA
+    mediaChannels = [model_to_dict(c) for c in show.mediasChannels]
+    # WEB
+    webChannels = [model_to_dict(c) for c in show.webChannels]
+
     # On prépare la liste des liens
     vdoLinks = []
     vdoRoomID = generateVdoRoomID(show.id)
@@ -220,8 +254,6 @@ def conductorsView(show_guid, cond_guid=None):
             "push": push,
             "label": guestName
         }
-        if conductor.password != "":
-            inviteParams["password"] = conductor.password
         inviteLink = "https://vdo.ninja/?"+urlencode(inviteParams)
 
         # On fabrique le lien solo
@@ -230,8 +262,6 @@ def conductorsView(show_guid, cond_guid=None):
             "view": push,
             "solo": ""
         }
-        if conductor.password != "":
-            soloParams["password"] = conductor.password
         soloLink = "https://vdo.ninja/?"+urlencode(soloParams)
 
         # On compile le tout et on ajoute à la liste
@@ -249,11 +279,9 @@ def conductorsView(show_guid, cond_guid=None):
         urlParams = {
             "director": vdoRoomID,
         }
-        if conductor.password != "":
-            urlParams["password"] = conductor.password
         directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, web_base=config["web_base"])
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"])
 
 
 
@@ -574,8 +602,8 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
                 # On enregistre l'image
                 filename_main = filename + ".webp"
                 filename_tmb = filename + ".tmb.webp"
-                imgMain.save("medias/"+filename_main, quality=65)
-                imgTmb.save("medias/"+filename_tmb, quality=55)
+                imgMain.save(config["medias_dir"]+"/"+filename_main, quality=65)
+                imgTmb.save(config["medias_dir"]+"/"+filename_tmb, quality=55)
 
                 image.close()
                 imgMain.close()
@@ -591,7 +619,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
                 metadata = {
                     "media_id": media.id
                 }
-                meta_path = "medias/" + filename + ".meta.txt"
+                meta_path = config["medias_dir"]+"/" + filename + ".meta.txt"
                 with open(meta_path, "w") as meta_file:
                     json.dump(metadata, meta_file, indent=4)
 
@@ -599,7 +627,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
             try:
                 # On sauvegarde le fichier renommé avec son extension
                 filename_main = filename + "." + extension
-                file.save("tmp_medias/"+filename_main)
+                file.save(config["medias_tmp"]+"/"+filename_main)
 
             except Exception as e:
                 abort(500, description=e)
@@ -613,7 +641,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
                     "media_id": media.id,
                     "transcode": transcode
                 }
-                meta_path = "tmp_medias/" + filename + ".meta.txt"
+                meta_path = config["medias_tmp"]+"/" + filename + ".meta.txt"
                 with open(meta_path, "w") as meta_file:
                     json.dump(metadata, meta_file, indent=4)
                 

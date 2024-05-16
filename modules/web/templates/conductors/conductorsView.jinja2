@@ -1,7 +1,7 @@
-{% extends "_layoutConductor.jinja2" %}
+{% extends "conductors/_layoutConductor.jinja2" %}
 
 {% block title %}
-    {{ conductor.name }}
+    {{ conductor.name }} - {{ "Modèle" if conductor.type=="template" else "Conducteur" }}
 {% endblock %}
 
 {% block content %}
@@ -73,7 +73,6 @@
                 </tbody>
             {% endfor %}
         </table>
-
         {% include 'conductors/conductorView/modals/editLine.jinja2' %}
         {% include 'conductors/conductorView/modals/editMedia.jinja2' %}
         {% include 'conductors/conductorView/modals/preview.jinja2' %}
@@ -81,14 +80,22 @@
             {% include 'conductors/conductorView/modals/vdo.jinja2' %}
         {% endif %}
     </div>
+
+    <script>
+        var webSocketAddr = "/";
+        var conductorType = "{{ conductor.type }}";
+
+        var activateMedias = (conductorType!="template");
+
+        var defaultMediaChannels = {{ defaultMediaChannels | tojson }};
+        var defaultWebChannels = {{ defaultWebChannels | tojson }};
+
+        var currentShowID = "{{ show.id }}";
+        var currentConductorID = "{{ conductor.id }}";
+
+        var mediasDir = "{{ medias_dir }}";
+    </script>
 {% endblock %}
 
 {% block endbody %}
-    <script>
-        currentShowID = "{{ show.id }}";
-        currentConductorID = "{{ conductor.id }}";
-        currentClientID = generateRandomHash(24);
-
-        const webSocketAddr = "{{ web_base }}";
-    </script>
 {% endblock %}

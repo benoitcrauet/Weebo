@@ -93,7 +93,7 @@
                                 <div class="col-9">
                                     <div class="row">
                                         <div class="col-10">
-                                            <input type="range" id="gVolume" name="volume" class="form-range col-8" min="0" max="1" step="0.02" value="0">
+                                            <input type="range" id="gVolume" name="volume" class="form-range col-8" min="0" max="1" step="0.2" value="0">
                                         </div>
                                         <div class="col-auto text-center">
                                             <span id="editMediaVolumeValue">0 %</span>
@@ -138,8 +138,9 @@
                                 </label>
                                 <div class="col-9">
                                     <select id="gMediaChannel" name="mediaChannel" multiple class="form-select">
-                                        <option value="media1">Canal media 1</option>
-                                        <option value="media2">Canal media 2</option>
+                                        {% for c in mediaChannels %}
+                                            <option value="{{ c.id }}">{{ c.name }}</option>
+                                        {% endfor %}
                                     </select>
                                     <span class="form-text">
                                         Choisissez dans quels canaux envoyer ce média.
@@ -155,8 +156,9 @@
                                 </label>
                                 <div class="col-9">
                                     <select id="gWebChannel" name="webChannel" multiple class="form-select">
-                                        <option value="web1">Canal web 1</option>
-                                        <option value="web2">Canal web 2</option>
+                                        {% for c in webChannels %}
+                                            <option value="{{ c.id }}">{{ c.name }}</option>
+                                        {% endfor %}
                                     </select>
                                     <span class="form-text">
                                         Choisissez dans quels canaux envoyer ce média.

@@ -1,12 +1,3 @@
-/**
- * Reste à faire :
- * - Channels par défaut
- * - Templates
- * - Gestion de l'upload de fichier côté client (blocage bouton + spinner + annuler l'envoi ?)
- * - ?? PEUT ETRE ?? Gestion des timecodes (chaque channel doit pouvoir avoir un paramètre de s'il faut enregistrer ou non les médias qui y passent)
- * - Revoir tous les points medias/ de l'app pour les passer via la config. Back ET front.
- */
-
 // Query représentant le modal du formulaire d'édition des lignes
 const modalLineQuery = "#editLineFormModal";
 // QUery représentant le titre du modal d'édition des lignes
@@ -45,11 +36,6 @@ $(function() {
         }
     });
 });
-
-
-var currentShowID = null;
-var currentConductorID = null;
-var currentClientID = null;
 
 
 
@@ -212,8 +198,8 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
             mediaModalVolume.value = data.volume;
             mediaModalUrl.value = data.path;
             mediaId.value = data.id;
-            multiSelectSetValues(mediaModalMediaChannel, []);
-            multiSelectSetValues(mediaModalWebChannel, []);
+            multiSelectSetValues(mediaModalMediaChannel, defaultMediaChannels);
+            multiSelectSetValues(mediaModalWebChannel, defaultWebChannels);
             if(data.type=="media")
                 multiSelectSetValues(mediaModalMediaChannel, data.channel.split(","));
             else
@@ -251,8 +237,8 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
         mediaModalVolume.value = 0;
         mediaModalUrl.value = "";
         mediaId.value = "";
-        multiSelectSetValues(mediaModalMediaChannel, []);
-        multiSelectSetValues(mediaModalWebChannel, []);
+        multiSelectSetValues(mediaModalMediaChannel, defaultMediaChannels);
+        multiSelectSetValues(mediaModalWebChannel, defaultWebChannels);
 
         mediaEditUpdateDisplay(mediaModalType.value);
 
@@ -304,7 +290,7 @@ function updateLines(data) {
         }
         // ...s'il n'existe pas, on le crée
         else {
-            let newLine = lineStructure();
+            let newLine = lineStructure(activateMedias);
             lineSetDatas(newLine, line);
             condMainTable.append(newLine);
         }
@@ -424,8 +410,6 @@ function calculateMediasOrder(lineID) {
 }
 
 
-
-
 /**
  * Remet à jour l'ensemble du DOM du conducteur
  */
@@ -447,9 +431,9 @@ function refreshAllConductor() {
             // On récupère chaque data et on place dans le tableau
             for(let k in data) {
                 let line = data[k];
-
+                
                 // On crée la structure DOM et on l'ajoute
-                let elements = lineStructure(line);
+                let elements = lineStructure(activateMedias);
                 lineSetDatas(elements, line);
                 condMainTable.append(elements);
                 // On enregistre les eventListeners
@@ -541,11 +525,13 @@ function lineElementsRegisterEventListeners(elements) {
     });
 
     // Évènement quand on clique sur le bouton d'ajout de médias
-    const mediasInsert = elements.querySelector(".cond-medias-adder-link");
-    mediasInsert.addEventListener("click", function(e) {
-        e.preventDefault();
-        openMediaEditor(lineID);
-    });
+    if(activateMedias) {
+        const mediasInsert = elements.querySelector(".cond-medias-adder-link");
+        mediasInsert.addEventListener("click", function(e) {
+            e.preventDefault();
+            openMediaEditor(lineID);
+        });
+    }
 
 
 
@@ -586,7 +572,7 @@ function mediaElementsRegisterEventListeners(elements) {
         let mediaLoop = mediaElement.getAttribute("data-loop") == "true";
         let mediaVolume = mediaElement.getAttribute("data-volume");
 
-        let path = "/medias/"+mediaPath;
+        let path = "/"+mediasDir+"/"+mediaPath;
         if(mediaType == "web")
             path = mediaPath;
         
@@ -819,7 +805,7 @@ function mediaSendDelete(id) {
     };
 
     // URL de l'API
-    var url = "/api/conductor/"+currentConductorID+"/media/"+id;
+    var url = "/api/conductor/"+currentConductorID+"/medias/"+id;
     
     // Effectue la requête DELETE
     fetch(url, options)
@@ -1089,8 +1075,8 @@ function mediaEditUpdateDisplay(type) {
             mediaModalUrl.value = "";
             // mediaModalLoop.checked = false;
             // mediaModalVolume.value = 0;
-            // multiSelectSetValues(mediaModalMediaChannel, []);
-            multiSelectSetValues(mediaModalWebChannel, []);
+            // multiSelectSetValues(mediaModalMediaChannel, defaultMediaChannels);
+            multiSelectSetValues(mediaModalWebChannel, defaultWebChannels);
             break;
         case "web":
             mediaModalSourceContainer.style.display = "none";
@@ -1106,8 +1092,8 @@ function mediaEditUpdateDisplay(type) {
             // mediaModalUrl.value = "";
             mediaModalLoop.checked = false;
             mediaModalVolume.value = 0;
-            multiSelectSetValues(mediaModalMediaChannel, []);
-            // multiSelectSetValues(mediaModalWebChannel, []);
+            multiSelectSetValues(mediaModalMediaChannel, defaultMediaChannels);
+            // multiSelectSetValues(mediaModalWebChannel, defaultWebChannels);
             break;
         default:
             mediaModalSourceContainer.style.display = "none";
@@ -1123,8 +1109,8 @@ function mediaEditUpdateDisplay(type) {
             mediaModalUrl.value = "";
             mediaModalLoop.checked = false;
             mediaModalVolume.value = 0;
-            multiSelectSetValues(mediaModalMediaChannel, []);
-            multiSelectSetValues(mediaModalWebChannel, []);
+            multiSelectSetValues(mediaModalMediaChannel, defaultMediaChannels);
+            multiSelectSetValues(mediaModalWebChannel, defaultWebChannels);
             break;
     }
 }

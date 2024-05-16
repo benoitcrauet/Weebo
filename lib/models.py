@@ -36,6 +36,7 @@ class MediaChannel(Base):
     customCSS = Column(String)
     width = Column(Integer, default=1920)
     height = Column(Integer, default=1080)
+    defaultEnable = Column(Boolean)
 
     show_id = Column(String, ForeignKey('Shows.id'))
     show = relationship("Show", back_populates="mediasChannels")
@@ -46,6 +47,8 @@ class MediaChannel(Base):
             self.width = 1920
         if not self.height:
             self.height = 1080
+        if not self.defaultEnable:
+            self.defaultEnable = False
 
 
 class WebChannel(Base):
@@ -54,10 +57,15 @@ class WebChannel(Base):
     id = Column(String, primary_key=True, default=lambda: str(generate_guid()))
     name = Column(String)
     description = Column(Integer)
-    customCSS = Column(String)
+    defaultEnable = Column(Boolean)
 
     show_id = Column(String, ForeignKey('Shows.id'))
     show = relationship("Show", back_populates="webChannels")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.defaultEnable:
+            self.defaultEnable = False
 
 
 
@@ -67,7 +75,6 @@ class Conductor(Base):
     id = Column(String, primary_key=True, default=lambda: str(generate_guid()))
     name = Column(String)
     guests = Column(String)
-    password = Column(String)
     vdoEnable = Column(Boolean)
     type = Column(Enum("operational", "template", name="type_enum"), default="operational")
 

@@ -14,8 +14,8 @@ from lib.config import config
 from lib.video import convertVideo, getThumbnailPicture
 
 
-dirTmpMedias = "tmp_medias" # Temporary medias folder without last /
-dirMedias = "medias" # Temporary medias folder without last /
+dirTmpMedias = config["medias_tmp"] # Temporary medias folder without last /
+dirMedias = config["medias_dir"] # Temporary medias folder without last /
 
 # On défini le dossier temporaire pour ffmpeg
 ffmpeg_temporary = "{}/{}".format(os.getcwd(), dirTmpMedias)

@@ -10,18 +10,26 @@
                                 <span class="toolbar-button-label">Mode édition</span>
                             </a>
                         </li>
-                        <li>
-                            <button {{ "disabled" if not conductor.vdoEnable or conductor.guests.strip()=="" }} class="btn btn-sm btn-outline-light text-center px-3" data-bs-toggle="modal" data-bs-target="#vdoModal">
-                                <i class="bi bi-webcam-fill"></i>
-                                <span class="toolbar-button-label">Paramètres VDO</span>
-                            </a>
-                        </li>
+                        {% if conductor.type != "template" %}
+                            <li>
+                                <button {{ "disabled" if not conductor.vdoEnable or conductor.guests.strip()=="" }} class="btn btn-sm btn-outline-light text-center px-3" data-bs-toggle="modal" data-bs-target="#vdoModal">
+                                    <i class="bi bi-webcam-fill"></i>
+                                    <span class="toolbar-button-label">Paramètres VDO</span>
+                                </a>
+                            </li>
+                        {% endif %}
                     </ul>
                 </div>
                 <div class="col-4 text-center d-flex flex-column justify-content-center">
-                    <h1>{{ conductor.name }}</h1>
-                    <h2>{{ show.name }}</h2>
-                    <h3>Diffusion le {{ conductor.date.strftime("%A %d %B %Y") | lower }}</h3>
+                    {% if conductor.type != "template" %}
+                        <h1>{{ conductor.name }}</h1>
+                        <h2>{{ show.name }}</h2>
+                        <h3>{{ conductor.type | length }} Diffusion le {{ conductor.date.strftime("%A %d %B %Y") | lower }}</h3>
+                    {% else %}
+                        <h1>Modèle de conducteur</h1>
+                        <h2>{{ conductor.name }}</h2>
+                        <h3>{{ show.name }}</h3>
+                    {% endif %}
                 </div>
                 <div class="col-4 d-flex flex-wrap justify-content-end align-items-center gap-1">
                         <ul class="nav gap-1">
