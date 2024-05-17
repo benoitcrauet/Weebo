@@ -24,7 +24,7 @@
                     {% if conductor.type != "template" %}
                         <h1>{{ conductor.name }}</h1>
                         <h2>{{ show.name }}</h2>
-                        <h3>{{ conductor.type | length }} Diffusion le {{ conductor.date.strftime("%A %d %B %Y") | lower }}</h3>
+                        <h3>Diffusion le {{ conductor.date.strftime("%A %d %B %Y") | lower }}</h3>
                     {% else %}
                         <h1>Modèle de conducteur</h1>
                         <h2>{{ conductor.name }}</h2>

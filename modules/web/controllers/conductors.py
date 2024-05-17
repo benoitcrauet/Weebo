@@ -801,3 +801,56 @@ def api_conductorsMediaDelete(cond_guid, media_guid):
     # On envoie le média supprimé
     socketio.emit("conductor_command", conductorWebSocketBase(action="delete", conductor=cond.id, data_line=None, data_media=media_to_send))
     return jsonify(media_to_send)
+
+
+
+
+@bp.route("/api/medias/<string:guid>/armtake")
+def mediaBroadcast(guid):
+    # On vérifie si le média éxiste
+    media = session.query(Media).filter(Media.id == guid).first()
+    if not media:
+        abort(404, description="Ce canal est introuvable.")
+    
+    # Building viewers list
+    viewers_list = media.channel.split(",")
+
+    # Building args list
+    args = {}
+    if media.type=="media":
+        ext = media.path.split(".")[-1]
+        # VIDEO
+        if ext=="webm":
+            args = {
+                "type": "video",
+                "src": "/"+config["medias_dir"]+"/"+media.path,
+                "source": media.source,
+                "volume": media.volume,
+                "loop": media.loop
+            }
+        # IMAGE
+        elif ext=="webp":
+            args = {
+                "type": "picture",
+                "src": "/"+config["medias_dir"]+"/"+media.path,
+                "source": media.source,
+                "volume": None,
+                "loop": None
+            }
+    else:
+        args = {
+            "type": "web",
+            "src": media.path
+        }
+    
+    # Building websocket object
+    object_to_send = {
+        "command": "armtake",
+        "viewer": viewers_list,
+        "args": args
+    }
+
+    # Sending object
+    socketio.emit("media_command", object_to_send)
+    
+    return model_to_dict(media)

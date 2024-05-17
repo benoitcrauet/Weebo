@@ -1,10 +1,7 @@
 // Connexion au socket
-var socket = io.connect(webSocketAddr);
+var socket = io.connect("/");
 
 // A la réception d'un socket media_command
-socket.on('test', function(data) {
-    console.log("test", data);
-});
 socket.on('conductor_command', function(data) {
     if(data.conductor!==undefined && data.action!==undefined && data.data_line!==undefined && data.data_media!==undefined) {
         const action = data.action;

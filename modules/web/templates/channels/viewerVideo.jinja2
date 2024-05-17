@@ -11,7 +11,7 @@
             }
 
             .media_item {
-                transition: .5s opacity;
+                transition: .3s opacity;
                 opacity: 1;
                 width: 100vw;
                 height: 100vh;
@@ -31,7 +31,7 @@
                 font-family: "Arial", sans-serif;
                 font-weight: bold;
                 color: white;
-                font-size: 6vh;
+                font-size: 5vh;
                 text-shadow: 0px 0px 10px black;
             }
 
@@ -71,8 +71,77 @@
                     object-fit: cover;
                 }
         </style>
+
+
+        <style>
+            {{ channel.customCSS }}
+        </style>
+
+            
+        <style>
+            #identifier {
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                right: 0px;
+                bottom: 0px;
+                display: flex;
+                padding: 100px;
+                box-sizing: border-box;
+                flex-direction: column;
+                justify-content: baseline;
+                align-items: start;
+                gap: 10px;
+                color: white;
+                text-shadow: 0px 0px 3px black;
+                font-family: monospace;
+                font-weight: bold;
+                animation: disappear .5s 6s forwards;
+                background-image: url("/static/img/smpte.png");
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: 100% 100%;
+            }
+
+                #identifier > * {
+                    background: rgba(0,0,0,.8);
+                    padding: 10px;
+                }
+
+                #identifier_id {
+                    font-size: 4vh;
+                }
+                #identifier_name {
+                    font-size: 10vh;
+                }
+                #identifier_resolution {
+                    font-size: 7vh;
+                }
+                #identifier_show {
+                    font-size: 6vh;
+                }
+            
+            @keyframes disappear {
+                0% { opacity: 1; }
+                100% { opacity: 0; }
+            }
+        </style>
     </head>
     <body>
+        <div id="identifier">
+            <div id="identifier_id">
+                {{ channel.id }}
+            </div>
+            <div id="identifier_name">
+                {{ channel.name }}
+            </div>
+            <div id="identifier_resolution">
+                {{ channel.width }}x{{ channel.height }}
+            </div>
+            <div id="identifier_show">
+                {{ channel.show.name }}
+            </div>
+        </div>
         <div id="main">
             <!--<div class="media_item video">
                 <div class="media_credit">
@@ -90,11 +159,8 @@
 
         <script src="/static/js/socket/socket.io.min.js"></script>
         <script>
-            // URL du socket
-            const socketAddr = '/';
-
             // ID du viewer en cours
-            const viewerID = "{{ viewerID }}";
+            const viewerID = "{{ channel.id }}";
 
             // ID des médias armés et en cours de lecture
             var armedMedia = null;
@@ -121,7 +187,7 @@
             /**
             * Crée une nouvelle structure DOM contenant un nouveau média.
             **/
-            function mediaArm(type, src, credit, volume=1, loop=false) {
+            function mediaArm(type, src, source, volume=1, loop=false) {
                 let id = generateGUID();
 
                 // Création du nouvel élément
@@ -134,7 +200,7 @@
 
                 let dom_media_credit = document.createElement("div");
                 dom_media_credit.classList.add("media_credit");
-                dom_media_credit.innerText = credit;
+                dom_media_credit.innerText = source.trim()!="" ? "Source : " + source : "";
 
                 let dom_media_foreground = document.createElement("div");
                 dom_media_foreground.classList.add("media_foreground");
@@ -165,24 +231,32 @@
 
                 // Définition des ID dom
                 dom_media_background_obj.setAttribute("id", "media-item-obj-background-" + id);
+                dom_media_background_obj.classList.add("media-item-obj-background");
                 dom_media_foreground_obj.setAttribute("id", "media-item-obj-foreground-" + id);
+                dom_media_foreground_obj.classList.add("media-item-obj-foreground");
 
                 // Définition des URLs des médias
-                dom_media_background_obj.setAttribute("src", "/medias/" + src);
-                dom_media_foreground_obj.setAttribute("src", "/medias/" + src);
+                dom_media_background_obj.setAttribute("src", src);
+                dom_media_foreground_obj.setAttribute("src", src);
 
 
                 // Synchronisation des médias foreground/background
                 if(type=="video") {
-                    dom_media_foreground_obj.addEventListener("play", function() {
-                        dom_media_background_obj.play();
-                    });
-                    dom_media_foreground_obj.addEventListener("pause", function() {
-                        dom_media_background_obj.pause();
-                    });
-                    dom_media_foreground_obj.addEventListener("seeked", function() {
-                        dom_media_background_obj.currentTime = vm.currentTime;
-                    });
+                    const syncVideos = () => {
+                        let vm = dom_media_foreground_obj;
+                        let vs = dom_media_background_obj;
+
+                        vs.currentTime = vm.currentTime;
+                        if(vm.paused && !vs.paused)
+                            vs.pause();
+                        else if(!vm.paused && vs.paused)
+                            vs.play();
+                    };
+                    dom_media_foreground_obj.addEventListener("play", syncVideos);
+                    dom_media_foreground_obj.addEventListener("pause", syncVideos);
+                    dom_media_foreground_obj.addEventListener("seeking", syncVideos);
+                    dom_media_foreground_obj.addEventListener("seeked", syncVideos);
+                    dom_media_foreground_obj.addEventListener("timeupdate", syncVideos);
                 }
 
 
@@ -210,6 +284,12 @@
 
                 // On change l'ID du média armé
                 armedMedia = id;
+
+                // On retourne les données
+                return {
+                    playerID: id,
+                    element: dom_media_item
+                };
 
             }
 
@@ -278,10 +358,17 @@
 
 
             // Connexion au socket
-            var socket = io.connect(socketAddr);
+            var socket = io.connect("/");
+            
+            
+            socket.on("connect", () => {
+                console.log("Socket connected!");
+            });
+            socket.on("disconnect", () => {
+                console.error("Socket disconnected!");
+            });
 
-            // A la réception d'un socket media_command
-            socket.on('media_command', function(data) {
+            socket.on("media_command", function(data) {
                 if(data.command!==undefined && data.viewer!==undefined && data.args!==undefined) {
                     const command = data.command;
                     const viewer = data.viewer;
@@ -290,14 +377,19 @@
 
                     console.log("Websocket received for viewer ID \"" + viewer + "\"");
 
-                    if(viewerID == viewer) {
+                    if(viewer.includes(viewerID)) {
                         console.log("   It's me! Processing the command...");
 
                         switch(command) {
                             case "arm":
-                                if (args.type!==undefined && args.src!==undefined && args.credit!==undefined && args.volume!==undefined && args.loop!==undefined) {
+                                if ((args.type=="video" || args.type=="picture") &&
+                                        args.src!==undefined &&
+                                        args.source!==undefined &&
+                                        args.volume!==undefined &&
+                                        args.loop!==undefined) {
                                     console.log("Arming media.");
-                                    mediaArm(args.type, args.src, args.credit, args.volume/100, args.loop);
+                                    
+                                    mediaArm(args.type, args.src, args.source, args.volume, args.loop);
                                 }
                                 else {
                                     console.error("'arm' command needs the following args: type, src, credit, volume, loop.", args);
@@ -305,9 +397,45 @@
 
                                 break;
                             
+                            case "armtake":
+                                if ((args.type=="video" || args.type=="picture") &&
+                                        args.src!==undefined &&
+                                        args.source!==undefined &&
+                                        args.volume!==undefined &&
+                                        args.loop!==undefined) {
+                                    console.log("Arm and take media.");
+                                    
+                                    let mediaData = mediaArm(args.type, args.src, args.source, args.volume, args.loop);
+                                    let mediaElement = mediaData.element;
+                                    let mediaPlayerID = mediaData.playerID;
+
+                                    let foregroundElement = mediaElement.querySelector(".media-item-obj-foreground");
+
+                                    // On take quand le média est chargé
+                                    if(args.type=="picture") {
+                                        foregroundElement.addEventListener("load", function() {
+                                            takeArmed();
+                                            mediaPlay(mediaData.playerID);
+                                        })
+                                    }
+                                    else if(args.type=="video") {
+                                        foregroundElement.addEventListener("loadeddata", function() {
+                                            takeArmed();
+                                            window.setTimeout(function() {
+                                                mediaPlay(mediaData.playerID);
+                                            }, 200);
+                                        })
+                                    }
+                                }
+                                else {
+                                    console.error("'armtake' command needs the following args: type, src, source, volume, loop.", args);
+                                }
+
+                                break;
+                            
                             case "take":
                                 takeArmed();
-                                playMedia(takedMedia);
+                                mediaPlay(takedMedia);
                                 console.log("Playing armed media.");
                                 break;
                         }
@@ -321,19 +449,6 @@
                     console.error("Invalid media_command websocket datas received.", data);
                 }
             });
-        </script>
-        <script>
-            window.setInterval(function() {
-                let videos_master = document.querySelectorAll(".media_foreground video");
-                let videos_slave = document.querySelectorAll(".media_background video");
-
-                for(let k = 0; k < videos_master.length; k++) {
-                    let vm = videos_master[k];
-                    let vs = videos_slave[k];
-
-                    vs.currentTime = vm.currentTime+0.01;
-                }
-            }, 1000);
         </script>
     </body>
 </html>

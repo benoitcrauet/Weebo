@@ -10,7 +10,8 @@ from lib.guid import generate_guid
 from lib.mime import get_mime, mime_extract_type
 from lib.config import config
 from lib.db import session
-from lib.models import MediaChannel, WebChannel, Show
+from lib.models import MediaChannel, WebChannel, Show, Media
+from lib.dict import model_to_dict
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -260,7 +261,12 @@ def channelsWebDelete(show_guid, channel_guid):
 
 @bp.route("/viewer/medias/<string:guid>")
 def viewerMedias(guid):
-    return render_template("channels/viewerVideo.jinja2", viewerID=guid)
+    # On vérifie si le viewer éxiste
+    channel = session.query(MediaChannel).filter(MediaChannel.id == guid).first()
+    if not channel:
+        abort(404, description="Ce canal est introuvable.")
+    
+    return render_template("channels/viewerVideo.jinja2", channel=channel)
 
 
 @bp.route("/test/arm")

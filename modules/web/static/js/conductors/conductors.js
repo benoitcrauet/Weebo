@@ -595,6 +595,24 @@ function mediaElementsRegisterEventListeners(elements) {
         if(confirm("Êtes-vous sûr de vouloir supprimer ce média ?"))
             mediaSendDelete(mediaID);
     });
+
+    // Évènement quand on clique sur un bouton de diffusion
+    const mediaOnair = elements.querySelector(".cond-medias-line-action-onair");
+    mediaOnair.addEventListener("click", function(e) {
+        e.preventDefault();
+        if(confirm("Êtes-vous sûr de vouloir diffuser ce média ?"))
+            mediaBroadcast(mediaID);
+    });
+}
+
+
+
+/**
+ * 
+ * @param {string} id ID du média à diffuser
+ */
+function mediaBroadcast(id) {
+    fetch("/api/medias/"+id+"/armtake");
 }
 
 
