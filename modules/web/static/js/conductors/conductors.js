@@ -19,6 +19,8 @@ const conductorMediasTableQuery = ".cond-line-medias-table tbody";
 const conductorMediasDraggerQuery = ".cond-medias-line-dragger";
 
 
+
+
 $(function() {
     // On rend les lignes draggables
     $(conductorTableQuery).sortable({
@@ -1380,4 +1382,41 @@ $(function() {
 
     // On instancie la modale du formulaire de médias
     mediaModal = new bootstrap.Modal(modalMediaQuery);
+
+
+
+    /**
+     * Fonctionnalité pour rendre les sticky des sections empilables
+     */
+    function updateStickyPosition() {
+        let stickyRows = document.querySelectorAll(".cond-line[data-type='section'] .cond-line-display");
+        let offset = document.querySelector("header:nth-child(1)").getBoundingClientRect().height;
+
+        stickyRows.forEach((element, index) => {
+            let rect = element.getBoundingClientRect();
+
+            if(index>0) {
+                let lastElement = stickyRows[index-1];
+                let lastRect = lastElement.getBoundingClientRect();
+                let delta = rect.top - lastRect.height;
+                let opacity = Math.min(1, (lastRect.height + delta-offset) / lastRect.height);
+
+                lastElement.querySelectorAll("td").forEach(td => {
+                    td.style.opacity = opacity;
+                });
+
+                if(rect.top <= offset+lastRect.height) {
+                    lastElement.style.top = String(delta) + "px";
+                }
+                else {
+                    lastElement.style.top = offset + "px";
+                }
+            }
+
+            lastElement = element;
+        });
+    }
+    window.addEventListener("scroll", updateStickyPosition);
+    window.addEventListener("resize", updateStickyPosition);
+
 });
