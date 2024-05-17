@@ -269,31 +269,3 @@ def viewerMedias(guid):
     return render_template("channels/viewerVideo.jinja2", channel=channel)
 
 
-@bp.route("/test/arm")
-def viewertestarm():
-    socketio.emit("media_command", {
-        "command": "arm",
-        "viewer": "test",
-        "args": {
-            "type": "video",
-            "src": "test.webm",
-            "credit": "Source : The Blender Foundation",
-            "volume": 0.5,
-            "loop": False
-        }
-    })
-    return "socket envoyé"
-
-@bp.route("/test/play")
-def viewertestplay():
-    socketio.emit("media_command", {
-        "command": "take",
-        "viewer": "test",
-        "args": None
-    })
-    return "socket envoyé"
-
-@bp.route("/test/buttons")
-def viewertestbuttons():
-    return '<button onclick="fetch(\'/test/arm\');">Arm</button> <button onclick="fetch(\'/test/play\');">Play</button>'
-

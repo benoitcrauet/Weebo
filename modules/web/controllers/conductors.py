@@ -518,7 +518,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
         data = json.loads(data_raw)
     except json.JSONDecodeError as e:
         abort(400, decription="Impossible de décoder le JSON dans le champ data.")
-
+    print(data)
     # On vérifie les champs
     if data.get("type") is None:
         abort(400, description="Le champ type est requis.")
@@ -530,8 +530,8 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
         if request.files["file"] is None:
             abort(400, description="Le champ file est requis")
         
-        if data.get("mediaChannel") is None or not isinstance(data.get("mediaChannel"), list):
-            abort(400, description="Le champ mediaChannel est requis et doit-être un tableau de valeurs")
+        if data.get("mediaChannel") is None:
+            abort(400, description="Le champ mediaChannel est requis")
     
     elif data.get("type")=="web":
         if data.get("name") is None or data.get("name").strip()=="":
@@ -540,8 +540,8 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
         if data.get("url") is None or data.get("url").strip()=="":
             abort(400, description="Le champ url est requis")
         
-        if data.get("webChannel") is None or not isinstance(data.get("webChannel"), list):
-            abort(400, description="Le champ webChannel est requis et doit-être un tableau de valeurs")
+        if data.get("webChannel") is None:
+            abort(400, description="Le champ webChannel est requis")
 
     else:
         abort(400, description="Type de média invalide")
@@ -564,7 +564,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
     
     # On traite selon le type
     if media.type=="media":
-        media.channel = ",".join(data["mediaChannel"]);
+        media.channel = data["mediaChannel"]
         media.source = data["source"]
         media.loop = data["loop"]
         media.volume = data["volume"]
@@ -649,7 +649,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
             abort(400, description="Mauvaise extension de fichier pour le fichier média.")
 
     elif media.type=="web":
-        media.channel = ",".join(data["webChannel"]);
+        media.channel = data["webChannel"]
         media.path = data["url"]
         media.progress = 100 # Pas de traitement pour les médias
 
@@ -685,22 +685,23 @@ def api_conductorsMediaEdit(cond_guid, media_guid):
         data = request.json
 
         if "type" in data:
-            media.type = data["type"];
+            media.type = data["type"]
         if "name" in data:
-            media.name = data["name"];
+            media.name = data["name"]
         if media.type=="web" and "url" in data:
-            media.path = data["url"];
+            media.path = data["url"]
         if "source" in data:
-            media.source = data["source"];
+            media.source = data["source"]
         if "loop" in data:
-            media.loop = data["loop"];
+            media.loop = data["loop"]
         if "volume" in data:
-            media.volume = data["volume"];
-        if "channel" in data:
-            media.channel = ",".join(data["mediaChannel"]) if media.type=="media" else ",".join(data["webChannel"]);
+            media.volume = data["volume"]
+        if "mediaChannel" in data and media.type=="media":
+            media.channel = data["mediaChannel"]
+        if "mediaChannel" in data and media.type=="web":
+            media.channel = data["webChannel"]
         
         session.merge(media)
-
         session.commit()
 
         # On envoie le média modifié en socket

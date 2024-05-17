@@ -1292,8 +1292,8 @@ formEditMedia.addEventListener("submit", function(e) {
             cutEnd: getSecondsFromString(mediaModalCutEnd.value),
             rotate: parseInt(mediaModalRotate.value) ?? 0
         },
-        mediaChannel: multiSelectGetValues(mediaModalMediaChannel),
-        webChannel: multiSelectGetValues(mediaModalWebChannel)
+        mediaChannel: multiSelectGetValues(mediaModalMediaChannel).join(","),
+        webChannel: multiSelectGetValues(mediaModalWebChannel).join(",")
     };
     
     // On désactive le submit et le cancel
