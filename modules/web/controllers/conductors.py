@@ -518,7 +518,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
         data = json.loads(data_raw)
     except json.JSONDecodeError as e:
         abort(400, decription="Impossible de décoder le JSON dans le champ data.")
-    print(data)
+    
     # On vérifie les champs
     if data.get("type") is None:
         abort(400, description="Le champ type est requis.")
