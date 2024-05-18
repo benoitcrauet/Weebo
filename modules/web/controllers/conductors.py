@@ -568,6 +568,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
         media.source = data["source"]
         media.loop = data["loop"]
         media.volume = data["volume"]
+        media.volumeAfterLoop = data["volumeAfterLoop"]
         media.progress = -1
         
         # On récupère l'objet transcode
@@ -696,6 +697,8 @@ def api_conductorsMediaEdit(cond_guid, media_guid):
             media.loop = data["loop"]
         if "volume" in data:
             media.volume = data["volume"]
+        if "volumeAfterLoop" in data:
+            media.volumeAfterLoop = data["volumeAfterLoop"]
         if "mediaChannel" in data and media.type=="media":
             media.channel = data["mediaChannel"]
         if "mediaChannel" in data and media.type=="web":
@@ -827,6 +830,7 @@ def mediaBroadcast(guid):
                 "src": "/"+config["medias_dir"]+"/"+media.path,
                 "source": media.source,
                 "volume": media.volume,
+                "volumeAfterLoop": media.volumeAfterLoop,
                 "loop": media.loop
             }
         # IMAGE
@@ -836,6 +840,7 @@ def mediaBroadcast(guid):
                 "src": "/"+config["medias_dir"]+"/"+media.path,
                 "source": media.source,
                 "volume": None,
+                "volumeAfterLoop": None,
                 "loop": None
             }
     else:

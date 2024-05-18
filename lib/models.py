@@ -128,6 +128,7 @@ class Media(Base):
     source = Column(String)
     loop = Column(Boolean, default=True)
     volume = Column(Float)
+    volumeAfterLoop = Column(Float)
     progress = Column(Integer)
 
     line_id = Column(String, ForeignKey('Lines.id'))

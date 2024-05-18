@@ -132,6 +132,7 @@ const mediaModalSource = document.getElementById("gSource");
 const mediaModalFile = document.getElementById("gFile");
 const mediaModalLoop = document.getElementById("gLoop");
 const mediaModalVolume = document.getElementById("gVolume");
+const mediaModalVolumeAfterLoop = document.getElementById("gVolumeAfterLoop");
 const mediaModalUrl = document.getElementById("gUrl");
 const mediaModalMediaChannel = document.getElementById("gMediaChannel");
 const mediaModalWebChannel = document.getElementById("gWebChannel");
@@ -153,6 +154,7 @@ const mediaModalFileContainer = document.getElementById("gFileContainer");
 const mediaModalRotateContainer = document.getElementById("gRotateContainer");
 const mediaModalLoopContainer = document.getElementById("gLoopContainer");
 const mediaModalVolumeContainer = document.getElementById("gVolumeContainer");
+const mediaModalVolumeAfterLoopContainer = document.getElementById("gVolumeAfterLoopContainer");
 const mediaModalUrlContainer = document.getElementById("gUrlContainer");
 const mediaModalMediaChannelContainer = document.getElementById("gMediaChannelContainer");
 const mediaModalWebChannelContainer = document.getElementById("gWebChannelContainer");
@@ -192,12 +194,14 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
 
         let data = await mediaGet(id)
         try {
+            console.log(data);
             mediaModalType.value = data.type;
             mediaModalName.value = data.name;
             mediaModalSource.value = data.source;
             mediaModalFile.value = "";
             mediaModalLoop.checked = data.loop;
             mediaModalVolume.value = data.volume;
+            mediaModalVolumeAfterLoop.value = data.volumeAfterLoop;
             mediaModalUrl.value = data.path;
             mediaId.value = data.id;
             multiSelectSetValues(mediaModalMediaChannel, defaultMediaChannels);
@@ -237,6 +241,7 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
         mediaModalRotate.selectedIndex = 0;
         mediaModalLoop.checked = false;
         mediaModalVolume.value = 0;
+        mediaModalVolumeAfterLoop.value = 0;
         mediaModalUrl.value = "";
         mediaId.value = "";
         multiSelectSetValues(mediaModalMediaChannel, defaultMediaChannels);
@@ -825,7 +830,7 @@ function mediaSendDelete(id) {
     };
 
     // URL de l'API
-    var url = "/api/conductor/"+currentConductorID+"/medias/"+id;
+    var url = "/api/conductor/"+currentConductorID+"/media/"+id;
     
     // Effectue la requête DELETE
     fetch(url, options)
@@ -1287,6 +1292,7 @@ formEditMedia.addEventListener("submit", function(e) {
         source: mediaModalSource.value,
         loop: mediaModalLoop.checked,
         volume: parseFloat(mediaModalVolume.value),
+        volumeAfterLoop: parseFloat(mediaModalVolumeAfterLoop.value),
         transcode: {
             cutBegin: getSecondsFromString(mediaModalCutBegin.value),
             cutEnd: getSecondsFromString(mediaModalCutEnd.value),

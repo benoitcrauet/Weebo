@@ -70,21 +70,6 @@
                             </div>
                         </div>
 
-                        <div id="gLoopContainer">
-                            <div class="row mb-3">
-                                <label class="col-form-label col-sm-3" for="gLoop">
-                                    Lecture en boucle
-                                </label>
-                                <div class="col-9">
-                                    <input type="checkbox" id="gLoop" name="loop" class="form-check-input">
-                                    <label for="gLoop">Lecture en boucle</label>
-                                    <div class="form-text">
-                                        <u>Seulement pour les vidéos.</u> Indique si la vidéo doit-être lue en boucle ou non.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div id="gVolumeContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gVolume">
@@ -114,6 +99,52 @@
                                 gVolume.addEventListener("change", function() { _updateMediaVolumeDisplay(_gVolume); });
                                 gVolume.addEventListener("input", function() { _updateMediaVolumeDisplay(_gVolume); });
                                 window.setInterval(function() { _updateMediaVolumeDisplay(_gVolume); }, 500);
+                            </script>
+                        </div>
+
+                        <div id="gLoopContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gLoop">
+                                    Lecture en boucle
+                                </label>
+                                <div class="col-9">
+                                    <input type="checkbox" id="gLoop" name="loop" class="form-check-input">
+                                    <label for="gLoop">Lecture en boucle</label>
+                                    <div class="form-text">
+                                        <u>Seulement pour les vidéos.</u> Indique si la vidéo doit-être lue en boucle ou non.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="gVolumeAfterLoopContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gVolumeAfterLoop">
+                                    Volume <u>après</u> la boucle
+                                </label>
+                                <div class="col-9">
+                                    <div class="row">
+                                        <div class="col-10">
+                                            <input type="range" id="gVolumeAfterLoop" name="volumeAfterLoop" class="form-range col-8" min="0" max="1" step="0.2" value="0">
+                                        </div>
+                                        <div class="col-auto text-center">
+                                            <span id="editMediaVolumeAfterLoopValue">0 %</span>
+                                        </div>
+                                    </div>
+                                    <span class="form-text">
+                                        <u>Seulement pour les vidéos en boucle.</u> Spécifiez le volume de lecture du média une fois la première boucle passée.
+                                    </span>
+                                </div>
+                            </div>
+                            <script>
+                                function _updateMediaVolumeAfterLoopDisplay(source) {
+                                    document.getElementById('editMediaVolumeAfterLoopValue').innerText =  Math.round(source.value*100) + ' %';
+                                }
+
+                                const _gVolumeAfterLoop = document.getElementById("gVolumeAfterLoop");
+                                gVolumeAfterLoop.addEventListener("change", function() { _updateMediaVolumeAfterLoopDisplay(_gVolumeAfterLoop); });
+                                gVolumeAfterLoop.addEventListener("input", function() { _updateMediaVolumeAfterLoopDisplay(_gVolumeAfterLoop); });
+                                window.setInterval(function() { _updateMediaVolumeAfterLoopDisplay(_gVolumeAfterLoop); }, 500);
                             </script>
                         </div>
 
