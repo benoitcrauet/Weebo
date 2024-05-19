@@ -21,6 +21,8 @@ dirMedias = config["medias_dir"] # Temporary medias folder without last /
 ffmpeg_temporary = "{}/{}".format(os.getcwd(), dirTmpMedias)
 
 def main():
+    print("Starting video thread...")
+    
     time.sleep(3)
     # On scanne le dossier
     while True:
@@ -177,6 +179,8 @@ def main():
 
         sys.stdout.flush()
         time.sleep(10) # On attend 10 secondes avant le prochain scan
+
+
 
 def print(*args, **kwargs):
     sep = kwargs.get('sep', ' ')

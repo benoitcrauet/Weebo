@@ -10,7 +10,7 @@ from lib.arguments import arguments
 from lib.file import clean_media_dir
 
 
-from modules import web, video
+from modules import web, video, cleaner
 
 welcome()
 print()
@@ -106,6 +106,10 @@ else:
     # Thread video
     thread_vid = threading.Thread(target=video.main, args=())
     thread_vid.start()
+
+    # Thread cleaner
+    thread_cle = threading.Thread(target=cleaner.main, args=())
+    thread_cle.start()
 
 
     thread_web.join()

@@ -2,10 +2,12 @@ from flask import Flask, send_from_directory
 from flask_socketio import SocketIO
 from flask_cors import CORS
 import time
+import sys
 import os
 import logging
 from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
+from colorama import Back, Fore, Style
 
 from lib.config import config
 from lib.arguments import arguments
@@ -17,6 +19,7 @@ from lib.socketio import SocketIOInstance
 ######################
 
 def main():
+    print("Starting web thread...")
     
     # Initialisation du serveur web
     app = Flask("modules.web")
@@ -51,3 +54,10 @@ def main():
     server.serve_forever()
 
 
+
+
+def print(*args, **kwargs):
+    sep = kwargs.get('sep', ' ')
+    end = kwargs.get('end', '\n')
+    message = sep.join(map(str, args)) + end
+    sys.stdout.write("🌎  " + Back.CYAN + Fore.WHITE + Style.BRIGHT + "[WEB]" + Style.RESET_ALL + " " + message)
