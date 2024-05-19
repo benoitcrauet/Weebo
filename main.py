@@ -1,10 +1,13 @@
 import threading
 import os
 import time
+import sys
+from colorama import Fore, Back, Style
 
 from lib.config import config
 from lib.welcome import welcome
 from lib.arguments import arguments
+from lib.file import clean_media_dir
 
 
 from modules import web, video
@@ -13,8 +16,20 @@ welcome()
 print()
 
 
+# En cas d'absence de fichier config
+if not os.path.isfile("config.env"):
+    print("ERREUR :")
+    print("Impossible de trouver le fichier config.env. Peut-être devriez-vous modifier et renommer le fichier config.sample.env ?")
+    quit()
+
+
 # En cas de --reinit-database
 if arguments.reinit_database:
+    print("Procédure de réinitialisation de la base de données lancée.")
+    print("")
+    sys.stdout.write(Back.RED + Fore.WHITE + Style.BRIGHT + "⚠️ ATTENTION : Cette suppression est irréversible et entraînera une perte DÉFINITIVE des fichiers liés. ⚠️" + Style.RESET_ALL + "\n\n")
+    
+    time.sleep(1)
     input_confirm = input("Êtes-vous sûr de vouloir réinitialiser la base de données ? [yN] ")
     if input_confirm.upper()=="Y":
         input_mistake = input("Est-ce que cette suppression est une erreur ? [Yn] ")
@@ -28,11 +43,29 @@ if arguments.reinit_database:
 
             if os.path.exists(db_file):
                 print(f"Suppression du fichier '{db_file}'...")
+                print("")
                 os.remove(db_file)
                 time.sleep(1)
             
+            # Suppression des médias
+            print(f"Nettoyage des répertoires...")
+            time.sleep(0.5)
+            print("  > Répertoire des images : {}/".format(config["images_dir"]))
+            clean_media_dir(config["images_dir"])
+            time.sleep(0.5)
+            print("  > Répertoire des médias : {}/".format(config["medias_dir"]))
+            clean_media_dir(config["medias_dir"])
+            time.sleep(0.5)
+            print("  > Répertoire temporaire des médias : {}/".format(config["medias_tmp"]))
+            clean_media_dir(config["medias_tmp"])
+            time.sleep(1)
+            print("")
+
+
+            
             with open(db_file, "a") as f:
                 print(f"Création du fichier '{db_file}'...")
+                print("")
                 os.utime(db_file, None)
                 time.sleep(1)
 

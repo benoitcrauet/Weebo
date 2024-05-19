@@ -26,7 +26,7 @@ def main():
     @app.route('/medias/<path:filename>')
     def medias_static(filename):
         root_path = os.path.dirname(os.path.abspath(__file__))
-        medias_folder = os.path.abspath(os.path.join(root_path, "..", "..", "medias"))
+        medias_folder = os.path.abspath(os.path.join(root_path, "..", "..", config["medias_dir"]))
         return send_from_directory(medias_folder, filename)
 
 
@@ -34,7 +34,7 @@ def main():
     @app.route('/images/<path:filename>')
     def images_static(filename):
         root_path = os.path.dirname(os.path.abspath(__file__))
-        medias_folder = os.path.abspath(os.path.join(root_path, "..", "..", "images"))
+        medias_folder = os.path.abspath(os.path.join(root_path, "..", "..", config["images_dir"]))
         return send_from_directory(medias_folder, filename)
 
 
