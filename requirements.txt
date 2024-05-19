@@ -3,9 +3,9 @@ Flask
 flask-socketio
 Flask-WTF
 SQLAlchemy
-pillow
+pillow==9.5.0
 flask-cors
-moviepy
+moviepy==2.0.0.dev2
 setuptools
 proglog
 requests
