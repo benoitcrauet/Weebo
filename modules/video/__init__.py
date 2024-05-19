@@ -121,9 +121,9 @@ def main():
 
                         if videoConversion==True:
                             print("Conversion succeeded for media ID {}.".format(media.id))
-                            time.sleep(1)
+                            time.sleep(0.2)
                             print("Extracting gif thumbnail for {}...".format(media.id))
-                            time.sleep(1)
+                            time.sleep(0.2)
 
                             thumbnailExtraction = getThumbnailPicture(dirMedias+"/"+final_filename, dirMedias+"/"+tmb_filename, 70);
                         

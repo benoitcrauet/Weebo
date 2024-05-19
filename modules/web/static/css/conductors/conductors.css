@@ -229,7 +229,7 @@ body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkb
             height: 30px;
             object-fit: cover;
             border: none;
-            background-color: red;
+            background-color: gray;
         }
 
         .cond-medias-line[data-type=web] .cond-media-thumbnail-img {
