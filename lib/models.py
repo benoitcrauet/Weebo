@@ -131,6 +131,7 @@ class Media(Base):
     volumeAfterLoop = Column(Float)
     progress = Column(Integer)
     error = Column(String)
+    passes = Column(Integer)
 
     line_id = Column(String, ForeignKey('Lines.id'))
     line = relationship("Line", back_populates="medias")
@@ -139,6 +140,8 @@ class Media(Base):
         super().__init__(*args, **kwargs)
         if not self.id:
             self.id = generate_guid()
+        if not self.passes:
+            self.passes = 0
 
 def delete_media_files(mapper, connection, target):
     if target.type == "media":

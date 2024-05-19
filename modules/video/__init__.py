@@ -29,7 +29,8 @@ def main():
         files = os.listdir(dirTmpMedias+"/")
 
         for filename in files:
-            if not filename.endswith(".meta.txt") and not filename.startswith("."):
+            file_path = os.path.join(dirTmpMedias, filename)
+            if os.path.isfile(file_path) and not filename.endswith(".meta.txt") and not filename.startswith("."):
                 # On récupère le nom de fichier et son extension
                 basename, extension = filename.split(".")
 
@@ -68,104 +69,102 @@ def main():
                         # On crée le nom du nouveau fichier meta
                         final_meta_filename = media.id + ".meta.txt"
 
-                        # Fonction anonyme permettant d'envoyer une update
-                        def updateMediaWeb():
-                            # On envoie un évènement de mise à jour au web
-                            try:
-                                requests.get("{}/api/conductor/media/update/{}".format(config["web_base"], media.id), timeout=0.5)
-                            except Exception as e:
-                                print("ERROR while sending event to web: {}".format(e))
+                        # On déclare une nouvelle passe d'encodage
+                        media.passes += 1
+                        session.merge(media)
 
-                        # Fonction anonyme permettant le suivi de progression
-                        def progressCallback(percent, lastUpdate):
-                            modified = False
-                            currentTime = time.time()
+                        print("Pass {}/{}...".format(media.passes, config["medias_max_retry"]))
 
-                            if currentTime - lastUpdate[0] >= 2:
-                                media.progress = percent
-                                modified = True
+                        # Si on est dans les retry acceptables
+                        if media.passes <= int(config["medias_max_retry"]):
+                            # Fonction anonyme permettant d'envoyer une update
+                            def updateMediaWeb():
+                                # On envoie un évènement de mise à jour au web
+                                try:
+                                    requests.get("{}/api/conductor/media/update/{}".format(config["web_base"], media.id), timeout=0.5)
+                                except Exception as e:
+                                    print("ERROR while sending event to web: {}".format(e))
 
-                            if percent>=100:
-                                media.progress = 100
-                                media.path = final_filename
-                                media.error = None
-                                modified = True
+                            # Fonction anonyme permettant le suivi de progression
+                            def progressCallback(percent, lastUpdate):
+                                modified = False
+                                currentTime = time.time()
+
+                                if currentTime - lastUpdate[0] >= 2:
+                                    media.progress = percent
+                                    modified = True
+
+                                if percent>=100:
+                                    media.progress = 100
+                                    media.path = final_filename
+                                    media.error = None
+                                    modified = True
+                                
+                                if modified:
+                                    print("Media {} : conversion in progress... {}%".format(media.id, percent))
+                                    session.merge(media)
+                                    session.commit()
+                                    lastUpdate[0] = currentTime
+
+                                    updateMediaWeb()
                             
-                            if modified:
-                                print("Media {} : conversion in progress... {}%".format(media.id, percent))
-                                session.merge(media)
-                                session.commit()
-                                lastUpdate[0] = currentTime
 
-                                updateMediaWeb()
-                        
-
-                        # Si c'est un webm, on copie juste, sans transcodage
-                        if extension=="webm":
-                            try:
-                                shutil.copy(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename)
-                                videoConversion = True
-
-                                media.progress = 100
-                                media.path = final_filename
-                                media.error = None
-
-                                session.merge(media)
-                                session.commit()
-
-                                updateMediaWeb()
-
-                            except Exception as e:
-                                videoConversion = e
-                        else:
                             # On lance la conversion
                             videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, 1280, progressCallback, transcode)
 
-                        if videoConversion==True:
-                            print("Conversion succeeded for media ID {}.".format(media.id))
-                            time.sleep(0.2)
-                            print("Extracting gif thumbnail for {}...".format(media.id))
-                            time.sleep(0.2)
-
-                            thumbnailExtraction = getThumbnailPicture(dirMedias+"/"+final_filename, dirMedias+"/"+tmb_filename, 70);
-                        
-                            if thumbnailExtraction==True:
-                                print("Conversion complete for media ID {}".format(media.id))
-
-                                # On met à jour la bdd avec le fichier miniature
-                                media.tmb = tmb_filename
-
-                                session.merge(media)
-                                session.commit()
-
+                            if videoConversion==True:
+                                print("Conversion succeeded for media ID {}.".format(media.id))
                                 time.sleep(0.2)
-                                # On envoie l'update au web
-                                updateMediaWeb()
+                                print("Extracting gif thumbnail for {}...".format(media.id))
+                                time.sleep(0.2)
+
+                                thumbnailExtraction = getThumbnailPicture(dirMedias+"/"+final_filename, dirMedias+"/"+tmb_filename, 70);
+                            
+                                if thumbnailExtraction==True:
+                                    print("Conversion complete for media ID {}".format(media.id))
+
+                                    # On met à jour la bdd avec le fichier miniature
+                                    media.tmb = tmb_filename
+
+                                    session.merge(media)
+                                    session.commit()
+
+                                    time.sleep(0.2)
+                                    # On envoie l'update au web
+                                    updateMediaWeb()
+                                else:
+                                    print("/!\\ Thumbnail extraction error for media ID {}".format(media.id))
+
+                                    # On injecte l'erreur dans le média
+                                    media.error = "Thumbnail Extraction\n\n"+str(thumbnailExtraction)
+                                    session.merge(media)
+                                    session.commit()
+
+                                    updateMediaWeb()
+                                
+
+                                # Suppression du fichier d'origine
+                                os.remove(dirTmpMedias + "/" + filename)
+
+                                # Déplacement du meta file
+                                shutil.move(dirTmpMedias + "/" + meta_filename, dirMedias + "/" + final_meta_filename)
                             else:
-                                print("/!\\ Thumbnail extraction error for media ID {}".format(media.id))
+                                print("/!\\ Conversion error for media ID {}".format(media.id))
 
                                 # On injecte l'erreur dans le média
-                                media.error = "Thumbnail Extraction\n\n"+str(thumbnailExtraction)
+                                media.error = str(videoConversion)
                                 session.merge(media)
                                 session.commit()
 
                                 updateMediaWeb()
-                            
 
-                            # Suppression du fichier d'origine
-                            os.remove(dirTmpMedias + "/" + filename)
-
-                            # Déplacement du meta file
-                            shutil.move(dirTmpMedias + "/" + meta_filename, dirMedias + "/" + final_meta_filename)
-                        else:
-                            print("/!\\ Conversion error for media ID {}".format(media.id))
-
-                            # On injecte l'erreur dans le média
-                            media.error = str(videoConversion)
-                            session.merge(media)
                             session.commit()
 
-                            updateMediaWeb()
+                        else:
+                            print("Too many tries for media ID {}. Deleting media.".format(media.id))
+
+                            session.delete(media)
+                            session.commit()
 
                     else:
                         # Média introuvable : on supprime les fichiers meta et source
