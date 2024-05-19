@@ -409,7 +409,10 @@ function mediaLineSetDatas(element, media) {
     else element.classList.remove("error");
     
     // On édite le thumbnail
-    element.querySelector(".cond-media-thumbnail-img").src = "/medias/" + tmb;
+    if(tmb==null)
+        element.querySelector(".cond-media-thumbnail-img").setAttribute("src", "");
+    else
+        element.querySelector(".cond-media-thumbnail-img").setAttribute("src", "/medias/" + tmb + "?" + Math.floor(Math.random()*100000000));
 
     // On édite le mode de volume
     if(volume == 0) element.dataset.volumeMode = "mute";

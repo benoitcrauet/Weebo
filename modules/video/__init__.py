@@ -97,8 +97,27 @@ def main():
 
                                 updateMediaWeb()
                         
-                        # On lance la conversion
-                        videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, 1280, progressCallback, transcode)
+
+                        # Si c'est un webm, on copie juste, sans transcodage
+                        if extension=="webm":
+                            try:
+                                shutil.copy(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename)
+                                videoConversion = True
+
+                                media.progress = 100
+                                media.path = final_filename
+                                media.error = None
+
+                                session.merge(media)
+                                session.commit()
+
+                                updateMediaWeb()
+
+                            except Exception as e:
+                                videoConversion = e
+                        else:
+                            # On lance la conversion
+                            videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, 1280, progressCallback, transcode)
 
                         if videoConversion==True:
                             print("Conversion succeeded for media ID {}.".format(media.id))
@@ -113,17 +132,18 @@ def main():
 
                                 # On met à jour la bdd avec le fichier miniature
                                 media.tmb = tmb_filename
+
                                 session.merge(media)
                                 session.commit()
 
-                                time.sleep(1)
+                                time.sleep(0.2)
                                 # On envoie l'update au web
                                 updateMediaWeb()
                             else:
                                 print("/!\\ Thumbnail extraction error for media ID {}".format(media.id))
 
                                 # On injecte l'erreur dans le média
-                                media.error = str(thumbnailExtraction)
+                                media.error = "Thumbnail Extraction\n\n"+str(thumbnailExtraction)
                                 session.merge(media)
                                 session.commit()
 
