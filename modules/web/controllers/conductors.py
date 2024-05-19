@@ -13,6 +13,7 @@ import json
 from io import BytesIO
 from PIL import Image
 
+from lib.socketio import SocketIOInstance
 from lib.db import session
 from lib.models import Show, Conductor, Line, Media
 from lib.guid import generate_guid
@@ -28,7 +29,7 @@ socketio = None
 def init(flaskapp):
     global app, bp, socketio
     app = flaskapp
-    socketio = SocketIO(app)
+    socketio = SocketIOInstance().socketio
     CORS(app, origins="*")
 
     app.register_blueprint(bp)

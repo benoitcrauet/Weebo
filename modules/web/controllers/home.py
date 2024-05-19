@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import desc
 import locale
 
+from lib.socketio import SocketIOInstance
 from lib.guid import generate_guid
 from lib.mime import get_mime, mime_extract_type
 from lib.config import config
@@ -13,10 +14,11 @@ from lib.models import Conductor
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
 app = None
+socketio = None
 def init(flaskapp):
     global app, bp
     app = flaskapp
-
+    socketio = SocketIOInstance().socketio
     app.register_blueprint(bp)
 
 

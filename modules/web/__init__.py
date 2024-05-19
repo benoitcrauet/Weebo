@@ -9,6 +9,7 @@ from geventwebsocket.handler import WebSocketHandler
 
 from lib.config import config
 from lib.arguments import arguments
+from lib.socketio import SocketIOInstance
 
 
 ######################
@@ -20,6 +21,7 @@ def main():
     # Initialisation du serveur web
     app = Flask("modules.web")
     app.config["SECRET_KEY"] = config["web_secret_key"]
+    socketio = SocketIOInstance(app)
     CORS(app, origins="*") # CORS from all
 
     # Ajouter une règle de route pour servir les fichiers statiques du dossier '/medias'
@@ -44,9 +46,6 @@ def main():
     channels.init(app)
     shows.init(app)
     conductors.init(app)
-
-    #app.run(debug=(arguments.debug), host=config["web_host"], port=config["web_port"]) #, ssl_context="adhoc")
-
 
     server = pywsgi.WSGIServer((config["web_host"], int(config["web_port"])), app, handler_class=WebSocketHandler)
     server.serve_forever()

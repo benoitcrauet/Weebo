@@ -6,6 +6,7 @@ from flask_cors import CORS
 import wtforms
 import wtforms.validators as validators
 
+from lib.socketio import SocketIOInstance
 from lib.guid import generate_guid
 from lib.mime import get_mime, mime_extract_type
 from lib.config import config
@@ -20,7 +21,7 @@ socketio = None
 def init(flaskapp):
     global app, bp, socketio
     app = flaskapp
-    socketio = SocketIO(app)
+    socketio = SocketIOInstance().socketio
     CORS(app, origin="*")
 
     app.register_blueprint(bp)

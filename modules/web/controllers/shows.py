@@ -7,6 +7,7 @@ import wtforms.validators as validators
 from PIL import Image
 from io import BytesIO
 
+from lib.socketio import SocketIOInstance
 from lib.db import session
 from lib.models import Show
 from lib.guid import generate_guid
@@ -15,10 +16,11 @@ from lib.picture import ResizeMinimal
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
 app = None
+socketio = None
 def init(flaskapp):
     global app, bp
     app = flaskapp
-
+    socketio = SocketIOInstance().socketio
     app.register_blueprint(bp)
 
 
