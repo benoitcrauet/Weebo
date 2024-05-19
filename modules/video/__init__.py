@@ -45,7 +45,7 @@ def main():
                 
                 # Si on a un media id
                 if meta["media_id"]:
-                    print("Found media source file \"{}\" with metadata file \"{}\".".format(filename, meta_filename))
+                    print("Found media source file \"{}\":".format(filename))
 
                     # On stocke l'ID
                     media_guid = meta["media_id"]
@@ -73,10 +73,13 @@ def main():
                         media.passes += 1
                         session.merge(media)
 
-                        print("Pass {}/{}...".format(media.passes, config["medias_max_retry"]))
+                        print("    > Media name: {}".format(media.name))
 
                         # Si on est dans les retry acceptables
                         if media.passes <= int(config["medias_max_retry"]):
+                            print("    > Pass {}/{}...".format(media.passes, config["medias_max_retry"]))
+                            print("")
+
                             # Fonction anonyme permettant d'envoyer une update
                             def updateMediaWeb():
                                 # On envoie un évènement de mise à jour au web
@@ -101,7 +104,7 @@ def main():
                                     modified = True
                                 
                                 if modified:
-                                    print("Media {} : conversion in progress... {}%".format(media.id, percent))
+                                    print("    ⚙️ Conversion in progress... {}%".format(percent))
                                     session.merge(media)
                                     session.commit()
                                     lastUpdate[0] = currentTime
@@ -113,15 +116,15 @@ def main():
                             videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, 1280, progressCallback, transcode)
 
                             if videoConversion==True:
-                                print("Conversion succeeded for media ID {}.".format(media.id))
+                                print("        > ✅ Conversion succeeded for media ID {}.".format(media.id))
                                 time.sleep(0.2)
-                                print("Extracting gif thumbnail for {}...".format(media.id))
+                                print("    🏞️ Extracting gif thumbnail for {}...".format(media.id))
                                 time.sleep(0.2)
 
                                 thumbnailExtraction = getThumbnailPicture(dirMedias+"/"+final_filename, dirMedias+"/"+tmb_filename, 70);
                             
                                 if thumbnailExtraction==True:
-                                    print("Conversion complete for media ID {}".format(media.id))
+                                    print("        > ✅ Conversion complete for media ID {}".format(media.id))
 
                                     # On met à jour la bdd avec le fichier miniature
                                     media.tmb = tmb_filename
@@ -133,7 +136,7 @@ def main():
                                     # On envoie l'update au web
                                     updateMediaWeb()
                                 else:
-                                    print("/!\\ Thumbnail extraction error for media ID {}".format(media.id))
+                                    print("        > ⚠️ Thumbnail extraction error for media ID {}".format(media.id))
 
                                     # On injecte l'erreur dans le média
                                     media.error = "Thumbnail Extraction\n\n"+str(thumbnailExtraction)
@@ -149,7 +152,7 @@ def main():
                                 # Déplacement du meta file
                                 shutil.move(dirTmpMedias + "/" + meta_filename, dirMedias + "/" + final_meta_filename)
                             else:
-                                print("/!\\ Conversion error for media ID {}".format(media.id))
+                                print("        > ⚠️ Conversion error for media ID {}".format(media.id))
 
                                 # On injecte l'erreur dans le média
                                 media.error = str(videoConversion)
@@ -161,20 +164,25 @@ def main():
                             session.commit()
 
                         else:
-                            print("Too many tries for media ID {}. Deleting media.".format(media.id))
+                            print("    > ⚠️ Too many tries.")
+                            print("        > 🗑️ Deleting media.")
 
                             session.delete(media)
                             session.commit()
 
                     else:
                         # Média introuvable : on supprime les fichiers meta et source
-                        print("Media does not exists in database for \"{}\": removing files...".format(filename))
+                        print("    > Media entry does not exists in database.")
+                        print("        > 🗑️ Removing files...")
 
                         os.remove(dirTmpMedias+"/"+meta_filename)
                         os.remove(dirTmpMedias+"/"+filename)
 
                 else:
                     print("Metadata file not found for {}.".format(filename))
+
+
+                sys.stdout.write("\n")
 
         sys.stdout.flush()
         time.sleep(10) # On attend 10 secondes avant le prochain scan

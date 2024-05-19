@@ -115,7 +115,6 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={})
             subclip.rotate(rotateDeg).write_videofile(output, codec="libvpx", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
 
     except Exception as e:
-        print("Error occured while transcoding \"{}\"...".format(input))
         return e
     finally:
         try:
@@ -171,7 +170,6 @@ def getThumbnailPicture(input, output, maxborder):
             clip.close()
 
     except Exception as e:
-        print("Error occured while extracting thumbnail of file \"{}\"...".format(input))
         return e
     finally:
         try:
