@@ -233,10 +233,23 @@ function mediaLineStructure() {
                 audioIcon2.classList.add("bi-volume-up-fill");
                 audioIcon2.classList.add("text-warning");
 
+                let errorButton = document.createElement("button");
+                errorButton.classList.add("cond-media-error-button");
+                errorButton.classList.add("btn");
+                errorButton.classList.add("btn-sm");
+                errorButton.classList.add("btn-danger");
+
+                    let errorButtonIcon = document.createElement("i");
+                    errorButtonIcon.classList.add("bi");
+                    errorButtonIcon.classList.add("bi-exclamation-triangle-fill");
+                
+                errorButton.append(errorButtonIcon);
+
+
                 let mediaNameText = document.createElement("span");
                 mediaNameText.classList.add("cond-media-name-text");
 
-            mediaName.append(audioIcon0, audioIcon1, audioIcon2, mediaNameText);
+            mediaName.append(audioIcon0, audioIcon1, audioIcon2, errorButton, mediaNameText);
         
             let progress = document.createElement("div");
             progress.classList.add("progress");
@@ -369,6 +382,7 @@ function mediaLineSetDatas(element, media) {
     let loop = media.loop;
     let volume = media.volume;
     let channel = media.channel;
+    let error = media.error;
     let progress = media.progress;
     let line_id = media.line_id;
 
@@ -386,8 +400,13 @@ function mediaLineSetDatas(element, media) {
     element.dataset.volume = volume;
     element.dataset.channel = channel;
     element.dataset.progress = progress;
+    element.dataset.error = error;
     element.dataset.inprogress = progress<100;
     element.dataset.lineId = line_id;
+
+    // On ajoute ou supprime la classe error
+    if(error!=null) element.classList.add("error");
+    else element.classList.remove("error");
     
     // On édite le thumbnail
     element.querySelector(".cond-media-thumbnail-img").src = "/medias/" + tmb;

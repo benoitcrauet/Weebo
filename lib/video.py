@@ -116,7 +116,7 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={})
 
     except Exception as e:
         print("Error occured: {}".format(e))
-        return False
+        return e
     finally:
         try:
             video.close()
@@ -172,7 +172,7 @@ def getThumbnailPicture(input, output, maxborder):
 
     except Exception as e:
         print("Error occured: {}".format(e))
-        return False
+        return e
     finally:
         try:
             video.close()

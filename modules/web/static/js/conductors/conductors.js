@@ -566,9 +566,19 @@ function mediaElementsRegisterEventListeners(elements) {
     let lineID = elements.getAttribute("data-line-id");
     let mediaID = elements.getAttribute("data-id");
 
-    // Évènement quand on coche la case d'une ligne
+    // Évènement quand on clique sur le bouton d'erreur
+    const mediaError = elements.querySelector(".cond-media-error-button");
+    mediaError.addEventListener("click", function(e) {
+        e.preventDefault();
+        
+        let mediaElement = document.getElementById("cond-media-line-"+mediaID);
+        let mediaError = mediaElement.getAttribute("data-error");
+        
+        alert("Erreur de transcodage du média :\n\n"+mediaError);
+    });
+
+    // Évènement quand on clique sur le bouton de preview
     const mediaPreview = elements.querySelector(".cond-medias-line-action-preview");
-    
     mediaPreview.addEventListener("click", function(e) {
         e.preventDefault();
         
@@ -586,7 +596,7 @@ function mediaElementsRegisterEventListeners(elements) {
         showPreview(mediaType, mediaName, path, mediaLoop, mediaVolume);
     });
 
-    // Évènement quand on coche la case d'une ligne
+    // Évènement quand on clique sur le bouton d'édition
     const mediaEdit = elements.querySelector(".cond-medias-line-action-edit");
     mediaEdit.addEventListener("click", function(e) {
         e.preventDefault();

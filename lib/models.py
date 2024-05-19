@@ -130,6 +130,7 @@ class Media(Base):
     volume = Column(Float)
     volumeAfterLoop = Column(Float)
     progress = Column(Integer)
+    error = Column(String)
 
     line_id = Column(String, ForeignKey('Lines.id'))
     line = relationship("Line", back_populates="medias")

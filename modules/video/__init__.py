@@ -86,6 +86,7 @@ def main():
                             if percent>=100:
                                 media.progress = 100
                                 media.path = final_filename
+                                media.error = None
                                 modified = True
                             
                             if modified:
@@ -99,7 +100,7 @@ def main():
                         # On lance la conversion
                         videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, 1280, progressCallback, transcode)
 
-                        if videoConversion:
+                        if videoConversion==True:
                             print("Conversion succeeded for media ID {}.".format(media.id))
                             time.sleep(1)
                             print("Extracting gif thumbnail for {}...".format(media.id))
@@ -107,7 +108,7 @@ def main():
 
                             thumbnailExtraction = getThumbnailPicture(dirMedias+"/"+final_filename, dirMedias+"/"+tmb_filename, 70);
                         
-                            if thumbnailExtraction:
+                            if thumbnailExtraction==True:
                                 print("Conversion complete for media ID {}".format(media.id))
 
                                 # On met à jour la bdd avec le fichier miniature
@@ -120,6 +121,13 @@ def main():
                                 updateMediaWeb()
                             else:
                                 print("/!\\ Thumbnail extraction error for media ID {}".format(media.id))
+
+                                # On injecte l'erreur dans le média
+                                media.error = str(thumbnailExtraction)
+                                session.merge(media)
+                                session.commit()
+
+                                updateMediaWeb()
                             
 
                             # Suppression du fichier d'origine
@@ -129,6 +137,13 @@ def main():
                             shutil.move(dirTmpMedias + "/" + meta_filename, dirMedias + "/" + final_meta_filename)
                         else:
                             print("/!\\ Conversion error for media ID {}".format(media.id))
+
+                            # On injecte l'erreur dans le média
+                            media.error = str(videoConversion)
+                            session.merge(media)
+                            session.commit()
+
+                            updateMediaWeb()
 
                     else:
                         # Média introuvable : on supprime les fichiers meta et source
