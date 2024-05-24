@@ -53,7 +53,7 @@
                             {{ "Oui" if c.vdoEnable else "Non" }}
                         </td>
                         <td>
-                            {{ "Oui" if c.password!="" else "Non" }}
+                            {{ "Oui" if c.vdoPassword!="" else "Non" }}
                         </td>
                         <td class="text-end">
                             <a href="{{ url_for("conductors.conductorsView", show_guid=show.id, cond_guid=c.id) }}" class="btn btn-primary" title="Ouvrir le conducteur"><i class="bi bi-folder2-open"></i> Ouvrir</a>

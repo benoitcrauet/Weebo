@@ -82,6 +82,8 @@ class Conductor(Base):
     month = Column(Integer)
     day = Column(Integer)
 
+    vdoPassword = Column(String)
+
     @property
     def date(self):
         return datetime(self.year, self.month, self.day)

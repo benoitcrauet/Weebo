@@ -115,6 +115,14 @@
                         </div>
                     </div>
 
+                    <div class="mb-3 row">
+                        {{ form.vdoPassword.label(class="col-form-label col-sm-3") }}
+                        <div class="col-sm-9">
+                            {{ form.vdoPassword(class="form-control") }}
+                            {% if form.vdoPassword.description %}<div class="form-text">{{ form.vdoPassword.description }}</div>{% endif %}
+                        </div>
+                    </div>
+
                 </div>
 
             </fieldset>
