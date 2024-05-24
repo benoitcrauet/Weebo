@@ -394,6 +394,7 @@ def conductorsView(show_guid, cond_guid=None):
     # On fabrique le lien director
     urlParams = {
         "director": vdoRoomID, # Room ID
+        "r2d2": "", # Ajout des notifications star ouar
         "cleandirector": "", # Pas de liens d'invitation
         "codirector": coDirectorHash, # Mot de passe co-director
     }
