@@ -12,13 +12,14 @@ import locale
 import json
 from io import BytesIO
 from PIL import Image
+import base64
 
 from lib.socketio import SocketIOInstance
 from lib.db import session
 from lib.models import Show, Conductor, Line, Media
 from lib.guid import generate_guid
 from lib.dict import model_to_dict
-from lib.vdo import generateVdoGuestHash, generateVdoRoomID
+from lib.vdo import generateVdoGuestHash, generateVdoRoomID, generateVdoRemoteHash, generateVdoCoDirectorHash
 from lib.config import config
 from lib.picture import ResizeMaximal
 
@@ -97,6 +98,7 @@ class FormConductorEdit(FlaskForm):
     year = wtforms.IntegerField("année", validators=[validators.NumberRange(min=datetime.now().year-1, max=datetime.now().year+2)])
     guests = wtforms.TextAreaField("Participants", description="Saisissez un nom par ligne, vous compris", validators=[])
     vdoEnable = wtforms.BooleanField("Activer VDO", description="Permet d'activer la génération automatique des liens VDO.", validators=[], default=True)
+    vdoPassword = wtforms.StringField("Mot de passe VDO", description="Facultatif. Vous permet de définir un mot de passe sur votre room VDO.", validators=[])
     fromTemplate = wtforms.SelectField("Template", choices=[("","- Aucun modèle -")], description="Depuis quel modèle souhaitez-vous créer votre conducteur ?")
 
     show_id = wtforms.HiddenField("show_id")
@@ -142,12 +144,15 @@ def conductorsEdit(show_guid, cond_guid=None):
             conductor = Conductor()
         
         conductor.type = form.type.data
-        conductor.name = form.name.data
+        conductor.name = form.name.data.strip()
         conductor.day = form.day.data
         conductor.month = form.month.data
         conductor.year = form.year.data
         conductor.guests = form.guests.data
+
         conductor.vdoEnable = form.vdoEnable.data
+        conductor.vdoPassword = form.vdoPassword.data.strip()
+
         conductor.show = show
 
 
@@ -243,46 +248,161 @@ def conductorsView(show_guid, cond_guid=None):
 
     # On prépare la liste des liens
     vdoLinks = []
-    vdoRoomID = generateVdoRoomID(show.id)
+    vdoRoomID = generateVdoRoomID(conductor.id)
+
+    # Code de remote OBS
+    obsRemote = generateVdoRemoteHash(conductor.id)
+
+    # Code co-director
+    coDirectorHash = generateVdoCoDirectorHash(conductor.id)
 
     for k,guestName in enumerate(conductor.guests.split("\n")):
         # On fabrique le hash de l'utilisateur
-        push = generateVdoGuestHash(show.id, k)
+        streamID = generateVdoGuestHash(conductor.id, k)
+
+        # Message de bienvenue en base64
+        welcomeRaw = "Bienvenue, {} !".format(guestName)
+        welcomeBytes = welcomeRaw.encode("utf-8")
+        base64Bytes = base64.b64encode(welcomeBytes)
+        welcomeB64 = base64Bytes.decode("utf-8")
         
         # On fabrique le lien d'invitation
         inviteParams = {
-            "room": vdoRoomID,
-            "push": push,
-            "label": guestName
+            "room": vdoRoomID, # Room ID
+            "push": streamID, # Stream ID
+            "label": guestName, # Nom du guest
+            "webcam": "", # Pas de choix entre screenshare ou webcam (webcam direct)
+            "welcomeb64": welcomeB64, # Message de bienvenue
+            "order": 10-k, # Priorité de mix (plus le guest est en premier dans la liste, plus il est prioritaire)
+            "showlabels": "teams", # Affichage des noms des guests (style Teams)
+            "clock24": "2", # Affichage de l'heure en haut
+            "timer": "5", # Affichage du timer au centre
+            "consent": "", # Permission de contrôler les caméras et micros
+            "obs": "", # Activer le controle d'OBS (que pour les guests)
+            "remote": obsRemote, # Token de controle d'OBS
+            "hands": "", # Autorise les guests à lever la main
+            "screensharebutton": "", # Autorise les guests à partager leur écran
+            "nohangupbutton": "", # On cache le bouton raccrocher pour éviter les erreurs
+            "fullscreenbutton": "", # On permet l'affichage en plein écran
+            "grid": "", # Ajout de la grille des tiers
+            "quality": "0", # Qualité maximale
+            "aspectratio": "1.777777", # 16/9
+            "channelcount": "1", # Micro en mono
         }
+
+        # On rajoute l'image de bienvenue s'il y en a une
+        if show.logo:
+            inviteParams["welcomeimage"] = config["web_base"]+"/"+config["images_dir"]+"/"+show.logo
+        
+        # On rajoute le mot de passe s'il y en a un
+        if conductor.vdoPassword.split()!="":
+            inviteParams["password"] = ""
+        
         inviteLink = "https://vdo.ninja/?"+urlencode(inviteParams)
 
         # On fabrique le lien solo
         soloParams = {
-            "room": vdoRoomID,
-            "view": push,
-            "solo": ""
+            "room": vdoRoomID, # Room ID
+            "view": streamID, # Stream ID
+            "solo": "", # Vue solo
+            "remote": obsRemote, # Token de pilotage OBS
+            "password": conductor.vdoPassword
         }
+        # On rajoute le mot de passe s'il y en a un
+        if conductor.vdoPassword.split()!="":
+            soloParams["password"] = conductor.vdoPassword
         soloLink = "https://vdo.ninja/?"+urlencode(soloParams)
 
         # On compile le tout et on ajoute à la liste
         obj = {
             "name": guestName,
-            "push": push,
+            "push": streamID,
             "cam_number": k,
             "link_invite": inviteLink,
-            "link_solo": soloLink
+            "link_solo": soloLink,
         }
         vdoLinks.append(obj)
     
 
-        # On fabrique le lien director
-        urlParams = {
-            "director": vdoRoomID,
-        }
-        directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
+    # On fabrique le lien guests
+    urlParams = {
+        "room": vdoRoomID, # Room ID
+        "labelsuggestion": "", # On demande au guest son mom
+        "webcam": "", # Pas de choix entre screenshare ou webcam (webcam direct)
+        "showlabels": "teams", # Affichage des noms des guests (style Teams)
+        "clock24": "2", # Affichage de l'heure en haut
+        "timer": "5", # Affichage du timer au centre
+        "consent": "", # Permission de contrôler les caméras et micros
+        "screensharebutton": "", # Autorise les guests à partager leur écran
+        "nohangupbutton": "", # On cache le bouton raccrocher pour éviter les erreurs
+        "grid": "", # Ajout de la grille des tiers
+        "quality": "0", # Qualité maximale
+        "aspectratio": "1.777777", # 16/9
+        "channelcount": "1", # Micro en mono
+    }
+    # On rajoute le mot de passe s'il y en a un
+    if conductor.vdoPassword.split()!="":
+        urlParams["password"] = ""
+    guestsLink = "https://vdo.ninja/?"+urlencode(urlParams)
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"])
+
+    # On fabrique le lien autocommut
+    urlParams = {
+        "room": vdoRoomID, # Room ID
+        "scene": "1", # Seule la scène 1 est commutable
+        "solo": "", # Mode solo
+        "activespeaker": "3", # Mode speaker : une seule cam affichée à la fois mais pas les sources audio
+        "animated": "0", # Pas d'animation
+        "bitrate": "6144", # Bitrate vidéo
+    }
+    # On rajoute le mot de passe s'il y en a un
+    if conductor.vdoPassword.split()!="":
+        urlParams["password"] = conductor.vdoPassword
+    autoCommutLink = "https://vdo.ninja/?"+urlencode(urlParams)
+    
+
+    # On fabrique le lien PbP
+    urlParams = {
+        "room": vdoRoomID, # Room ID
+        "scene": "1", # Seule la scène 1 est commutable
+        "solo": "", # Mode solo
+        "activespeaker": "4", # Mode speaker : plusieurs cams affichées à la fois mais pas les sources audio
+        "square": "", # On optimise l'affichage pour avoir un affichage plein écran (en colonnes)
+        "animated": "0", # Pas d'animation
+        "bitrate": "6144", # Bitrate vidéo
+    }
+    # On rajoute le mot de passe s'il y en a un
+    if conductor.vdoPassword.split()!="":
+        urlParams["password"] = conductor.vdoPassword
+    pictureByPictureLink = "https://vdo.ninja/?"+urlencode(urlParams)
+
+    # On fabrique le lien PbP Fullscreen
+    urlParams = {
+        "room": vdoRoomID, # Room ID
+        "scene": "1", # Seule la scène 1 est commutable
+        "solo": "", # Mode solo
+        "activespeaker": "4", # Mode speaker : plusieurs cams affichées à la fois mais pas les sources audio
+        "cover": "", # On recouvre la totalité de la surface
+        "animated": "0", # Pas d'animation
+        "bitrate": "6144", # Bitrate vidéo
+    }
+    # On rajoute le mot de passe s'il y en a un
+    if conductor.vdoPassword.split()!="":
+        urlParams["password"] = conductor.vdoPassword
+    pictureByPictureFullscreenLink = "https://vdo.ninja/?"+urlencode(urlParams)
+
+    # On fabrique le lien director
+    urlParams = {
+        "director": vdoRoomID, # Room ID
+        "cleandirector": "", # Pas de liens d'invitation
+        "codirector": coDirectorHash, # Mot de passe co-director
+    }
+    # On rajoute le mot de passe s'il y en a un
+    if conductor.vdoPassword.split()!="":
+        urlParams["password"] = ""
+    directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
+    
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, autoCommutLink=autoCommutLink, pictureByPictureLink=pictureByPictureLink, pictureByPictureFullscreenLink=pictureByPictureFullscreenLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"])
 
 
 

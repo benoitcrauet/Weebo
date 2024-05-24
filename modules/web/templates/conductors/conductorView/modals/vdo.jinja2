@@ -13,17 +13,15 @@
                     Vous trouverez ci-dessous l'ensemble de vos liens.
                 </p>
 
-                <div class="alert alert-warning" role="alert">
-                    Pour éviter de mélanger les caméras, merci de bien vous assurer d'utiliser <strong>votre</strong> lien et pas celui de quelqu'un d'autre !
-                </div>
-
                 <nav>
                     <div class="nav nav-tabs" id="nav-vdo-modal-tabs" role="tablist">
                         <button class="nav-link active" id="nav-vdo-modal-users-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-users" type="button" role="tab" aria-controls="nav-vdo-modal-users" aria-selected="true">
+                            <i class="bi bi-people-fill"></i>
                             Liens d'invitation
                         </button>
                         <button class="nav-link" id="nav-vdo-modal-obs-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-obs" type="button" role="tab" aria-controls="nav-vdo-modal-obs" aria-selected="false">
-                            Liens pour OBS
+                            <i class="bi bi-broadcast-pin"></i>
+                            Sources OBS
                         </button>
                     </div>
                 </nav>
@@ -41,21 +39,73 @@
                                 {% for l in vdoLinks %}
                                     <tr>
                                         <th scope="row">
+                                            <i class="bi bi-person"></i>
                                             {{ l.name }}
                                         </th>
                                         <td>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" readonly value="{{ l.link_invite }}" onclick="this.select();">
                                                 <a href="{{ l.link_invite }}" class="btn btn-primary" onclick="window.open(this.href); return false;">
                                                     <i class="bi bi-box-arrow-up-right"></i>
                                                     Accéder
                                                 </a>
+                                                <input type="text" class="form-control" readonly value="{{ l.link_invite }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
+                        
+                        <div class="alert alert-warning mt-3" role="alert">
+                            Pour éviter de mélanger les caméras, merci de bien vous assurer d'utiliser <strong>votre</strong> lien et pas celui de quelqu'un d'autre !
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-form-label col-3" for="vdoInviteLinkOtherGuests">
+                                <i class="bi bi-people"></i>
+                                Autres participants
+                            </label>
+                            <div class="col-9">
+                                <div class="input-group">
+                                    <input type="text" id="vdoInviteLinkOtherGuests" class="form-control" readonly value="{{ guestsLink }}" onclick="this.select();">
+                                    <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                        <i class="bi bi-copy"></i>
+                                    </button>
+                                </div>
+                                <span class="form-text">
+                                    Ce lien est à donner aux invités externes à l'émission.<br>
+                                    <b class="text-warning">Attention : les invités seront liés au groupe 1 par défaut.</b>
+                                </span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row mb-3">
+                            <label class="col-form-label col-3" for="vdoDirectorLink">
+                                <i class="bi bi-camera-reels-fill"></i>
+                                Accès réalisateur
+                            </label>
+                            <div class="col-9">
+                                <div class="input-group">
+                                    <a href="{{ directorLink }}" class="btn btn-primary" onclick="window.open(this.href); return false;">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                        Accéder
+                                    </a>
+                                    <input type="text" id="vdoDirectorLink" class="form-control" readonly value="{{ directorLink }}" onclick="this.select();">
+                                    <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                        <i class="bi bi-copy"></i>
+                                    </button>
+                                </div>
+                                <span class="form-text">
+                                    Ce lien vous donne accès à l'interface de contrôle de la room VDO.<br>
+                                    <b>Ne le transmettez pas à n'importe qui !</b>
+                                </span>
+                            </div>
+                        </div>
 
 
                     </div>
@@ -73,6 +123,7 @@
                                 {% for l in vdoLinks %}
                                     <tr>
                                         <th scope="row">
+                                            <i class="bi bi-camera-video"></i>
                                             {{ l.name }}
                                         </th>
                                         <td>
@@ -91,26 +142,67 @@
                             </tbody>
                         </table>
 
+                        <div class="row mb-3">
+                            <label class="col-form-label col-3" for="vdoSourceLinkAutoSwitch">
+                                <i class="bi bi-person-video"></i>
+                                Source automatique
+                            </label>
+                            <div class="col-9">
+                                <div class="input-group">
+                                    <input type="text" id="vdoSourceLinkAutoSwitch" class="form-control" readonly value="{{ autoCommutLink }}" onclick="this.select();">
+                                    <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                        <i class="bi bi-copy"></i>
+                                    </button>
+                                </div>
+                                <span class="form-text">
+                                    Cette source change automatiquement de caméra selon qui est en train de parler.<br>
+                                    <b class="text-info">Seules les sources de la scène 1 seront visibles.</b>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-form-label col-3" for="vdoSourceLinkPictureByPicture">
+                                <i class="bi bi-layout-split"></i>
+                                Picture-by-Picture
+                            </label>
+                            <div class="col-9">
+                                <div class="input-group">
+                                    <input type="text" id="vdoSourceLinkPictureByPicture" class="form-control" readonly value="{{ pictureByPictureLink }}" onclick="this.select();">
+                                    <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                        <i class="bi bi-copy"></i>
+                                    </button>
+                                </div>
+                                <span class="form-text">
+                                    Affiche 2 caméras côte-à-côte.<br>
+                                    <b class="text-info">Seules les sources de la scène 1 seront visibles.</b>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label class="col-form-label col-3" for="vdoSourceLinkPictureByPictureFullscreen">
+                                <i class="bi bi-layout-split"></i>
+                                Picture-by-Picture plein écran
+                            </label>
+                            <div class="col-9">
+                                <div class="input-group">
+                                    <input type="text" id="vdoSourceLinkPictureByPictureFullscreen" class="form-control" readonly value="{{ pictureByPictureFullscreenLink }}" onclick="this.select();">
+                                    <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                        <i class="bi bi-copy"></i>
+                                    </button>
+                                </div>
+                                <span class="form-text">
+                                    Affiche 2 caméras côte-à-côte en plein écran.<br>
+                                    <b class="text-info">Seules les sources de la scène 1 seront visibles.</b>
+                                </span>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
 
-
-                <h3>Accès réalisateur</h3>
-
-                <p>
-                    Weebo a également généré un lien pour le réalisateur.<br>
-                    <span class="text-danger">Attention : une seule personne à la fois peut accéder à cette interface.<br>
-                    Si vous n'en n'avez pas besoin, ne l'utilisez pas, merci !</span>
-                </p>
-
-                <div class="input-group">
-                    <input type="text" class="form-control" readonly value="{{ directorLink }}" onclick="this.select();">
-                    <a href="{{ directorLink }}" class="btn btn-primary" onclick="window.open(this.href); return false;">
-                        <i class="bi bi-box-arrow-up-right"></i>
-                        Accéder
-                    </a>
-                </div>
 
             </div>
 
