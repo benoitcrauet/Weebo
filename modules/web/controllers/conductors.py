@@ -12,7 +12,6 @@ import locale
 import json
 from io import BytesIO
 from PIL import Image
-import base64
 
 from lib.socketio import SocketIOInstance
 from lib.db import session
@@ -260,19 +259,13 @@ def conductorsView(show_guid, cond_guid=None):
         # On fabrique le hash de l'utilisateur
         streamID = generateVdoGuestHash(conductor.id, k)
 
-        # Message de bienvenue en base64
-        welcomeRaw = "Bienvenue, {} !".format(guestName)
-        welcomeBytes = welcomeRaw.encode("utf-8")
-        base64Bytes = base64.b64encode(welcomeBytes)
-        welcomeB64 = base64Bytes.decode("utf-8")
-        
         # On fabrique le lien d'invitation
         inviteParams = {
             "room": vdoRoomID, # Room ID
             "push": streamID, # Stream ID
             "label": guestName, # Nom du guest
             "webcam": "", # Pas de choix entre screenshare ou webcam (webcam direct)
-            "welcomeb64": welcomeB64, # Message de bienvenue
+            "welcomeb64": "Bienvenue, {} !".format(guestName), # Message de bienvenue
             "order": 10-k, # Priorité de mix (plus le guest est en premier dans la liste, plus il est prioritaire)
             "showlabels": "teams", # Affichage des noms des guests (style Teams)
             "clock24": "2", # Affichage de l'heure en haut
@@ -289,13 +282,11 @@ def conductorsView(show_guid, cond_guid=None):
             "aspectratio": "1.777777", # 16/9
             "channelcount": "1", # Micro en mono
         }
-
         # On rajoute l'image de bienvenue s'il y en a une
         if show.logo:
             inviteParams["welcomeimage"] = config["web_base"]+"/"+config["images_dir"]+"/"+show.logo
-        
         # On rajoute le mot de passe s'il y en a un
-        if conductor.vdoPassword.split()!="":
+        if conductor.vdoPassword!="":
             inviteParams["password"] = ""
         
         inviteLink = "https://vdo.ninja/?"+urlencode(inviteParams)
@@ -309,7 +300,7 @@ def conductorsView(show_guid, cond_guid=None):
             "password": conductor.vdoPassword
         }
         # On rajoute le mot de passe s'il y en a un
-        if conductor.vdoPassword.split()!="":
+        if conductor.vdoPassword!="":
             soloParams["password"] = conductor.vdoPassword
         soloLink = "https://vdo.ninja/?"+urlencode(soloParams)
 
@@ -341,7 +332,7 @@ def conductorsView(show_guid, cond_guid=None):
         "channelcount": "1", # Micro en mono
     }
     # On rajoute le mot de passe s'il y en a un
-    if conductor.vdoPassword.split()!="":
+    if conductor.vdoPassword!="":
         urlParams["password"] = ""
     guestsLink = "https://vdo.ninja/?"+urlencode(urlParams)
     
@@ -356,7 +347,7 @@ def conductorsView(show_guid, cond_guid=None):
         "bitrate": "6144", # Bitrate vidéo
     }
     # On rajoute le mot de passe s'il y en a un
-    if conductor.vdoPassword.split()!="":
+    if conductor.vdoPassword!="":
         urlParams["password"] = conductor.vdoPassword
     autoCommutLink = "https://vdo.ninja/?"+urlencode(urlParams)
     
@@ -372,7 +363,7 @@ def conductorsView(show_guid, cond_guid=None):
         "bitrate": "6144", # Bitrate vidéo
     }
     # On rajoute le mot de passe s'il y en a un
-    if conductor.vdoPassword.split()!="":
+    if conductor.vdoPassword!="":
         urlParams["password"] = conductor.vdoPassword
     pictureByPictureLink = "https://vdo.ninja/?"+urlencode(urlParams)
 
@@ -387,7 +378,7 @@ def conductorsView(show_guid, cond_guid=None):
         "bitrate": "6144", # Bitrate vidéo
     }
     # On rajoute le mot de passe s'il y en a un
-    if conductor.vdoPassword.split()!="":
+    if conductor.vdoPassword!="":
         urlParams["password"] = conductor.vdoPassword
     pictureByPictureFullscreenLink = "https://vdo.ninja/?"+urlencode(urlParams)
 
@@ -399,7 +390,7 @@ def conductorsView(show_guid, cond_guid=None):
         "codirector": coDirectorHash, # Mot de passe co-director
     }
     # On rajoute le mot de passe s'il y en a un
-    if conductor.vdoPassword.split()!="":
+    if conductor.vdoPassword!="":
         urlParams["password"] = ""
     directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
     
