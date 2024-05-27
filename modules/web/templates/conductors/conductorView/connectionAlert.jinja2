@@ -1,0 +1,24 @@
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="connectionAlertToast" class="toast text-bg-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+        <div class="toast-header">
+            <strong class="me-auto">Erreur</strong>
+        </div>
+        <div class="toast-body">
+            La connexion avec le serveur a été perdue.
+        </div>
+    </div>
+</div>
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="connectionSuccessToast" class="toast text-bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Connexion établie</strong>
+        </div>
+        <div class="toast-body">
+            Vous êtes connecté avec le serveur.
+        </div>
+    </div>
+</div>
+<script>
+    const _connectionAlertToast = bootstrap.Toast.getOrCreateInstance(document.getElementById("connectionAlertToast"));
+    const _connectionSuccessToast = bootstrap.Toast.getOrCreateInstance(document.getElementById("connectionSuccessToast"));
+</script>
