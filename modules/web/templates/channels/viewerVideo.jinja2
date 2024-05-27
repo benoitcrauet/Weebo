@@ -125,6 +125,39 @@
                 0% { opacity: 1; }
                 100% { opacity: 0; }
             }
+
+            #connectionAlert {
+                z-index: 9999999999;
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                right: 0px;
+                bottom: 0px;
+                color: white;
+                background: red;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                transition: .4s opacity;
+                opacity: 0;
+            }
+
+            #connectionAlert .connectionAlert_text {
+                display: inline;
+                background: rgba(0,0,0,.6);
+                padding: 10px;
+                text-shadow: 0px 0px 3px black;
+                font-family: monospace;
+                font-size: 80px;
+                font-weight: bold;
+                animation: blinker .6s 0s infinite alternate;
+                opacity: 1;
+            }
+            
+            @keyframes blinker {
+                0% { opacity: 1; }
+                100% { opacity: .6; }
+            }
         </style>
     </head>
     <body>
@@ -140,6 +173,11 @@
             </div>
             <div id="identifier_show">
                 {{ channel.show.name }}
+            </div>
+        </div>
+        <div id="connectionAlert">
+            <div class="connectionAlert_text">
+                Pas de connexion
             </div>
         </div>
         <div id="main">
@@ -167,6 +205,9 @@
             var takedMedia = null;
 
             console.log("Viewer ID \""+viewerID+"\"");
+
+            // Élément contenant l'alerte de connexion
+            const _connectionAlert = document.getElementById("connectionAlert");
 
 
 
@@ -420,9 +461,11 @@
             
             socket.on("connect", () => {
                 console.log("Socket connected!");
+                _connectionAlert.style.opacity = 0; // On cache l'alerte de connexion
             });
             socket.on("disconnect", () => {
                 console.error("Socket disconnected!");
+                _connectionAlert.style.opacity = 1; // On affiche l'alerte de connexion
             });
 
             socket.on("media_command", function(data) {
