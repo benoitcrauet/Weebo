@@ -304,6 +304,19 @@ function mediaLineStructure() {
 
             btnDelete.append(iDelete);
 
+            let btnCopy = document.createElement("a");
+            btnCopy.classList.add("cond-medias-line-action-copy");
+            btnCopy.classList.add("btn");
+            btnCopy.classList.add("btn-sm");
+            btnCopy.classList.add("btn-outline-secondary");
+            btnCopy.setAttribute("title", "Copier le lien");
+
+                let iCopy = document.createElement("i");
+                iCopy.classList.add("bi");
+                iCopy.classList.add("bi-copy");
+
+            btnCopy.append(iCopy);
+
             let btnPreview = document.createElement("a");
             btnPreview.classList.add("cond-medias-line-action-preview");
             btnPreview.classList.add("btn");
@@ -331,7 +344,7 @@ function mediaLineStructure() {
 
                 btnOnAir.append(iOnAir);
 
-        td5.append(btnPreview, btnEdit, btnDelete, btnOnAir);
+        td5.append(btnCopy, btnPreview, btnEdit, btnDelete, btnOnAir);
 
     tr.append(td1, td2, td3, td4, td5);
     

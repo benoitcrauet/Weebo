@@ -72,7 +72,7 @@
                 </tbody>
             {% endfor %}
         </table>
-        {% include 'conductors/conductorView/connectionAlert.jinja2' %}
+        {% include 'conductors/conductorView/toasts.jinja2' %}
         {% include 'conductors/conductorView/modals/editLine.jinja2' %}
         {% include 'conductors/conductorView/modals/editMedia.jinja2' %}
         {% include 'conductors/conductorView/modals/preview.jinja2' %}
@@ -82,17 +82,19 @@
     </div>
 
     <script>
-        var conductorType = "{{ conductor.type }}";
+        const conductorType = "{{ conductor.type }}";
 
-        var activateMedias = (conductorType!="template");
+        const activateMedias = (conductorType!="template");
 
-        var defaultMediaChannels = {{ defaultMediaChannels | tojson }};
-        var defaultWebChannels = {{ defaultWebChannels | tojson }};
+        const defaultMediaChannels = {{ defaultMediaChannels | tojson }};
+        const defaultWebChannels = {{ defaultWebChannels | tojson }};
 
-        var currentShowID = "{{ show.id }}";
-        var currentConductorID = "{{ conductor.id }}";
+        const currentShowID = "{{ show.id }}";
+        const currentConductorID = "{{ conductor.id }}";
 
-        var mediasDir = "{{ medias_dir }}";
+        const mediasDir = "{{ medias_dir }}";
+
+        const webBase = "{{ web_base }}";
     </script>
 {% endblock %}
 
