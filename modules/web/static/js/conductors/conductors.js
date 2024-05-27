@@ -19,6 +19,10 @@ const conductorMediasTableQuery = ".cond-line-medias-table tbody";
 const conductorMediasDraggerQuery = ".cond-medias-line-dragger";
 
 
+// ID du toast générique
+const genericToastQuery = "#genericToast";
+
+
 
 
 $(function() {
@@ -61,6 +65,8 @@ const lineModalTextContainer = document.getElementById("fTextContainer");
 
 var lineModal = null;
 var mediaModal = null;
+
+var genericToast = null;
 
 /**
  * Ouvre une modale d'édition de ligne
@@ -575,6 +581,33 @@ function mediaElementsRegisterEventListeners(elements) {
         let mediaError = mediaElement.getAttribute("data-error");
         
         alert("Erreur de transcodage du média :\n\n"+mediaError);
+    });
+
+    // Évènement quand on clique sur le bouton de copie de lien
+    const mediaCopy = elements.querySelector(".cond-medias-line-action-copy");
+    mediaCopy.addEventListener("click", function(e) {
+        e.preventDefault();
+        
+        let mediaElement = document.getElementById("cond-media-line-"+mediaID);
+        let mediaPath = mediaElement.getAttribute("data-path");
+        let mediaType = mediaElement.getAttribute("data-type");
+
+        // Si c'est un média, on construit le lien absolu
+        if(mediaType=="media")
+            mediaPath = webBase + "/" + mediasDir + "/" + mediaPath;
+
+        if (navigator.clipboard) {
+            // Utilisez l'API Clipboard pour écrire le texte
+            navigator.clipboard.writeText(mediaPath)
+                .then(() => {
+                    displayGenericToast("Lien copié", "Le lien a bien été copié dans le presse-papier !");
+                })
+                .catch(err => {
+                    displayGenericToast("Erreur", "Une erreur est survenue lors de la copie du lien dans le presse-papier.", "danger");
+                });
+        } else {
+            displayGenericToast("API Clipboard indisponible", "Impossible de copier le lien sur ce navigateur.", "warning");
+        }
     });
 
     // Évènement quand on clique sur le bouton de preview
@@ -1102,6 +1135,7 @@ function mediaEditUpdateDisplay(type) {
             mediaModalUrlContainer.style.display = "none";
             mediaModalLoopContainer.style.display = "block";
             mediaModalVolumeContainer.style.display = "block";
+            mediaModalVolumeAfterLoopContainer.style.display = "block";
             mediaModalMediaChannelContainer.style.display = "block";
             mediaModalWebChannelContainer.style.display = "none";
             mediaModalTranscodeSettingsAccordion.style.display = "block";
@@ -1119,6 +1153,7 @@ function mediaEditUpdateDisplay(type) {
             mediaModalUrlContainer.style.display = "block";
             mediaModalLoopContainer.style.display = "none";
             mediaModalVolumeContainer.style.display = "none";
+            mediaModalVolumeAfterLoopContainer.style.display = "none";
             mediaModalMediaChannelContainer.style.display = "none";
             mediaModalWebChannelContainer.style.display = "block";
             mediaModalTranscodeSettingsAccordion.style.display = "none";
@@ -1136,6 +1171,7 @@ function mediaEditUpdateDisplay(type) {
             mediaModalUrlContainer.style.display = "none";
             mediaModalLoopContainer.style.display = "none";
             mediaModalVolumeContainer.style.display = "none";
+            mediaModalVolumeAfterLoopContainer.style.display = "none";
             mediaModalMediaChannelContainer.style.display = "none";
             mediaModalWebChannelContainer.style.display = "none";
             mediaModalTranscodeSettingsAccordion.style.display = "none";
@@ -1192,6 +1228,32 @@ function generateRandomHash(length) {
     const array = new Uint8Array(length / 2);
     window.crypto.getRandomValues(array);
     return Array.from(array, byte => ('0' + byte.toString(16)).slice(-2)).join('');
+}
+
+
+
+/**
+ * Affiche un toast générique avec un titre et un message définis.
+ * @param {string} title Titre du toast
+ * @param {string} message Message du toast
+ * @param {boolean} [type=false] Type bootstrap du toast. Par défaut, pas de style appliqué.
+ */
+function displayGenericToast(title, message, type=false) {
+    // On récupère les objets du toast
+    let toastElement = document.querySelector(genericToastQuery);
+    let toastTitleElement = toastElement.querySelector(".toast-header strong");
+    let toastMessageElement = toastElement.querySelector(".toast-body");
+
+    // On supprime les éventuelles classes de style
+    toastElement.className = toastElement.className.split(' ').filter(className => !className.startsWith('text-bg-')).join(' ');
+    // Si on a un type indiqué, on rajoute la classe
+    if(type!==false)
+        toastElement.classList.add("text-bg-" + type);
+
+    // On set le titre, message et on affiche
+    toastTitleElement.innerText = title;
+    toastMessageElement.innerText = message;
+    genericToast.show();
 }
 
 
@@ -1408,14 +1470,19 @@ formEditMedia.addEventListener("submit", function(e) {
 
 // Au chargement...
 $(function() {
-    // On refresh le conducteur
-    refreshAllConductor();
-
     // On instancie la modale du formulaire de ligne
     lineModal = new bootstrap.Modal(modalLineQuery);
 
     // On instancie la modale du formulaire de médias
     mediaModal = new bootstrap.Modal(modalMediaQuery);
+
+    // On récupère l'instance du toast générique
+    genericToast = bootstrap.Toast.getOrCreateInstance(document.querySelector(genericToastQuery));
+
+
+
+    // On refresh le conducteur
+    refreshAllConductor();
 
 
 
