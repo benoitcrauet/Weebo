@@ -1,6 +1,18 @@
 // Connexion au socket
 var socket = io.connect("/");
 
+// À la connexion du socket
+socket.on("connect", function() {
+    _connectionAlertToast.hide();
+    _connectionSuccessToast.show();
+});
+
+// À la déconnexion du socket
+socket.on("disconnect", function() {
+    _connectionAlertToast.show();
+    _connectionSuccessToast.hide();
+});
+
 // A la réception d'un socket media_command
 socket.on('conductor_command', function(data) {
     if(data.conductor!==undefined && data.action!==undefined && data.data_line!==undefined && data.data_media!==undefined) {
