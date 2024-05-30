@@ -55,15 +55,7 @@
                                             URL
                                         </th>
                                         <td>
-                                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ web_base }}" onclick="this.select();">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">
-                                            ID du canal
-                                        </th>
-                                        <td>
-                                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ channel.id }}" onclick="this.select();">
+                                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ web_base }}{{ url_for("channels.viewerWeb", guid=channel.id) }}" onclick="this.select();">
                                         </td>
                                     </tr>
                                 </tbody>
