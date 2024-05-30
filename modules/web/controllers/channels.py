@@ -298,7 +298,7 @@ def viewerWeb(guid):
             "id": c.id,
             "name": c.name,
             "urls": {
-                "all_links": config["web_base"]+url_for("channels.viewerWebLinks", guid=c.id),
+                "all_links": config["web_base"]+url_for("channels.viewerWebLinks", chan_guid=guid, cond_guid=c.id),
                 "conductor_details": config["web_base"]+url_for("channels.viewerWebConductor", guid=c.id)
             }
         })
@@ -307,10 +307,15 @@ def viewerWeb(guid):
 
 
 
-@bp.route("/viewer/web/links/<string:guid>")
-def viewerWebLinks(guid):
+@bp.route("/viewer/web/<string:chan_guid>/links/<string:cond_guid>")
+def viewerWebLinks(chan_guid, cond_guid):
+    # On vérifie si le canal éxiste
+    channel = session.query(WebChannel).filter(WebChannel.id == chan_guid).first()
+    if not channel:
+        abort(404, description="Ce conducteur est introuvable.")
+    
     # On vérifie si le conducteur éxiste
-    conductor = session.query(Conductor).filter(Conductor.type == "operational").filter(Conductor.id == guid).first()
+    conductor = session.query(Conductor).filter(Conductor.type == "operational").filter(Conductor.id == cond_guid).first()
     if not conductor:
         abort(404, description="Ce conducteur est introuvable.")
 
@@ -336,12 +341,18 @@ def viewerWebLinks(guid):
 
     medias = query.all()
 
+    index = 0
     for m in medias:
-        output["links"].append({
-            "id": m.id,
-            "name": m.name,
-            "path": m.path
-        })
+        channels = [id.strip() for id in m.channel.split(",")]
+
+        if channel.id in channels:
+            output["links"].append({
+                "id": m.id,
+                "name": m.name,
+                "path": m.path,
+                "index": index
+            })
+            index = index + 1
     
     return jsonify(output)
 
