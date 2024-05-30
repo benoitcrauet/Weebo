@@ -922,12 +922,20 @@ def api_conductorsMediaDelete(cond_guid, media_guid):
 
 
 
-@bp.route("/api/medias/<string:guid>/armtake")
-def mediaBroadcast(guid):
+@bp.route("/api/conductors/<string:cond_guid>/medias/<string:media_guid>/armtake")
+def mediaBroadcast(cond_guid, media_guid):
+    # On vérifie si le conducteur éxiste
+    conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if not conductor:
+        abort(404, description="Ce conducteur est introuvable.")
+    
     # On vérifie si le média éxiste
-    media = session.query(Media).filter(Media.id == guid).first()
+    media = session.query(Media).filter(Media.id == media_guid).first()
     if not media:
         abort(404, description="Ce canal est introuvable.")
+    
+    # On met à jour le champ média
+    media.currentMedia = media.id
     
     # Building viewers list
     viewers_list = media.channel.split(",")
@@ -961,6 +969,9 @@ def mediaBroadcast(guid):
             "type": "web",
             "src": media.path
         }
+
+        # On met à jour le media web
+        conductor.currentMediaWeb = media.id
     
     # Building websocket object
     object_to_send = {
@@ -968,6 +979,9 @@ def mediaBroadcast(guid):
         "viewer": viewers_list,
         "args": args
     }
+
+    # On met à jour le conducteur
+    session.merge(conductor)
 
     # Sending object
     socketio.emit("media_command", object_to_send)

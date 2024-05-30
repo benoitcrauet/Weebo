@@ -77,6 +77,8 @@ class Conductor(Base):
     guests = Column(String)
     vdoEnable = Column(Boolean)
     type = Column(Enum("operational", "template", name="type_enum"), default="operational")
+    currentMediaWeb = Column(String)
+    currentMedia = Column(String)
 
     year = Column(Integer)
     month = Column(Integer)

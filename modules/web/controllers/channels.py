@@ -1,17 +1,18 @@
 import os
-from flask import Blueprint, render_template, request, abort, redirect, url_for
+from flask import Blueprint, render_template, request, abort, redirect, url_for, jsonify
 from flask_socketio import SocketIO
 from flask_wtf import FlaskForm
 from flask_cors import CORS
 import wtforms
 import wtforms.validators as validators
+from sqlalchemy import asc
 
 from lib.socketio import SocketIOInstance
 from lib.guid import generate_guid
 from lib.mime import get_mime, mime_extract_type
 from lib.config import config
 from lib.db import session
-from lib.models import MediaChannel, WebChannel, Show, Media
+from lib.models import MediaChannel, WebChannel, Show, Media, Conductor, Line
 from lib.dict import model_to_dict
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
@@ -268,5 +269,92 @@ def viewerMedias(guid):
         abort(404, description="Ce canal est introuvable.")
     
     return render_template("channels/viewerVideo.jinja2", channel=channel)
+
+
+@bp.route("/viewer/web/<string:guid>")
+def viewerWeb(guid):
+    # On vérifie si le viewer éxiste
+    channel = session.query(WebChannel).filter(WebChannel.id == guid).first()
+    if not channel:
+        abort(404, description="Ce canal est introuvable.")
+
+    output = {
+        "channel": {
+            "id": channel.id,
+            "name": channel.name
+        },
+        "parentShow": {
+            "id": channel.show.id,
+            "name": channel.show.name
+        },
+        "conductors": []
+    }
+    
+    # On liste les conducteurs de cette émission
+    conductors = session.query(Conductor).filter(Conductor.show_id == channel.show.id).filter(Conductor.type == "operational").order_by(Conductor.name).all()
+
+    for c in conductors:
+        output["conductors"].append({
+            "id": c.id,
+            "name": c.name,
+            "urls": {
+                "all_links": config["web_base"]+url_for("channels.viewerWebLinks", guid=c.id),
+                "conductor_details": config["web_base"]+url_for("channels.viewerWebConductor", guid=c.id)
+            }
+        })
+    
+    return jsonify(output)
+
+
+
+@bp.route("/viewer/web/links/<string:guid>")
+def viewerWebLinks(guid):
+    # On vérifie si le conducteur éxiste
+    conductor = session.query(Conductor).filter(Conductor.type == "operational").filter(Conductor.id == guid).first()
+    if not conductor:
+        abort(404, description="Ce conducteur est introuvable.")
+
+    output = {
+        "conductor": {
+            "id": conductor.id,
+            "name": conductor.name,
+            # "date": conductor.date.sfrftime("%Y-%m-%d")
+        },
+        "links": []
+    }
+    
+
+    # On liste tous les liens du conducteur, dans l'ordre
+    query = (
+        session.query(Media)
+            .join(Media.line)
+            .join(Line.conductor)
+            .filter(Conductor.id == conductor.id)
+            .filter(Media.type == "web")
+            .order_by(asc(Line.order), asc(Media.order))
+    )
+
+    medias = query.all()
+
+    for m in medias:
+        output["links"].append({
+            "id": m.id,
+            "name": m.name,
+            "path": m.path
+        })
+    
+    return jsonify(output)
+
+
+
+
+@bp.route("/viewer/web/conductor/<string:guid>")
+def viewerWebConductor(guid):
+    # On vérifie si le conducteur éxiste
+    conductor = session.query(Conductor).filter(Conductor.type == "operational").filter(Conductor.id == guid).first()
+    if not conductor:
+        abort(404, description="Ce conducteur est introuvable.")
+    
+    return jsonify(model_to_dict(conductor))
 
 

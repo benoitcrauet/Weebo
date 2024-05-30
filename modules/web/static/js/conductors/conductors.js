@@ -660,7 +660,7 @@ function mediaElementsRegisterEventListeners(elements) {
  * @param {string} id ID du média à diffuser
  */
 function mediaBroadcast(id) {
-    fetch("/api/medias/"+id+"/armtake");
+    fetch("/api/conductors/"+currentConductorID+"/medias/"+id+"/armtake");
 }
 
 
