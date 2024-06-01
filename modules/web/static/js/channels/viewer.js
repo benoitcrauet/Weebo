@@ -29,7 +29,7 @@ function getVideoByTarget(target) {
 /**
  * Crée une nouvelle structure DOM contenant un nouveau média.
  **/
-function mediaArm(type, src, source, volume=1, volumeAfterLoop=1, loop=false) {
+function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=false) {
     let id = generateGUID();
 
     // Création du nouvel élément
@@ -39,6 +39,7 @@ function mediaArm(type, src, source, volume=1, volumeAfterLoop=1, loop=false) {
     dom_media_item.setAttribute("id", "media-item-" + id);
     dom_media_item.style.zIndex = currentZindex--;
     dom_media_item.dataset.id = id;
+    dom_media_item.dataset.mediaId = mediaID;
     dom_media_item.classList.add("invisible"); // Par défaut l'élément est invisible
 
     let dom_media_credit = document.createElement("div");
@@ -219,6 +220,28 @@ function mediaPlay(id) {
 }
 
 
+function stopAllMediasID(mediaID) {
+    document.querySelectorAll(".media_item").forEach((element) => {;
+        if(element.dataset.mediaId == mediaID) {
+            console.debug("stopAllMediasID() : Found element for mediaID "+mediaID+". Stopping. ", element);
+            element.querySelectorAll("video").forEach((obj) => {
+                obj.pause();
+            });
+        }
+    });
+}
+
+
+function destroyAllMediasID(mediaID) {
+    document.querySelectorAll(".media_item").forEach((element) => {
+        if(element.dataset.mediaId == mediaID) {
+            console.debug("destroyAllMediasID() : Found element for mediaID "+mediaID+". Removing. ", element);
+            element.remove();
+        }
+    });
+}
+
+
 
 /**
  * Transforme un volume linéaire en volume logarithmique
@@ -331,6 +354,7 @@ socket.on("media_command", function(data) {
             switch(command) {
                 case "arm":
                     if ((args.type=="video" || args.type=="picture") &&
+                            args.mediaID!==undefined &&
                             args.src!==undefined &&
                             args.source!==undefined &&
                             args.volume!==undefined &&
@@ -338,16 +362,17 @@ socket.on("media_command", function(data) {
                             args.loop!==undefined) {
                         console.log("Arming media.");
                         
-                        mediaArm(args.type, args.src, args.source, args.volume, args.volumeAfterLoop, args.loop);
+                        mediaArm(args.mediaID, args.type, args.src, args.source, args.volume, args.volumeAfterLoop, args.loop);
                     }
                     else {
-                        console.error("'arm' command needs the following args: type, src, credit, volume, loop.", args);
+                        console.error("'arm' command needs the following args: type, mediaID, src, credit, volume, volumeAfterLoop, loop.", args);
                     }
 
                     break;
                 
                 case "armtake":
                     if ((args.type=="video" || args.type=="picture") &&
+                            args.mediaID!==undefined &&
                             args.src!==undefined &&
                             args.source!==undefined &&
                             args.volume!==undefined &&
@@ -355,7 +380,7 @@ socket.on("media_command", function(data) {
                             args.loop!==undefined) {
                         console.log("Arm and take media.");
                         
-                        let mediaData = mediaArm(args.type, args.src, args.source, args.volume, args.volumeAfterLoop, args.loop);
+                        let mediaData = mediaArm(args.mediaID, args.type, args.src, args.source, args.volume, args.volumeAfterLoop, args.loop);
                         let mediaElement = mediaData.element;
                         let mediaPlayerID = mediaData.playerID;
 
@@ -370,38 +395,39 @@ socket.on("media_command", function(data) {
                             })
                         }
                         else if(args.type=="video") {
-                            foregroundElement.addEventListener("loadeddata", function() {
+                            foregroundElement.addEventListener("canplay", function() {
                                 takeArmed();
-                                window.setTimeout(function() {
-                                    // On lance la lecture du média
-                                    mediaPlay(mediaData.playerID);
-                                    // On baisse le volume des autres médias
-                                    volumeSet(mediaData.playerID, true, 0, 0.03, 50, (obj) => {
-                                        obj.pause();
-                                    });
-                                }, 200);
+                                
+                                // On lance la lecture du média
+                                mediaPlay(mediaData.playerID);
+                                // On baisse le volume des autres médias
+                                volumeSet(mediaData.playerID, true, 0, 0.03, 50, (obj) => {
+                                    obj.pause();
+                                });
                             })
                         }
                     }
                     else {
-                        console.error("'armtake' command needs the following args: type, src, source, volume, loop.", args);
+                        console.error("'armtake' command needs the following args: type, mediaID, src, source, volume, volumeAfterLoop, loop.", args);
                     }
 
-                    break;
-                
-                case "take":
-                    takeArmed();
-                    mediaPlay(takedMedia);
-                    console.log("Playing armed media.");
                     break;
 
                 case "jingle":
 
                     if (args.src!==undefined &&
                         args.volume!==undefined) {
-
                             playJingle(args.src, args.volume);
+                    }
 
+                    break;
+
+                case "stop":
+
+                    if (args.mediaID!==undefined) {
+                        console.log("Stopping medias ID "+args.mediaID);
+                        stopAllMediasID(args.mediaID);
+                        destroyAllMediasID(args.mediaID);
                     }
 
                     break;

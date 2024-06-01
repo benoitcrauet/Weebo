@@ -359,7 +359,7 @@ function mediaLineStructure() {
             btnOnAir.classList.add("cond-read-mode");
             btnOnAir.classList.add("btn");
             btnOnAir.classList.add("btn-sm");
-            btnOnAir.classList.add("btn-outline-danger");
+            btnOnAir.classList.add("btn-success");
             btnOnAir.setAttribute("title", "Diffuser le média à l'antenne");
 
                 let iOnAir = document.createElement("i");
@@ -368,7 +368,21 @@ function mediaLineStructure() {
 
                 btnOnAir.append(iOnAir);
 
-        td5.append(btnCopy, btnPreview, btnEdit, btnDelete, btnOnAir);
+            let btnStop = document.createElement("a");
+            btnStop.classList.add("cond-medias-line-action-stop");
+            btnStop.classList.add("cond-read-mode");
+            btnStop.classList.add("btn");
+            btnStop.classList.add("btn-sm");
+            btnStop.classList.add("btn-danger");
+            btnStop.setAttribute("title", "Arrêter la diffusion du média");
+
+                let iStop = document.createElement("i");
+                iStop.classList.add("bi");
+                iStop.classList.add("bi-stop-fill");
+
+                btnStop.append(iStop);
+
+        td5.append(btnCopy, btnPreview, btnEdit, btnDelete, btnOnAir, btnStop);
 
     tr.append(td1, td2, td3, td4, td5);
     
