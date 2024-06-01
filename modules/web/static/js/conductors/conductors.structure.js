@@ -52,6 +52,30 @@ function lineStructure(integrateMedias=true) {
 
             td_content.append(h3_title, div_text, div_desc, div_medias);
         
+        td_jingle = document.createElement("td");
+        td_jingle.classList.add("cond-line-jingle");
+        td_jingle.classList.add("cond-read-mode");
+        td_jingle.classList.add("text-end");
+
+            div_jingle_btngroup = document.createElement("div");
+            div_jingle_btngroup.classList.add("btn-group");
+
+                button_jingle = document.createElement("button");
+                button_jingle.classList.add("cond-line-jingle-start-button");
+                button_jingle.classList.add("btn");
+                button_jingle.classList.add("btn-success");
+                button_jingle.setAttribute("title", "Lancer le jingle associé")
+
+                    i_jingle = document.createElement("i");
+                    i_jingle.classList.add("bi");
+                    i_jingle.classList.add("bi-easel-fill");
+
+                    button_jingle.append(i_jingle);
+                
+                div_jingle_btngroup.append(button_jingle);
+
+            td_jingle.append(div_jingle_btngroup);
+
         td_actions = document.createElement("td");
         td_actions.classList.add("cond-line-actions");
         td_actions.classList.add("cond-edit-mode");
@@ -86,7 +110,7 @@ function lineStructure(integrateMedias=true) {
 
             td_actions.append(div_btngroup);
 
-        tr_display.append(td_dragger, td_done, td_content, td_actions);
+        tr_display.append(td_dragger, td_done, td_content, td_jingle, td_actions);
 
     tr_adder = document.createElement("tr");
     tr_adder.classList.add("cond-edit-mode");
@@ -359,12 +383,14 @@ function lineSetDatas(element, line) {
     let text = line.text;
     let done = line.done;
     let order = line.order;
+    let jingle = (line.jingle==undefined || line.jingle=="") ? false : line.jingle;
 
     // On édite le tbody principal
     element.setAttribute("id", "cond-line-"+id);
     element.dataset.id = id;
     element.dataset.type = type;
     element.dataset.order = order;
+    element.dataset.jingle = jingle;
 
     // On édite le nom de la ligne
     element.querySelector(".cond-line-title").innerText = name;
@@ -380,6 +406,9 @@ function lineSetDatas(element, line) {
 
     // On édite la checkbox
     element.querySelector(".cond-line-done-checkbox").checked = done;
+
+    // On envoie le jingle dans le bouton jingle
+    element.querySelector(".cond-line-jingle-start-button").dataset.jingle = jingle;
 }
 
 

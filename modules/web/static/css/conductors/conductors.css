@@ -183,6 +183,10 @@ a.cond-insertion-adder-link:hover {
         display: none;
     }
 
+.cond-line[data-jingle=false] .cond-line-jingle-start-button {
+    display: none;
+}
+
 body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkbox]:checked) td {
     background-color: rgb(30,30,30) !important;
     color: rgb(100,100,100) !important;

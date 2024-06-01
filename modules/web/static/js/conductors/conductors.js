@@ -55,6 +55,7 @@ const lineModalTitle = document.querySelector(modalLineTitleQuery);
 const lineModalType = document.getElementById("fType");
 const lineModalName = document.getElementById("fName");
 const lineModalText = document.getElementById("fText");
+const lineModalJingle = document.getElementById("fJingle");
 const lineModalId = document.getElementById("fId");
 const lineModalInsertAfter = document.getElementById("fInsertAfter");
 const lineModalSubmit = document.getElementById("fSubmit");
@@ -62,6 +63,7 @@ const lineModalSubmit = document.getElementById("fSubmit");
 const lineModalTypeContainer = document.getElementById("fTypeContainer");
 const lineModalNameContainer = document.getElementById("fNameContainer");
 const lineModalTextContainer = document.getElementById("fTextContainer");
+const lineModalJingleContainer = document.getElementById("fJingleContainer");
 
 var lineModal = null;
 var mediaModal = null;
@@ -93,6 +95,7 @@ async function openLineEditor(id=null, insertAfter=null, type=null, name=null, t
             lineModalType.value = data.type;
             lineModalName.value = data.name;
             lineModalText.value = data.text;
+            lineModalJingle.value = data.jingle;
             lineModalId.value = data.id;
             lineModalInsertAfter.value = "";
 
@@ -114,6 +117,7 @@ async function openLineEditor(id=null, insertAfter=null, type=null, name=null, t
         lineModalType.selectedIndex = 0;
         lineModalName.value = "";
         lineModalText.value = "";
+        lineModalJingle.value = "";
         lineModalId.value = id ?? "";
         lineModalInsertAfter.value = insertAfter ?? "";
 
@@ -546,6 +550,18 @@ function lineElementsRegisterEventListeners(elements) {
         });
     }
 
+    // Évènement quand on clique sur le bouton de lancement du jingle
+    const jingleButton = elements.querySelector(".cond-line-jingle-start-button");
+    jingleButton.addEventListener("click", function(e) {
+        e.preventDefault();
+        
+        const jingleID = this.dataset.jingle;
+
+        // On envoie une requête de lancement de jingle au serveur
+        if(confirm("Êtes-vous sûr de vouloir lancer ce jingle ?"))
+            jingleBroadcast(jingleID);
+    })
+
 
 
     // On rend les médias de la ligne draggables
@@ -656,11 +672,20 @@ function mediaElementsRegisterEventListeners(elements) {
 
 
 /**
- * 
+ * Lance un média
  * @param {string} id ID du média à diffuser
  */
 function mediaBroadcast(id) {
     fetch("/api/conductors/"+currentConductorID+"/medias/"+id+"/armtake");
+}
+
+
+/**
+ * Lance un jingle
+ * @param {string} id ID du média à diffuser
+ */
+function jingleBroadcast(id) {
+    fetch("/api/jingle/"+id+"/launch");
 }
 
 
@@ -1098,26 +1123,32 @@ function lineEditUpdateDisplay(type) {
         case "classic":
             lineModalNameContainer.style.display = "block";
             lineModalTextContainer.style.display = "block";
+            lineModalJingleContainer.style.display = "block";
             break;
         case "section":
             lineModalNameContainer.style.display = "block";
             lineModalTextContainer.style.display = "block";
+            lineModalJingleContainer.style.display = "block";
             break;
         case "comment":
             lineModalNameContainer.style.display = "none";
             lineModalTextContainer.style.display = "block";
+            lineModalJingleContainer.style.display = "block";
             lineModalName.value = "";
             break;
         case "important":
             lineModalNameContainer.style.display = "none";
             lineModalTextContainer.style.display = "block";
+            lineModalJingleContainer.style.display = "block";
             lineModalName.value = "";
             break;
         default:
             lineModalNameContainer.style.display = "none";
             lineModalTextContainer.style.display = "none";
+            lineModalJingleContainer.style.display = "none";
             lineModalName.value = "";
             lineModalText.value = "";
+            lineModalJingle.value = "";
             break;
     }
 }
@@ -1287,6 +1318,7 @@ formEditLine.addEventListener("submit", function(e) {
         type: lineModalType.value,
         name: lineModalName.value,
         text: lineModalText.value,
+        jingle: lineModalJingle.value,
         insertAfter: lineModalInsertAfter.value
     };
 

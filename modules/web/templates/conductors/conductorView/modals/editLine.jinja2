@@ -59,6 +59,25 @@
                             </div>
                         </div>
 
+                        <div id="fJingleContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="fJingle">
+                                    Jingle
+                                </label>
+                                <div class="col-9">
+                                    <select id="fJingle" name="jingle" class="form-select">
+                                        <option value="">- Aucun jingle -</option>
+                                        {% for j in jingles %}
+                                            <option value="{{ j.id }}">{{ j.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <span class="form-text">
+                                        Facultatif. Vous permet d'attacher un jingle à cette ligne.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
