@@ -19,6 +19,7 @@ class Show(Base):
     mediasChannels = relationship("MediaChannel", back_populates="show", cascade="all, delete")
     webChannels = relationship("WebChannel", back_populates="show", cascade="all, delete")
     conductors = relationship("Conductor", back_populates="show", cascade="all, delete")
+    medias = relationship("Media", back_populates="show", cascade="all, delete")
 
 def delete_show_avatar(mapper, connection, target):
     if target.logo:
@@ -137,8 +138,11 @@ class Media(Base):
     error = Column(String)
     passes = Column(Integer)
 
-    line_id = Column(String, ForeignKey('Lines.id'))
+    line_id = Column(String, ForeignKey('Lines.id'), nullable=True)
     line = relationship("Line", back_populates="medias")
+
+    show_id = Column(String, ForeignKey("Shows.id"), nullable=True)
+    show = relationship("Show", back_populates="medias")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -151,29 +155,30 @@ def delete_media_files(mapper, connection, target):
     if target.type == "media":
         filename = target.path
 
-        # On sépare nom et extension
-        basename, extension = filename.split(".")
+        if filename:
+            # On sépare nom et extension
+            basename, extension = filename.split(".")
 
-        # Paths pour les différents fichiers
-        pathFinal = config["medias_dir"] + "/" + str(filename)
-        pathThumbnail = config["medias_dir"] + "/" + str(target.tmb)
-        pathTemporary = config["medias_tmp"] + "/" + str(target.path)
-        pathMeta1 = config["medias_tmp"] + "/" + str(basename) + ".meta.txt"
-        pathMeta2 = config["medias_dir"] + "/" + str(basename) + ".meta.txt"
+            # Paths pour les différents fichiers
+            pathFinal = config["medias_dir"] + "/" + str(filename)
+            pathThumbnail = config["medias_dir"] + "/" + str(target.tmb)
+            pathTemporary = config["medias_tmp"] + "/" + str(target.path)
+            pathMeta1 = config["medias_tmp"] + "/" + str(basename) + ".meta.txt"
+            pathMeta2 = config["medias_dir"] + "/" + str(basename) + ".meta.txt"
 
-        # On supprime chaque fichier s'il existe
-        try:
-            if os.path.exists(pathFinal):
-                os.remove(pathFinal)
-            if os.path.exists(pathThumbnail):
-                os.remove(pathThumbnail)
-            if os.path.exists(pathTemporary):
-                os.remove(pathTemporary)
-            if os.path.exists(pathMeta1):
-                os.remove(pathMeta1)
-            if os.path.exists(pathMeta2):
-                os.remove(pathMeta2)
-        except Exception as e:
-            print("ERROR WHILE DELETING MEDIA FILES FOR ID {}:\n{}".format(target.id, e))
+            # On supprime chaque fichier s'il existe
+            try:
+                if os.path.exists(pathFinal):
+                    os.remove(pathFinal)
+                if os.path.exists(pathThumbnail):
+                    os.remove(pathThumbnail)
+                if os.path.exists(pathTemporary):
+                    os.remove(pathTemporary)
+                if os.path.exists(pathMeta1):
+                    os.remove(pathMeta1)
+                if os.path.exists(pathMeta2):
+                    os.remove(pathMeta2)
+            except Exception as e:
+                print("ERROR WHILE DELETING MEDIA FILES FOR ID {}:\n{}".format(target.id, e))
         
 event.listen(Media, "before_delete", delete_media_files)

@@ -50,6 +50,11 @@ def main():
                     # On stocke l'ID
                     media_guid = meta["media_id"]
 
+                    # On remande un fichier raw ?
+                    media_raw = "raw" in meta and meta["raw"]==True
+
+                    print("    > Raw: {}".format("Yes" if media_raw else "No"))
+
                     # On récupère les paramètres de transcodage
                     transcode = {}
                     if "transcode" in meta:
@@ -69,6 +74,13 @@ def main():
                         # On crée le nom du nouveau fichier meta
                         final_meta_filename = media.id + ".meta.txt"
 
+                        # On prends les noms de fichier actuels s'ils sont déjà présents
+                        if media.tmb or media.tmb=="":
+                            tmb_filename = media.tmb
+                        if media.path or media.path=="":
+                            final_filename = media.path
+                            final_meta_filename = os.path.splitext(final_filename)[0] + ".meta.txt"
+
                         # On déclare une nouvelle passe d'encodage
                         media.passes += 1
                         session.merge(media)
@@ -84,7 +96,8 @@ def main():
                             def updateMediaWeb():
                                 # On envoie un évènement de mise à jour au web
                                 try:
-                                    requests.get("{}/api/conductor/media/update/{}".format(config["web_base"], media.id), timeout=0.5)
+                                    if media.line_id:
+                                        requests.get("{}/api/conductor/media/update/{}".format(config["web_base"], media.id), timeout=0.5)
                                 except Exception as e:
                                     print("ERROR while sending event to web: {}".format(e))
 
@@ -112,8 +125,18 @@ def main():
                                     updateMediaWeb()
                             
 
-                            # On lance la conversion
-                            videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, 1280, progressCallback, transcode)
+                            # Si on demande une vidéo brute, on bypass la conversion
+                            if media_raw:
+                                # On copie le fichier
+                                print("    ⚙️ Just copying file {} to {}".format(filename, dirMedias + "/" + final_filename))
+                                shutil.copy(dirTmpMedias + "/" + filename, dirMedias + "/" + final_filename)
+                                media.progress = 100
+                                session.merge(media)
+
+                                videoConversion = True
+                            else:
+                                # On lance la conversion
+                                videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, 1280, progressCallback, transcode)
 
                             if videoConversion==True:
                                 print("        > ✅ Conversion succeeded for media ID {}.".format(media.id))
