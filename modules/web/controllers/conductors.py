@@ -171,7 +171,7 @@ def conductorsEdit(show_guid, cond_guid=None):
             lines = session.query(Line).filter(Line.conductor_id == form.fromTemplate.data).all()
             # On insert toutes les lignes
             for l in lines:
-                newLine = Line(type=l.type, name=l.name, text=l.text, order=l.order, conductor=conductor, done=False)
+                newLine = Line(type=l.type, name=l.name, text=l.text, order=l.order, jingle=l.jingle conductor=conductor, done=False)
                 session.add(newLine)
             session.commit()
 
