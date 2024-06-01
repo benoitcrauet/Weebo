@@ -81,7 +81,7 @@ function mediaArm(type, src, source, volume=1, volumeAfterLoop=1, loop=false) {
     dom_media_background_obj.setAttribute("src", src);
     dom_media_foreground_obj.setAttribute("src", src);
     if(type=="video")
-        dom_media_foreground_obj.volume = volume;
+        dom_media_foreground_obj.volume = linearToLogarithmic(volume);
 
 
     // Synchronisation des médias foreground/background
@@ -116,7 +116,7 @@ function mediaArm(type, src, source, volume=1, volumeAfterLoop=1, loop=false) {
                 vm.play();
                 vs.play();
 
-                e.target.volume = vm.dataset.volumeAfterLoop;
+                e.target.volume = linearToLogarithmic(vm.dataset.volumeAfterLoop);
             }
         });
     }
@@ -219,6 +219,19 @@ function mediaPlay(id) {
 }
 
 
+
+/**
+ * Transforme un volume linéaire en volume logarithmique
+ * @param {number} value Valeur linéaire du volume
+ * @returns Valeur logarithmique du volume
+ */
+function linearToLogarithmic(value) {
+    value = Math.min(1, value);
+    value = Math.max(0, value);
+    return Math.pow(value, 2);
+}
+
+
 /**
  * Défini le volume d'un média avec une rampe et un timing
  */
@@ -273,7 +286,7 @@ function playJingle(src, volume) {
 
     // On charge la vidéo
     jingleVideo.src = src;
-    jingleVideo.volume = volume;
+    jingleVideo.volume = linearToLogarithmic(volume);
 }
 
 jingleVideo.addEventListener("ended", function(e) {

@@ -458,8 +458,8 @@ function mediaLineSetDatas(element, media) {
 
     // On édite le mode de volume
     if(volume == 0) element.dataset.volumeMode = "mute";
-    else if(volume < 0.6) element.dataset.volumeMode = "low";
-    else if(volume >= 0.6) element.dataset.volumeMode = "high";
+    else if(volume < 0.5) element.dataset.volumeMode = "low";
+    else if(volume >= 0.5) element.dataset.volumeMode = "high";
 
     // On édite le nom
     element.querySelector(".cond-media-name-text").innerText = name;
