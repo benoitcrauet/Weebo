@@ -667,6 +667,14 @@ function mediaElementsRegisterEventListeners(elements) {
         if(confirm("Êtes-vous sûr de vouloir diffuser ce média ?"))
             mediaBroadcast(mediaID);
     });
+
+    // Évènement quand on clique sur un bouton stop
+    const mediaStopBtn = elements.querySelector(".cond-medias-line-action-stop");
+    mediaStopBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        if(confirm("Êtes-vous sûr de vouloir arrêter ce média ?"))
+            mediaStop(mediaID);
+    });
 }
 
 
@@ -677,6 +685,15 @@ function mediaElementsRegisterEventListeners(elements) {
  */
 function mediaBroadcast(id) {
     fetch("/api/conductors/"+currentConductorID+"/medias/"+id+"/armtake");
+}
+
+
+/**
+ * Stoppe un média s'il est en cours de lecture quelque part
+ * @param {string} id ID du média à stopper
+ */
+function mediaStop(id) {
+    fetch("/api/conductors/"+currentConductorID+"/medias/"+id+"/stop");
 }
 
 

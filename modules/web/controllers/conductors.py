@@ -979,9 +979,53 @@ def mediaBroadcast(cond_guid, media_guid):
         # On met à jour le media web
         conductor.currentMediaWeb = media.id
     
+    # On ajoute le mediaID à la trame
+    args["mediaID"] = media.id
+
     # Building websocket object
     object_to_send = {
         "command": "armtake",
+        "viewer": viewers_list,
+        "args": args
+    }
+
+    # On met à jour le conducteur
+    session.merge(conductor)
+
+    # Sending object
+    socketio.emit("media_command", object_to_send)
+    
+    return model_to_dict(media)
+
+
+
+
+@bp.route("/api/conductors/<string:cond_guid>/medias/<string:media_guid>/stop")
+def mediaStop(cond_guid, media_guid):
+    # On vérifie si le conducteur éxiste
+    conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if not conductor:
+        abort(404, description="Ce conducteur est introuvable.")
+    
+    # On vérifie si le média éxiste
+    media = session.query(Media).filter(Media.id == media_guid).first()
+    if not media:
+        abort(404, description="Ce canal est introuvable.")
+    
+    # On met à jour le champ média
+    media.currentMedia = media.id
+    
+    # Building viewers list
+    viewers_list = media.channel.split(",")
+
+    # Building args list
+    args = {
+        "mediaID": media.id
+    }
+    
+    # Building websocket object
+    object_to_send = {
+        "command": "stop",
         "viewer": viewers_list,
         "args": args
     }
