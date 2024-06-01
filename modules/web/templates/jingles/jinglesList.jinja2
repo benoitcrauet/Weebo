@@ -1,0 +1,77 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Jingles
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <h1>Jingles</h1>
+            </div>
+            <div class="col-2 text-end">
+                <a href="{{ url_for("jingles.shows") }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+
+        <p class="lead">Stockez ici vos différents jingles.</p>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a class="btn btn-primary" href="{{ url_for("jingles.jingleEdit", show_guid=show.id) }}">
+                <i class="bi bi-plus-square-fill"></i> Créer un jingle
+            </a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col" width="50%">Jingle</th>
+                    <th scope="col">Canaux</th>
+                    <th scope="col" class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for j in jingles %}
+                    <tr>
+                        <td class="text-center align-middle">
+                            {% if j.tmb and j.tmb!= "" %}
+                                <img src="/{{ config['medias_dir'] }}/{{ j.tmb }}" alt="">
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="h4">
+                                {{ j.name }}
+                            </div>
+                            {% if j.progress and j.progress < 100 %}
+                                <div class="text-muted small">
+                                    Conversion en cours... ({{ j.progress }} %)
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td class="text-center align-middle">
+                            {% for c in j.channelsList %}
+                                <span class="badge bg-secondary">
+                                    {{ c.name }}
+                                </span>
+                            {% endfor %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for("jingles.jingleEdit", show_guid=show.id, guid=j.id) }}" class="btn btn-secondary" title="Modifier"><i class="bi bi-pen-fill"></i></a>
+                                <a href="{{ url_for("jingles.jingleDelete", show_guid=show.id, guid=j.id) }}" class="btn btn-danger" title="Supprimer"><i class="bi bi-trash-fill"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center fst-italic">
+                            Aucun jingle n'a été créé pour le moment.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

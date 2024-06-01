@@ -44,11 +44,12 @@ def main():
 
 
     # Import des sous-modules de controleurs
-    from .controllers import home, channels, shows, conductors
+    from .controllers import home, channels, shows, conductors, jingles
     home.init(app)
     channels.init(app)
     shows.init(app)
     conductors.init(app)
+    jingles.init(app)
 
     server = pywsgi.WSGIServer((config["web_host"], int(config["web_port"])), app, handler_class=WebSocketHandler)
     server.serve_forever()

@@ -1,0 +1,132 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    {% if not guid %}
+        Nouveau jingle
+    {% else %}
+        Modifier un jingle
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                {% if not guid %}
+                    <h1>Nouveau jingle</h1>
+                {% else %}
+                    <h1>Modifier un jingle</h1>
+                    <h2>{{ media.name }}</h2>
+                {% endif %}
+            </div>
+            <div class="col-2 text-end">
+                <a href="{{ url_for("jingles.jinglesList", show_guid=show.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+        {% if not guid %}
+            <p class="lead">
+                Entrez ici les paramètres de ce nouveau jingle.
+            </p>
+        {% else %}
+
+            <p class="lead">
+                Ici, vous pouvez modifier les paramètres du jingle "{{ media.name }}" de l'émission "{{ show.name }}".
+            </p>
+        
+        {% endif %}
+
+
+        <form action="" method="post" enctype="multipart/form-data">
+
+            {% if form.errors.values() %}
+                <div class="alert alert-danger">
+                    Pas si vite ! Les erreurs suivantes ont été détectées :
+                    <ul class="mt-2">
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li>{{ form[field].label.text }} : {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <fieldset>
+                <legend>Général</legend>
+
+                <div class="mb-3 row">
+                    {{ form.name.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.name(class="form-control") }}
+                        {% if form.name.description %}<div class="form-text">{{ form.name.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.file.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.file(class="form-control") }}
+                        {% if form.file.description %}<div class="form-text">{{ form.file.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.fileRaw.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.fileRaw(class="form-check-input") }}
+                        {{ form.fileRaw.label() }}
+                        {% if form.fileRaw.description %}<div class="form-text">{{ form.fileRaw.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.volume.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        <div class="d-flex flex-row">
+                            {{ form.volume(class="form-range", min=0, max=1, step=0.1) }}
+                            <div class="text-end col-1" id="mediaVolumePreview">
+                                -
+                            </div>
+                        </div>
+                        {% if form.volume.description %}<div class="form-text">{{ form.volume.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.channels.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.channels(class="form-select", multiple="") }}
+                        {% if form.channels.description %}<div class="form-text">{{ form.channels.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <script>
+                    const volumeInput = document.getElementById("{{ form.volume.id }}");
+                    const volumePreview = document.getElementById("mediaVolumePreview");
+
+                    function displayVolumeValue() {
+                        volumePreview.innerText = (volumeInput.value * 100) + " %";
+                    }
+
+                    volumeInput.addEventListener("input", (e) => {
+                        displayVolumeValue();
+                    });
+
+                    displayVolumeValue();
+                </script>
+
+            <div class="col-12">
+                {{ form.hidden_tag() }}
+                {{ form.id }}
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+
+            {% if media.path and not media.path=="" %}
+                <p class="text-center">
+                    <video src="/{{ config['medias_dir'] }}/{{ media.path }}" controls style="width: 100%; max-width: 640px; height: 360px; background: url('/static/img/transparent.png') repeat;"></video>
+                </p>
+            {% endif %}
+        </form>
+        
+    </div>
+{% endblock %}
