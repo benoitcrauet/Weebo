@@ -278,6 +278,10 @@ body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkb
         display: none !important;
     }
 
+    .cond-medias-line[data-type="web"] .cond-medias-line-action-stop {
+        display: none !important;
+    }
+
     .cond-media-error-button {
         display: none;
     }
