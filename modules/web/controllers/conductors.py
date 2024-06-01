@@ -232,6 +232,10 @@ def conductorsView(show_guid, cond_guid=None):
         if conductor==None:
             abort(404)
     
+
+    # On récupère la liste des jingles de l'émission
+    jingles = session.query(Media).filter(Media.show_id == show.id).order_by(Media.order).all()
+
     # On récupère la liste des canaux par défaut...
     # MEDIA
     defaultMediaChannels = [c.id for c in show.mediasChannels if c.defaultEnable==True]
@@ -394,7 +398,7 @@ def conductorsView(show_guid, cond_guid=None):
         urlParams["password"] = ""
     directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, autoCommutLink=autoCommutLink, pictureByPictureLink=pictureByPictureLink, pictureByPictureFullscreenLink=pictureByPictureFullscreenLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"])
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, autoCommutLink=autoCommutLink, pictureByPictureLink=pictureByPictureLink, pictureByPictureFullscreenLink=pictureByPictureFullscreenLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"])
 
 
 
@@ -463,7 +467,7 @@ def api_conductorsLinesListInsert(cond_guid):
     if request.is_json:
         data = request.json
 
-        if "insertAfter" in data and "type" in data and "name" in data and "text" in data:
+        if "insertAfter" in data and "type" in data and "name" in data and "text" in data and "jingle" in data:
             # On récupère les lignes
             lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
 
@@ -491,7 +495,7 @@ def api_conductorsLinesListInsert(cond_guid):
 
 
             # Maintenant on ajoute la nouvelle ligne
-            newLine = Line(type=data["type"], name=data["name"], text=data["text"], order=newOrder, conductor=conductor, done=False)
+            newLine = Line(type=data["type"], name=data["name"], text=data["text"], jingle=data["jingle"], order=newOrder, conductor=conductor, done=False)
             session.add(newLine)
 
             # On stocke les objets modifiés pour le websocket
@@ -529,6 +533,8 @@ def api_conductorsLineEdit(line_guid):
             line.name = data["name"];
         if "text" in data:
             line.text = data["text"];
+        if "jingle" in data:
+            line.jingle = data["jingle"];
         if "order" in data:
             line.order = data["order"];
         if "done" in data:
@@ -944,18 +950,8 @@ def mediaBroadcast(cond_guid, media_guid):
     args = {}
     if media.type=="media":
         ext = media.path.split(".")[-1]
-        # VIDEO
-        if ext=="webm":
-            args = {
-                "type": "video",
-                "src": "/"+config["medias_dir"]+"/"+media.path,
-                "source": media.source,
-                "volume": media.volume,
-                "volumeAfterLoop": media.volumeAfterLoop,
-                "loop": media.loop
-            }
         # IMAGE
-        elif ext=="webp":
+        if ext=="webp":
             args = {
                 "type": "picture",
                 "src": "/"+config["medias_dir"]+"/"+media.path,
@@ -963,6 +959,16 @@ def mediaBroadcast(cond_guid, media_guid):
                 "volume": None,
                 "volumeAfterLoop": None,
                 "loop": None
+            }
+        # VIDEO
+        else:
+            args = {
+                "type": "video",
+                "src": "/"+config["medias_dir"]+"/"+media.path,
+                "source": media.source,
+                "volume": media.volume,
+                "volumeAfterLoop": media.volumeAfterLoop,
+                "loop": media.loop
             }
     else:
         args = {

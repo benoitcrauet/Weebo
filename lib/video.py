@@ -109,11 +109,10 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={})
                 "-speed", "1",                              # Vitesse de l'encodage (plus la valeur est élevée, plus l'encodage est rapide)
                 "-threads", "1",                            # Nombre de threads à utiliser pour l'encodage
                 "-vf", f"scale={newSize[0]}:{newSize[1]}",  # Redimensionner la vidéo
-                '-pix_fmt', 'yuva444p10le',
             ];
 
             # Lancement du transcodage avec un redimensionnement
-            subclip.rotate(rotateDeg).write_videofile(output, codec="libvpx-vp9", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
+            subclip.rotate(rotateDeg).write_videofile(output, codec="libvpx", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
 
     except Exception as e:
         return e

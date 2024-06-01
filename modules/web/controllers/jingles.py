@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
+from flask_cors import CORS
 import wtforms
 import wtforms.validators as validators
 from PIL import Image
@@ -21,9 +22,11 @@ bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 app = None
 socketio = None
 def init(flaskapp):
-    global app, bp
+    global app, bp, socketio
     app = flaskapp
     socketio = SocketIOInstance().socketio
+    CORS(app, origins="*")
+
     app.register_blueprint(bp)
 
 
@@ -219,3 +222,34 @@ def jingleDelete(show_guid, guid):
     
     return render_template("jingles/jinglesDelete.jinja2", guid=guid, show=show, media=media, form=form)
 
+
+
+
+@bp.route("/api/jingle/<string:guid>/launch", methods=["GET"])
+def api_jingleLaunch(guid):
+    # On check si le jingle existe
+    media = session.query(Media).filter(Media.id == guid).first()
+    
+    # On met à jour le champ média
+    media.currentMedia = media.id
+    
+    # Building viewers list
+    viewers_list = media.channel.split(",")
+
+    # Building args list
+    args = {
+        "src": "/"+config["medias_dir"]+"/"+media.path,
+        "volume": media.volume
+    }
+    
+    # Building websocket object
+    object_to_send = {
+        "command": "jingle",
+        "viewer": viewers_list,
+        "args": args
+    }
+
+    # Sending object
+    socketio.emit("media_command", object_to_send)
+    
+    return model_to_dict(media)

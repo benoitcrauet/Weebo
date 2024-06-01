@@ -75,9 +75,9 @@ def main():
                         final_meta_filename = media.id + ".meta.txt"
 
                         # On prends les noms de fichier actuels s'ils sont déjà présents
-                        if media.tmb or media.tmb=="":
+                        if media.tmb and media.tmb!="" and media.tmb!=None:
                             tmb_filename = media.tmb
-                        if media.path or media.path=="":
+                        if media.path and media.path!="" and media.path!=None:
                             final_filename = media.path
                             final_meta_filename = os.path.splitext(final_filename)[0] + ".meta.txt"
 
@@ -131,6 +131,8 @@ def main():
                                 print("    ⚙️ Just copying file {} to {}".format(filename, dirMedias + "/" + final_filename))
                                 shutil.copy(dirTmpMedias + "/" + filename, dirMedias + "/" + final_filename)
                                 media.progress = 100
+                                media.path = final_filename
+                                media.error = None
                                 session.merge(media)
 
                                 videoConversion = True

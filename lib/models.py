@@ -113,6 +113,7 @@ class Line(Base):
     order = Column(Integer)
     done = Column(Boolean, default=True)
     type = Column(String, default="classic")
+    jingle = Column(String)
 
     medias = relationship("Media", back_populates="line", cascade="all, delete")
 
