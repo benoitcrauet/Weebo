@@ -348,6 +348,10 @@ body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkb
         display: none;
     }
 
+    .cond-medias-line[data-inprogress=true] .cond-medias-line-action-stop {
+        display: none;
+    }
+
         .cond-medias-line-actions .btn {
             margin: 0px 3px;
             --bs-btn-padding-y: .25rem;
