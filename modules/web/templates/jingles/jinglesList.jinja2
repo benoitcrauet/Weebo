@@ -15,7 +15,7 @@
             </div>
         </div>
 
-        <p class="lead">Stockez ici vos différents jingles.</p>
+        <p class="lead">Stockez ici vos différents jingles pour l'émission "{{ show.name }}".</p>
 
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
             <a class="btn btn-primary" href="{{ url_for("jingles.jingleEdit", show_guid=show.id) }}">
@@ -26,15 +26,19 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th scope="col"></th>
+                    <th scope="col" width="15"><i class="bi bi-grip-vertical"></i></th>
+                    <th scope="col" width="80"></th>
                     <th scope="col" width="50%">Jingle</th>
                     <th scope="col">Canaux</th>
                     <th scope="col" class="text-center">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="jinglesSortable">
                 {% for j in jingles %}
-                    <tr>
+                    <tr data-id="{{ j.id }}">
+                        <td scope="col" width="15" class="jingle-dragger align-middle h4" style="cursor: ns-resize;">
+                            <i class="bi bi-grip-vertical"></i>
+                        </td>
                         <td class="text-center align-middle">
                             {% if j.tmb and j.tmb!= "" %}
                                 <img src="/{{ config['medias_dir'] }}/{{ j.tmb }}" alt="">
@@ -74,4 +78,79 @@
             </tbody>
         </table>
     </div>
+{% endblock %}
+
+
+{% block bodyend %}
+    <script src="/static/js/jquery-ui.min.js"></script>
+    <script>
+        const currentShowID = "{{ show.id }}";
+
+        const sortableContainer = document.getElementById("jinglesSortable");
+
+        $(function() {
+            // On rend les lignes du tableau sortables
+            $(sortableContainer).sortable({
+                opacity: 0.5,
+                scrollsensitivity: 50,
+                axis: "y",
+                handle: ".jingle-dragger",
+                start: (event, ui) => {
+                    console.log("Starting drag'n'drop...");
+                },
+                stop: (event, ui) => {
+                    console.log("Drag'n'drop finished!");
+
+                    linesSendReorder(calculateLinesOrder());
+                }
+            })
+        });
+
+        function calculateLinesOrder() {
+            let newOrder = [];
+
+            let order = 0;
+            sortableContainer.querySelectorAll("tr").forEach((tr) => {
+                if(tr.dataset.id !== undefined) {
+                    newOrder.push({
+                        id: tr.dataset.id,
+                        order: order++
+                    });
+                }
+            });
+
+            return newOrder;
+        }
+        
+        function linesSendReorder(reorder) {
+            let data = reorder;
+            
+            // Options de la requête
+            var options = {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            };
+            
+            // URL de l'API
+            var url = "/api/jingles/"+currentShowID+"/orders";
+            
+            // Effectue la requête PATCH
+            fetch(url, options)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la requête PATCH');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("New data", data)
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la mise à jour de l\'ordre des lignes du conducteur :', error);
+                });
+        }
+    </script>
 {% endblock %}

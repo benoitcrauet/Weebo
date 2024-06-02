@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, abort
+from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
 from flask_cors import CORS
@@ -127,9 +127,11 @@ def jingleEdit(show_guid, guid=None):
             media.show_id = show.id
         
         # On récupère l'ordre maximal
-        max_order = session.query(func.max(Media.order)).filter(Media.show_id == show.id).scalar()
-        if not max_order:
-            max_order = -1
+        allJingles = session.query(Media).filter(Media.show_id == show.id).all()
+        max_order = -1
+        for j in allJingles:
+            if j.order > max_order:
+                max_order = j.order
 
         media.name = form.name.data
         media.volume = form.volume.data
@@ -263,3 +265,40 @@ def api_jingleLaunch(guid):
     socketio.emit("media_command", object_to_send)
     
     return model_to_dict(media)
+
+
+@bp.route("/api/jingles/<string:show_guid>/orders", methods=["PATCH"])
+def api_jinglesReorder(show_guid):
+    # On check si l'émission existe
+    show = session.query(Show).filter(Show.id == show_guid).first()
+    if not show:
+        abort(404, description="Cette émission n'existe pas")
+        
+    if request.is_json:
+        data = request.json
+        
+        compiledOrder = {}
+
+        for l in data:
+            if not "id" in l or not "order" in l:
+                abort(400, description="L'objet JSON doit-être une liste d'objets étants uniquement constitués de valeurs id et order.")
+            else:
+                compiledOrder[l["id"]] = l["order"]
+        
+        # On liste les médias
+        medias = session.query(Media).filter(Media.show_id == show.id).order_by(Media.order).all()
+
+        for media in medias:
+            if media.id in compiledOrder:
+                media.order = compiledOrder[media.id]
+                session.merge(media)
+        
+        session.commit()
+
+        # Maintenant on liste les lignes et on affiche
+        medias = session.query(Media).filter(Media.line_id == show.id).order_by(Media.order).all()
+        medias_to_send = [model_to_dict(obj) for obj in medias]
+
+        return jsonify(medias_to_send)
+    else:
+        abort(400, description="La requête doit être une requête JSON.")
