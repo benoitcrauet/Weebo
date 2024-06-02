@@ -11,7 +11,6 @@ function lineStructure(integrateMedias=true) {
         td_dragger.classList.add("cond-edit-mode");
         td_dragger.classList.add("h5");
         td_dragger.classList.add("text-center");
-        td_dragger.classList.add("align-middle");
         
             i_dragger = document.createElement("i");
             i_dragger.classList.add("bi");
@@ -54,27 +53,21 @@ function lineStructure(integrateMedias=true) {
         
         td_jingle = document.createElement("td");
         td_jingle.classList.add("cond-line-jingle");
-        td_jingle.classList.add("cond-read-mode");
-        td_jingle.classList.add("text-end");
+        td_jingle.classList.add("text-center");
 
-            div_jingle_btngroup = document.createElement("div");
-            div_jingle_btngroup.classList.add("btn-group");
+            button_jingle = document.createElement("button");
+            button_jingle.classList.add("cond-line-jingle-start-button");
+            button_jingle.classList.add("btn");
+            button_jingle.classList.add("btn-success");
+            button_jingle.setAttribute("title", "Lancer le jingle associé")
 
-                button_jingle = document.createElement("button");
-                button_jingle.classList.add("cond-line-jingle-start-button");
-                button_jingle.classList.add("btn");
-                button_jingle.classList.add("btn-success");
-                button_jingle.setAttribute("title", "Lancer le jingle associé")
+                i_jingle = document.createElement("i");
+                i_jingle.classList.add("bi");
+                i_jingle.classList.add("bi-easel-fill");
 
-                    i_jingle = document.createElement("i");
-                    i_jingle.classList.add("bi");
-                    i_jingle.classList.add("bi-easel-fill");
+                button_jingle.append(i_jingle);
 
-                    button_jingle.append(i_jingle);
-                
-                div_jingle_btngroup.append(button_jingle);
-
-            td_jingle.append(div_jingle_btngroup);
+            td_jingle.append(button_jingle);
 
         td_actions = document.createElement("td");
         td_actions.classList.add("cond-line-actions");
@@ -117,7 +110,7 @@ function lineStructure(integrateMedias=true) {
     tr_adder.classList.add("cond-insertion-adder");
 
         td_adder = document.createElement("td");
-        td_adder.setAttribute("colspan", "3");
+        td_adder.setAttribute("colspan", "4");
 
             a_adder = document.createElement("a");
             a_adder.classList.add("cond-insertion-adder-link");
@@ -273,7 +266,12 @@ function mediaLineStructure() {
                 let mediaNameText = document.createElement("span");
                 mediaNameText.classList.add("cond-media-name-text");
 
-            mediaName.append(audioIcon0, audioIcon1, audioIcon2, errorButton, mediaNameText);
+                let mediaNameSource = document.createElement("span");
+                mediaNameSource.classList.add("cond-medias-line-credits");
+                mediaNameSource.classList.add("text-muted");
+                mediaNameSource.innerText = "";
+
+            mediaName.append(audioIcon0, audioIcon1, audioIcon2, errorButton, mediaNameText, mediaNameSource);
         
             let progress = document.createElement("div");
             progress.classList.add("progress");
@@ -291,100 +289,100 @@ function mediaLineStructure() {
         td3.append(mediaName, progress);
         
         let td4 = document.createElement("td");
-        td4.classList.add("cond-medias-line-credits");
-        td4.classList.add("text-muted");
+        td4.classList.add("cond-medias-line-actions");
         td4.classList.add("text-end");
-        td4.innerText = "Disneyland Paris";
-        
-        let td5 = document.createElement("td");
-        td5.classList.add("cond-medias-line-actions");
-        td5.classList.add("text-end");
 
-            let btnEdit = document.createElement("a");
-            btnEdit.classList.add("cond-medias-line-action-edit");
-            btnEdit.classList.add("cond-edit-mode");
-            btnEdit.classList.add("btn");
-            btnEdit.classList.add("btn-sm");
-            btnEdit.classList.add("btn-outline-primary");
-            btnEdit.setAttribute("title", "Modifier");
 
-                let iEdit = document.createElement("i");
-                iEdit.classList.add("bi");
-                iEdit.classList.add("bi-pen-fill");
+            let actionsContainer = document.createElement("div");
+            actionsContainer.classList.add("actions-container");
 
-            btnEdit.append(iEdit);
+                let btnEdit = document.createElement("a");
+                btnEdit.classList.add("cond-medias-line-action-edit");
+                btnEdit.classList.add("cond-edit-mode");
+                btnEdit.classList.add("btn");
+                btnEdit.classList.add("btn-sm");
+                btnEdit.classList.add("btn-outline-primary");
+                btnEdit.setAttribute("title", "Modifier");
 
-            let btnDelete = document.createElement("a");
-            btnDelete.classList.add("cond-medias-line-action-delete");
-            btnDelete.classList.add("cond-edit-mode");
-            btnDelete.classList.add("btn");
-            btnDelete.classList.add("btn-sm");
-            btnDelete.classList.add("btn-outline-danger");
-            btnDelete.setAttribute("title", "Supprimer le média");
+                    let iEdit = document.createElement("i");
+                    iEdit.classList.add("bi");
+                    iEdit.classList.add("bi-pen-fill");
 
-                let iDelete = document.createElement("i");
-                iDelete.classList.add("bi");
-                iDelete.classList.add("bi-trash3-fill");
+                btnEdit.append(iEdit);
 
-            btnDelete.append(iDelete);
+                let btnDelete = document.createElement("a");
+                btnDelete.classList.add("cond-medias-line-action-delete");
+                btnDelete.classList.add("cond-edit-mode");
+                btnDelete.classList.add("btn");
+                btnDelete.classList.add("btn-sm");
+                btnDelete.classList.add("btn-outline-danger");
+                btnDelete.setAttribute("title", "Supprimer le média");
 
-            let btnCopy = document.createElement("a");
-            btnCopy.classList.add("cond-medias-line-action-copy");
-            btnCopy.classList.add("btn");
-            btnCopy.classList.add("btn-sm");
-            btnCopy.classList.add("btn-outline-secondary");
-            btnCopy.setAttribute("title", "Copier le lien");
+                    let iDelete = document.createElement("i");
+                    iDelete.classList.add("bi");
+                    iDelete.classList.add("bi-trash3-fill");
 
-                let iCopy = document.createElement("i");
-                iCopy.classList.add("bi");
-                iCopy.classList.add("bi-copy");
+                btnDelete.append(iDelete);
 
-            btnCopy.append(iCopy);
+                let btnCopy = document.createElement("a");
+                btnCopy.classList.add("cond-medias-line-action-copy");
+                btnCopy.classList.add("btn");
+                btnCopy.classList.add("btn-sm");
+                btnCopy.classList.add("btn-outline-secondary");
+                btnCopy.setAttribute("title", "Copier le lien");
 
-            let btnPreview = document.createElement("a");
-            btnPreview.classList.add("cond-medias-line-action-preview");
-            btnPreview.classList.add("btn");
-            btnPreview.classList.add("btn-sm");
-            btnPreview.classList.add("btn-dark");
-            btnPreview.setAttribute("title", "Prévisualiser");
+                    let iCopy = document.createElement("i");
+                    iCopy.classList.add("bi");
+                    iCopy.classList.add("bi-copy");
 
-                let iPreview = document.createElement("i");
-                iPreview.classList.add("bi");
-                iPreview.classList.add("bi-eye-fill");
+                btnCopy.append(iCopy);
 
-            btnPreview.append(iPreview);
+                let btnPreview = document.createElement("a");
+                btnPreview.classList.add("cond-medias-line-action-preview");
+                btnPreview.classList.add("btn");
+                btnPreview.classList.add("btn-sm");
+                btnPreview.classList.add("btn-dark");
+                btnPreview.setAttribute("title", "Prévisualiser");
 
-            let btnOnAir = document.createElement("a");
-            btnOnAir.classList.add("cond-medias-line-action-onair");
-            btnOnAir.classList.add("cond-read-mode");
-            btnOnAir.classList.add("btn");
-            btnOnAir.classList.add("btn-sm");
-            btnOnAir.classList.add("btn-success");
-            btnOnAir.setAttribute("title", "Diffuser le média à l'antenne");
+                    let iPreview = document.createElement("i");
+                    iPreview.classList.add("bi");
+                    iPreview.classList.add("bi-eye-fill");
 
-                let iOnAir = document.createElement("i");
-                iOnAir.classList.add("bi");
-                iOnAir.classList.add("bi-caret-right-fill");
+                btnPreview.append(iPreview);
 
-                btnOnAir.append(iOnAir);
+                let btnOnAir = document.createElement("a");
+                btnOnAir.classList.add("cond-medias-line-action-onair");
+                btnOnAir.classList.add("cond-read-mode");
+                btnOnAir.classList.add("btn");
+                btnOnAir.classList.add("btn-sm");
+                btnOnAir.classList.add("btn-success");
+                btnOnAir.setAttribute("title", "Diffuser le média à l'antenne");
 
-            let btnStop = document.createElement("a");
-            btnStop.classList.add("cond-medias-line-action-stop");
-            btnStop.classList.add("cond-read-mode");
-            btnStop.classList.add("btn");
-            btnStop.classList.add("btn-sm");
-            btnStop.classList.add("btn-danger");
-            btnStop.setAttribute("title", "Arrêter la diffusion du média");
+                    let iOnAir = document.createElement("i");
+                    iOnAir.classList.add("bi");
+                    iOnAir.classList.add("bi-caret-right-fill");
 
-                let iStop = document.createElement("i");
-                iStop.classList.add("bi");
-                iStop.classList.add("bi-stop-fill");
+                    btnOnAir.append(iOnAir);
 
-                btnStop.append(iStop);
+                let btnStop = document.createElement("a");
+                btnStop.classList.add("cond-medias-line-action-stop");
+                btnStop.classList.add("cond-read-mode");
+                btnStop.classList.add("btn");
+                btnStop.classList.add("btn-sm");
+                btnStop.classList.add("btn-danger");
+                btnStop.setAttribute("title", "Arrêter la diffusion du média");
 
-        td5.append(btnCopy, btnPreview, btnEdit, btnDelete, btnOnAir, btnStop);
+                    let iStop = document.createElement("i");
+                    iStop.classList.add("bi");
+                    iStop.classList.add("bi-stop-fill");
 
-    tr.append(td1, td2, td3, td4, td5);
+                    btnStop.append(iStop);
+
+            actionsContainer.append(btnCopy, btnPreview, btnEdit, btnDelete, btnOnAir, btnStop);
+
+        td4.append(actionsContainer);
+
+    tr.append(td1, td2, td3, td4);
     
     return tr;
 }
