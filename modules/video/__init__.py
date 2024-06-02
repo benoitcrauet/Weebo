@@ -74,12 +74,14 @@ def main():
                         # On crée le nom du nouveau fichier meta
                         final_meta_filename = media.id + ".meta.txt"
 
-                        # On prends les noms de fichier actuels s'ils sont déjà présents
-                        if media.tmb and media.tmb!="" and media.tmb!=None:
-                            tmb_filename = media.tmb
-                        if media.path and media.path!="" and media.path!=None:
-                            final_filename = media.path
-                            final_meta_filename = os.path.splitext(final_filename)[0] + ".meta.txt"
+                        # Si on indique des noms de fichier, on prends ceux-là à la place
+                        if "paths" in meta:
+                            if "filename" in meta["paths"]:
+                                final_filename = meta["paths"]["filename"]
+                            if "thumbnail" in meta["paths"]:
+                                tmb_filename = meta["paths"]["thumbnail"]
+                            if "meta" in meta["paths"]:
+                                final_meta_filename = meta["paths"]["meta"]
 
                         # On déclare une nouvelle passe d'encodage
                         media.passes += 1
