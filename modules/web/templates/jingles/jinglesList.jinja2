@@ -62,6 +62,7 @@
                             {% endfor %}
                         </td>
                         <td class="text-center">
+                            <a href="#" class="btn btn-success jingle-preview-button" title="Aperçu"><i class="bi bi-easel-fill"></i></a>
                             <div class="btn-group" role="group">
                                 <a href="{{ url_for("jingles.jingleEdit", show_guid=show.id, guid=j.id) }}" class="btn btn-secondary" title="Modifier"><i class="bi bi-pen-fill"></i></a>
                                 <a href="{{ url_for("jingles.jingleDelete", show_guid=show.id, guid=j.id) }}" class="btn btn-danger" title="Supprimer"><i class="bi bi-trash-fill"></i></a>
@@ -152,5 +153,20 @@
                     console.error('Erreur lors de la mise à jour de l\'ordre des lignes du conducteur :', error);
                 });
         }
+
+        function jingleBroadcast(mediaID) {
+            fetch("/api/jingle/"+mediaID+"/launch");
+        }
+
+        sortableContainer.querySelectorAll("tr").forEach((tr) => {
+            if(tr.dataset.id !== undefined) {
+                tr.querySelector(".jingle-preview-button").addEventListener("click", (e) => {
+                    e.preventDefault();
+
+                    if(confirm("Confirmez-vous lancer un aperçu du jingle sur OBS ?"))
+                        jingleBroadcast(tr.dataset.id);
+                });
+            }
+        });
     </script>
 {% endblock %}
