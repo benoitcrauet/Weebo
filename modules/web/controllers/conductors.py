@@ -282,8 +282,6 @@ def conductorsView(show_guid, cond_guid=None):
             "nohangupbutton": "", # On cache le bouton raccrocher pour éviter les erreurs
             "fullscreenbutton": "", # On permet l'affichage en plein écran
             "grid": "", # Ajout de la grille des tiers
-            "quality": "0", # Qualité maximale
-            "aspectratio": "1.777777", # 16/9
             "channelcount": "1", # Micro en mono
         }
         # On rajoute l'image de bienvenue s'il y en a une
@@ -331,8 +329,6 @@ def conductorsView(show_guid, cond_guid=None):
         "screensharebutton": "", # Autorise les guests à partager leur écran
         "nohangupbutton": "", # On cache le bouton raccrocher pour éviter les erreurs
         "grid": "", # Ajout de la grille des tiers
-        "quality": "0", # Qualité maximale
-        "aspectratio": "1.777777", # 16/9
         "channelcount": "1", # Micro en mono
     }
     # On rajoute le mot de passe s'il y en a un
@@ -389,7 +385,7 @@ def conductorsView(show_guid, cond_guid=None):
     # On fabrique le lien director
     urlParams = {
         "director": vdoRoomID, # Room ID
-        "r2d2": "", # Ajout des notifications star ouar
+        "notify": "", # Ajout des notifications
         "cleandirector": "", # Pas de liens d'invitation
         "codirector": coDirectorHash, # Mot de passe co-director
     }
