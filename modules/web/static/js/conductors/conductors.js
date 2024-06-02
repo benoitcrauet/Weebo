@@ -430,7 +430,9 @@ function calculateMediasOrder(lineID) {
 /**
  * Remet à jour l'ensemble du DOM du conducteur
  */
-function refreshAllConductor() {
+function refreshAllConductor(callback=null) {
+    console.debug("Refresh all...");
+
     // Effectue la requête GET
     fetch("/api/conductor/"+currentConductorID+"/lines")
         .then(response => {
@@ -482,7 +484,10 @@ function refreshAllConductor() {
                     console.error('Erreur lors de la récupération du conducteur :', error);
                 })
                 .finally(function() {
-
+                    // Finalement on appelle le callback s'il est défini
+                    if(typeof callback === "function") {
+                        callback();
+                    }
                 })
         });
 }
@@ -501,7 +506,7 @@ function lineElementsRegisterEventListeners(elements) {
     const lineDone = elements.querySelector(".cond-line-done-checkbox");
     lineDone.addEventListener("click", function(e) {
         e.preventDefault();
-        
+
         let checked = e.target.checked;
         let linesToEdit = checkContinuousDone(lineID, checked);
 
@@ -1393,8 +1398,15 @@ formEditLine.addEventListener("submit", function(e) {
         .finally(function() {
             // Fermeture de la modale
             lineModal.hide();
+
+            // On stocke les valeurs de scroll
+            let scrollX = window.scrollX;
+            let scrollY = window.scrollY;
+
             // Refresh du conducteur
-            refreshAllConductor();
+            refreshAllConductor(() => {
+                window.scrollTo(scrollX, scrollY);
+            });
         });
 });
 
@@ -1513,8 +1525,14 @@ formEditMedia.addEventListener("submit", function(e) {
             mediaModalSubmit.disabled = false;
             mediaModalCancel.disabled = false;
 
+            // On stocke les valeurs de scroll
+            let scrollX = window.scrollX;
+            let scrollY = window.scrollY;
+
             // Refresh du conducteur
-            refreshAllConductor();
+            refreshAllConductor(() => {
+                window.scrollTo(scrollX, scrollY);
+            });
         });
 });
 
@@ -1529,11 +1547,6 @@ $(function() {
 
     // On récupère l'instance du toast générique
     genericToast = bootstrap.Toast.getOrCreateInstance(document.querySelector(genericToastQuery));
-
-
-
-    // On refresh le conducteur
-    refreshAllConductor();
 
 
 

@@ -5,6 +5,8 @@ var socket = io.connect("/");
 socket.on("connect", function() {
     _connectionAlertToast.hide();
     _connectionSuccessToast.show();
+
+    refreshAllConductor();
 });
 
 // À la déconnexion du socket
