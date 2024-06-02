@@ -28,9 +28,9 @@
                 <tr>
                     <th scope="col" width="15"><i class="bi bi-grip-vertical"></i></th>
                     <th scope="col" width="80"></th>
-                    <th scope="col" width="50%">Jingle</th>
-                    <th scope="col">Canaux</th>
-                    <th scope="col" class="text-center">Actions</th>
+                    <th scope="col">Jingle</th>
+                    <th scope="col" width="200">Canaux</th>
+                    <th scope="col" class="text-center" width="180">Actions</th>
                 </tr>
             </thead>
             <tbody id="jinglesSortable">
@@ -54,7 +54,7 @@
                                 </div>
                             {% endif %}
                         </td>
-                        <td class="text-center align-middle">
+                        <td class="align-middle">
                             {% for c in j.channelsList %}
                                 <span class="badge bg-secondary">
                                     {{ c.name }}
