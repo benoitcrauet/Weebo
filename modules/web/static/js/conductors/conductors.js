@@ -500,6 +500,8 @@ function lineElementsRegisterEventListeners(elements) {
     // Évènement quand on coche la case d'une ligne
     const lineDone = elements.querySelector(".cond-line-done-checkbox");
     lineDone.addEventListener("click", function(e) {
+        e.preventDefault();
+        
         let checked = e.target.checked;
         let linesToEdit = checkContinuousDone(lineID, checked);
 

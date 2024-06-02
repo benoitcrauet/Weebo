@@ -55,7 +55,8 @@ function lineStructure(integrateMedias=true) {
         td_jingle.classList.add("cond-line-jingle");
         td_jingle.classList.add("text-center");
 
-            button_jingle = document.createElement("button");
+            button_jingle = document.createElement("a");
+            button_jingle.setAttribute("href", "#");
             button_jingle.classList.add("cond-line-jingle-start-button");
             button_jingle.classList.add("btn");
             button_jingle.classList.add("btn-success");
@@ -77,7 +78,8 @@ function lineStructure(integrateMedias=true) {
             div_btngroup = document.createElement("div");
             div_btngroup.classList.add("btn-group");
 
-                button_edit = document.createElement("button");
+                button_edit = document.createElement("a");
+                button_edit.setAttribute("href", "#")
                 button_edit.classList.add("cond-line-action-edit");
                 button_edit.classList.add("btn");
                 button_edit.classList.add("btn-primary");
@@ -88,7 +90,8 @@ function lineStructure(integrateMedias=true) {
 
                     button_edit.append(i_edit);
 
-                button_delete = document.createElement("button");
+                button_delete = document.createElement("a");
+                button_delete.setAttribute("href", "#");
                 button_delete.classList.add("cond-line-action-delete");
                 button_delete.classList.add("btn");
                 button_delete.classList.add("btn-danger");
@@ -250,7 +253,8 @@ function mediaLineStructure() {
                 audioIcon2.classList.add("bi-volume-up-fill");
                 audioIcon2.classList.add("text-warning");
 
-                let errorButton = document.createElement("button");
+                let errorButton = document.createElement("a");
+                errorButton.setAttribute("href", "#");
                 errorButton.classList.add("cond-media-error-button");
                 errorButton.classList.add("btn");
                 errorButton.classList.add("btn-sm");
