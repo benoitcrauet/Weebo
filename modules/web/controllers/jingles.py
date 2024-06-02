@@ -164,6 +164,14 @@ def jingleEdit(show_guid, guid=None):
                     # Si l'extension est webm et qu'on demande un fichier brut, on rajoute le paramètre
                     if extension=="webm" and form.fileRaw.data==True:
                         metadata["raw"] = True
+                    
+                    # Si c'est une édition, on remplace les fichiers
+                    if editMode:
+                        metadata["paths"] = {
+                            "filename": media.path,
+                            "thumbnail": media.tmb,
+                            "meta": media.id + ".meta.txt"
+                        }
 
                     meta_path = config["medias_tmp"]+"/" + filename + ".meta.txt"
                     with open(meta_path, "w") as meta_file:
@@ -171,6 +179,8 @@ def jingleEdit(show_guid, guid=None):
                     
                     # On set la progression à 0
                     media.progress = 0
+                    # On défini le nom de fichier
+                    media.path = filename_main
 
             except Exception as e:
                 abort(500, description=e)
