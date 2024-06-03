@@ -95,7 +95,7 @@ class FormConductorEdit(FlaskForm):
     day = wtforms.IntegerField("Diffusion", description="Entrez ici la date de diffusion de l'émission.", validators=[validators.NumberRange(min=1, max=31)])
     month = wtforms.IntegerField("mois", validators=[validators.NumberRange(min=1, max=12)])
     year = wtforms.IntegerField("année", validators=[validators.NumberRange(min=datetime.now().year-1, max=datetime.now().year+2)])
-    guests = wtforms.TextAreaField("Participants", description="Saisissez un nom par ligne, vous compris", validators=[])
+    guests = wtforms.TextAreaField("Participants", description="Saisissez un nom par ligne.", validators=[])
     vdoEnable = wtforms.BooleanField("Activer VDO", description="Permet d'activer la génération automatique des liens VDO.", validators=[], default=True)
     vdoPassword = wtforms.StringField("Mot de passe VDO", description="Facultatif. Vous permet de définir un mot de passe sur votre room VDO.", validators=[])
     fromTemplate = wtforms.SelectField("Template", choices=[("","- Aucun modèle -")], description="Depuis quel modèle souhaitez-vous créer votre conducteur ?")
