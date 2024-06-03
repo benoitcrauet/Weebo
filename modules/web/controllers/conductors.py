@@ -937,7 +937,7 @@ def mediaBroadcast(cond_guid, media_guid):
         abort(404, description="Ce canal est introuvable.")
     
     # On met à jour le champ média
-    media.currentMedia = media.id
+    conductor.currentMedia = media.id
     
     # Building viewers list
     viewers_list = media.channel.split(",")
@@ -1009,7 +1009,7 @@ def mediaStop(cond_guid, media_guid):
         abort(404, description="Ce canal est introuvable.")
     
     # On met à jour le champ média
-    media.currentMedia = media.id
+    conductor.currentMedia = ""
     
     # Building viewers list
     viewers_list = media.channel.split(",")
