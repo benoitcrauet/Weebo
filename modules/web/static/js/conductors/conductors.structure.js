@@ -422,7 +422,10 @@ function lineSetDatas(element, line) {
 
     // On édite le contenu de la ligne
     element.querySelector(".cond-line-text").innerHTML = nl2br(parseMarkdown(htmlspecialchars(text)));
-    element.querySelector(".cond-line-desc").innerText = text;
+    if(type=="section")
+        element.querySelector(".cond-line-desc").innerText = text.replace(/(\n|\r)/g, " "); // C'est une section : pas de saut de ligne.
+    else
+        element.querySelector(".cond-line-desc").innerText = text;
 
     // On édite les boutons
     element.querySelector(".cond-line-action-edit").dataset.id = id;
