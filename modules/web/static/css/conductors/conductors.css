@@ -360,7 +360,7 @@ body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkb
         }
     
     .cond-medias-line[data-current-media=true] > * {
-        background-color: darkred;
+        background-color: rgb(0,70,70);
     }
 
 body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkbox]:checked) .cond-line-medias {
