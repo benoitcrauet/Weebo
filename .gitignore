@@ -19,6 +19,7 @@ config.env
 
 # Base de données
 database.db
+database.db-journal
 
 # Dossiers de contenu
 images/*
