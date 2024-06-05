@@ -232,6 +232,10 @@ function mediaLineStructure() {
             let mediaName = document.createElement("div");
             mediaName.classList.add("cond-media-name");
 
+                let playIcon = document.createElement("i");
+                playIcon.classList.add("cond-media-onair-icon");
+                playIcon.classList.add("bi");
+                playIcon.classList.add("bi-play-fill");
 
                 let audioIcon0 = document.createElement("i");
                 audioIcon0.classList.add("cond-media-volume-icon");
@@ -252,6 +256,11 @@ function mediaLineStructure() {
                 audioIcon2.classList.add("bi");
                 audioIcon2.classList.add("bi-volume-up-fill");
                 audioIcon2.classList.add("text-warning");
+
+                let loopIcon = document.createElement("i");
+                loopIcon.classList.add("cond-media-loop-icon");
+                loopIcon.classList.add("bi");
+                loopIcon.classList.add("bi-repeat");
 
                 let errorButton = document.createElement("a");
                 errorButton.setAttribute("href", "#");
@@ -275,7 +284,7 @@ function mediaLineStructure() {
                 mediaNameSource.classList.add("text-muted");
                 mediaNameSource.innerText = "";
 
-            mediaName.append(audioIcon0, audioIcon1, audioIcon2, errorButton, mediaNameText, mediaNameSource);
+            mediaName.append(playIcon, audioIcon0, audioIcon1, audioIcon2, loopIcon, errorButton, mediaNameText, mediaNameSource);
         
             let progress = document.createElement("div");
             progress.classList.add("progress");
