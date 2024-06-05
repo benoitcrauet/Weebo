@@ -76,6 +76,13 @@ socket.on('conductor_command', function(data) {
                         // Suppression : on update juste (en indiquant vouloir supprimer les éléments introuvables)
                         insertMediaInConductor(data_media, true);
                         break;
+                    case "currentMedia":
+                        // Changement de média courant : on transfert l'info au front
+                        if(data_media == false)
+                            setCurrentMedia(null);
+                        else
+                            setCurrentMedia(data_media.id);
+                        break;
                     default:
                         insertMediaInConductor(data_media);
                         reorderMedias();

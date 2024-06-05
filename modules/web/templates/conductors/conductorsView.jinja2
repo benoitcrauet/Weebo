@@ -87,6 +87,8 @@
     <script>
         const conductorType = "{{ conductor.type }}";
 
+        let currentMedia = "{{ conductor.currentMedia }}";
+
         const activateMedias = (conductorType!="template");
 
         const defaultMediaChannels = {{ defaultMediaChannels | tojson }};

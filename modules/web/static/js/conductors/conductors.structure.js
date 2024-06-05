@@ -461,6 +461,7 @@ function mediaLineSetDatas(element, media) {
     element.dataset.error = error;
     element.dataset.inprogress = progress<100;
     element.dataset.lineId = line_id;
+    element.dataset.currentMedia = currentMedia==id;
 
     // On ajoute ou supprime la classe error
     if(error!=null) element.classList.add("error");

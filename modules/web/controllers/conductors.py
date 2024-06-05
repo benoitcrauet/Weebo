@@ -990,6 +990,9 @@ def mediaBroadcast(cond_guid, media_guid):
 
     # Sending object
     socketio.emit("media_command", object_to_send)
+
+    # Sending information to media command
+    socketio.emit("conductor_command", conductorWebSocketBase(action="currentMedia", conductor=conductor.id, data_line=None, data_media=model_to_dict(media)))
     
     return model_to_dict(media)
 
@@ -1010,6 +1013,7 @@ def mediaStop(cond_guid, media_guid):
     
     # On met à jour le champ média
     conductor.currentMedia = ""
+    conductor.currentMediaWeb = ""
     
     # Building viewers list
     viewers_list = media.channel.split(",")
@@ -1031,5 +1035,8 @@ def mediaStop(cond_guid, media_guid):
 
     # Sending object
     socketio.emit("media_command", object_to_send)
+
+    # Sending information to media command
+    socketio.emit("conductor_command", conductorWebSocketBase(action="currentMedia", conductor=conductor.id, data_line=None, data_media=False))
     
     return model_to_dict(media)

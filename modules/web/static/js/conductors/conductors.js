@@ -1313,6 +1313,22 @@ function displayGenericToast(title, message, type=false) {
 
 
 
+
+/**
+ * Défini un nouveau média actuel
+ * @param {string} mediaID ID du média à définir comme média actuel
+ */
+function setCurrentMedia(mediaID="") {
+    currentMedia = mediaID;
+
+    // On liste tous les médias du conducteur
+    document.querySelectorAll(".cond-medias-line").forEach((element) => {
+        element.dataset.currentMedia = element.dataset.id == currentMedia;
+    });
+}
+
+
+
 // Event handler du select du type de ligne dans le modal d'édition
 lineModalType.addEventListener("change", function(e) {
     lineEditUpdateDisplay(e.target.value);
