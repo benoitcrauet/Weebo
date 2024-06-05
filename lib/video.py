@@ -111,7 +111,7 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={})
             ];
 
             # Lancement du transcodage avec un redimensionnement
-            subclip.rotate(rotateDeg).write_videofile(output, codec="libvpx", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
+            subclip.rotate(0-rotateDeg).write_videofile(output, codec="libvpx", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
 
     except Exception as e:
         return e
