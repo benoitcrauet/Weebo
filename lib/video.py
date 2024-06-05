@@ -57,7 +57,6 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={})
             else:
                 newSize = (currentWidth, currentHeight)
 
-
             # On demande un extrait ?
             newBegin = 0
             newEnd = videoDuration
