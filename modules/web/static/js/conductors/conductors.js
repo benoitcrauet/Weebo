@@ -25,6 +25,12 @@ const genericToastQuery = "#genericToast";
 
 
 
+// Shift pressed?
+let shiftPressed = false;
+
+
+
+
 $(function() {
     // On rend les lignes draggables
     $(conductorTableQuery).sortable({
@@ -511,13 +517,13 @@ function lineElementsRegisterEventListeners(elements) {
         let linesToEdit = checkContinuousDone(lineID, checked);
 
         if(checked && linesToEdit.length>0) {
-            if(!confirm("Certains éléments sont restés décochés plus haut dans le conducteur...\nÊtes-vous sûr de vouloir cocher celui-ci ?")) {
+            if(!shiftPressed && !confirm("Certains éléments sont restés décochés plus haut dans le conducteur...\nÊtes-vous sûr de vouloir cocher celui-ci ?")) {
                 e.preventDefault();
                 return false;
             }
         }
         if(!checked && linesToEdit.length>0) {
-            if(!confirm("Certains éléments sont restés cochés plus bas dans le conducteur...\nÊtes-vous sûr de vouloir décocher celui-ci ?")) {
+            if(!shiftPressed && !confirm("Certains éléments sont restés cochés plus bas dans le conducteur...\nÊtes-vous sûr de vouloir décocher celui-ci ?")) {
                 e.preventDefault();
                 return false;
             }
@@ -544,7 +550,7 @@ function lineElementsRegisterEventListeners(elements) {
     const lineDelete = elements.querySelector(".cond-line-action-delete");
     lineDelete.addEventListener("click", function(e) {
         e.preventDefault();
-        if(confirm("Êtes-vous sûr de vouloir supprimer cette ligne ?"))
+        if(shiftPressed || confirm("Êtes-vous sûr de vouloir supprimer cette ligne ?"))
             lineSendDelete(lineID);
     });
 
@@ -565,7 +571,7 @@ function lineElementsRegisterEventListeners(elements) {
         const jingleID = this.dataset.jingle;
 
         // On envoie une requête de lancement de jingle au serveur
-        if(confirm("Êtes-vous sûr de vouloir lancer ce jingle ?"))
+        if(shiftPressed || confirm("Êtes-vous sûr de vouloir lancer ce jingle ?"))
             jingleBroadcast(jingleID);
     })
 
@@ -663,7 +669,7 @@ function mediaElementsRegisterEventListeners(elements) {
     const mediaDelete = elements.querySelector(".cond-medias-line-action-delete");
     mediaDelete.addEventListener("click", function(e) {
         e.preventDefault();
-        if(confirm("Êtes-vous sûr de vouloir supprimer ce média ?"))
+        if(shiftPressed || confirm("Êtes-vous sûr de vouloir supprimer ce média ?"))
             mediaSendDelete(mediaID);
     });
 
@@ -671,7 +677,7 @@ function mediaElementsRegisterEventListeners(elements) {
     const mediaOnair = elements.querySelector(".cond-medias-line-action-onair");
     mediaOnair.addEventListener("click", function(e) {
         e.preventDefault();
-        if(confirm("Êtes-vous sûr de vouloir diffuser ce média ?"))
+        if(shiftPressed || confirm("Êtes-vous sûr de vouloir diffuser ce média ?"))
             mediaBroadcast(mediaID);
     });
 
@@ -679,7 +685,7 @@ function mediaElementsRegisterEventListeners(elements) {
     const mediaStopBtn = elements.querySelector(".cond-medias-line-action-stop");
     mediaStopBtn.addEventListener("click", function(e) {
         e.preventDefault();
-        if(confirm("Êtes-vous sûr de vouloir arrêter ce média ?"))
+        if(shiftPressed || confirm("Êtes-vous sûr de vouloir arrêter ce média ?"))
             mediaStop(mediaID);
     });
 }
@@ -1600,4 +1606,19 @@ $(function() {
     window.addEventListener("scroll", updateStickyPosition);
     window.addEventListener("resize", updateStickyPosition);
 
+
+
+    document.addEventListener("keydown", (e) => {
+        if(e.shiftKey) {
+            shiftPressed = true;
+            console.debug("Shift pressed");
+        }
+    });
+
+    document.addEventListener("keyup", (e) => {
+        if(!e.shiftKey) {
+            shiftPressed = false;
+            console.debug("Shift released");
+        }
+    });
 });
