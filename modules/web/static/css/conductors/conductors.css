@@ -285,11 +285,15 @@ body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkb
         display: inline-block;
     }
 
-    .cond-medias-line[data-type="web"] .cond-media-volume-icon {
+    .cond-medias-line[data-type=web] .cond-media-loop-icon {
+        display: none;
+    }
+
+    .cond-medias-line[data-type=web] .cond-media-volume-icon {
         display: none !important;
     }
 
-    .cond-medias-line[data-type="web"] .cond-medias-line-action-stop {
+    .cond-medias-line[data-type=web] .cond-medias-line-action-stop {
         display: none !important;
     }
 
