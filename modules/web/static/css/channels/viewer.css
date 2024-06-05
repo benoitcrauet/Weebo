@@ -87,7 +87,7 @@ body {
 }
 
 .media_item {
-    transition: .3s opacity;
+    transition: .5s opacity;
     opacity: 1;
     width: 100vw;
     height: 100vh;
