@@ -155,6 +155,8 @@ const mediaModalWebChannel = document.getElementById("gWebChannel");
 const mediaModalSubmit = document.getElementById("gSubmit");
 const mediaModalCancel = document.getElementById("gCancel");
 
+const mediaModalUrlAlert = document.getElementById("gUrlAlert");
+
 const mediaModalCutBegin = document.getElementById("gCutBegin");
 const mediaModalCutEnd = document.getElementById("gCutEnd");
 const mediaModalRotate = document.getElementById("gRotate");
@@ -201,6 +203,11 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
 
     // On set la valeur de la ligne parente
     mediaLine.value = line;
+
+    // On efface l'alerte d'URL
+    mediaModalUrlAlert.innerHTML = "";
+    mediaModalUrlAlert.style.display = "none";
+    mediaModalUrl.dataset.refused = false;
     
     if(editMode) {
         mediaModalTitle.innerText = "Modification du média";
@@ -1458,6 +1465,12 @@ formEditMedia.addEventListener("submit", function(e) {
         mediaChannel: multiSelectGetValues(mediaModalMediaChannel).join(","),
         webChannel: multiSelectGetValues(mediaModalWebChannel).join(",")
     };
+
+    // Si l'URL est invalide, on stoppe l'envoi
+    if(data.type=="web" && mediaModalUrl.dataset.refused=="true") {
+        alert("Ce lien n'est pas autorisé.");
+        return false;
+    }
     
     // On désactive le submit et le cancel
     mediaModalSubmit.disabled = true;

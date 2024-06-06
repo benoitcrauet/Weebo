@@ -154,11 +154,14 @@
                                     URL
                                 </label>
                                 <div class="col-9">
-                                    <input type="text" id="gUrl" name="url" class="form-control">
+                                    <input type="text" id="gUrl" name="url" class="form-control" data-refused="false">
                                     <span class="form-text">
                                         Spécifiez l'URL de la page web à intégrer.
                                     </span>
                                 </div>
+                            </div>
+                            <div class="row alert" id="gUrlAlert">
+                                -
                             </div>
                         </div>
 
@@ -326,7 +329,7 @@
 
                     </div>
 
-                    <div class="alert alert-warning text-center">
+                    <div class="alert alert-info text-center">
                         N'oubliez pas de prévisualiser vos médias une fois téléchargés !
                     </div>
 
@@ -348,6 +351,113 @@
 
 
 <script>
+    const _linksConstraints_source = [
+        {% for c in linksConstraints %}
+            {
+                "pattern": "{{ c.pattern | replace('"', '\\"') | replace('\\', '\\\\') }}",
+                "ignoreCase": {{ "true" if c.ignoreCase else "false" }},
+                "description": "{{ c.description | replace('"', '\\"') | replace('\\', '\\\\') }}",
+                "refuse": {{ "true" if c.refuse else "false" }},
+                "alert": "{{ c.alert | replace('"', '\\"') | replace('\\', '\\\\') }}"
+            },
+        {% endfor %}
+    ];
+
+    // On vérifie si les patterns sont valides
+    let linksConstraints = [];
+    _linksConstraints_source.forEach((constraint, index) => {
+        try {
+            const regexPattern = new RegExp(constraint.pattern, ((constraint.ignoreCase) ? "i" : ""));
+            console.debug(regexPattern + " est un pattern valide.", constraint);
+            
+            constraint.pattern = regexPattern;
+            // On insert la contrainte à la liste
+            linksConstraints.push(constraint);
+        }
+        catch(error) {
+            console.error(constraint.pattern + " est un pattern invalide.", error, constraint);
+        }
+    });
+
+
+    // On récupère les objets
+    const fieldUrl = document.getElementById("gUrl");
+    const alertUrl = document.getElementById("gUrlAlert");
+
+
+    /**
+     * Remplace les URL par des liens cliquables
+     **/
+    function textToLinks(input) {
+        // Expression régulière pour détecter les liens dans le texte
+        var regex = /(https?:\/\/[^\s]+)/g;
+
+        // Remplacer chaque lien détecté par une balise <a>
+        return input.replace(regex, function(lien) {
+            return '<a href="' + lien + '" onclick="window.open(this.href); return false;">' + lien + '</a>';
+        });
+    }
+
+
+    fieldUrl.addEventListener("input", (e) => {
+        let test = checkPattern(e.target.value);
+
+        if(test!==true) {
+            alertUrl.innerHTML = textToLinks(test.alert);
+
+            alertUrl.classList.remove("alert-danger");
+            alertUrl.classList.remove("alert-warning");
+
+            if(test.refuse) {
+                alertUrl.classList.add("alert-danger");
+                e.target.dataset.refused = true;
+            }
+            else {
+                alertUrl.classList.add("alert-warning");
+                e.target.dataset.refused = false;
+            }
+
+            alertUrl.style.display = "block";
+        }
+        else {
+            alertUrl.style.display = "none";
+            e.target.dataset.refused = false;
+        }
+    });
+
+
+    /**
+     * Vérifie la validité du champ avec tous les patterns
+     **/
+    function checkPattern(input) {
+        var valid = true;
+
+        for(let k=0; k<linksConstraints.length; k++) {
+            const c = linksConstraints[k];
+
+            const result = c.pattern.exec(input)
+            if(result) {
+                // On capture les éléments dans l'alerte
+                c.alert = c.alert.replace(/\$([U]?)([0-9]+)/g, (match, urlmode, group) => {
+                    const index = parseInt(group);
+
+                    if(urlmode==="U")
+                        return (typeof result[index] !== "undefined") ? encodeURIComponent(result[index]) : match;
+                    else
+                        return (typeof result[index] !== "undefined") ? result[index] : match;
+                });
+
+                valid = c;
+
+                break;
+            }
+        }
+
+        return valid;
+    }
+
+
+    // Lorsque jquery est loaded
     $(function() {
         function _changeRotatePreview(e) {
             let rotate = document.getElementById("gRotate").value;
