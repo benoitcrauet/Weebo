@@ -141,63 +141,6 @@
                             </tbody>
                         </table>
 
-                        <div class="row mb-3">
-                            <label class="col-form-label col-3" for="vdoSourceLinkAutoSwitch">
-                                <i class="bi bi-person-video"></i>
-                                Source automatique
-                            </label>
-                            <div class="col-9">
-                                <div class="input-group">
-                                    <input type="text" id="vdoSourceLinkAutoSwitch" class="form-control" readonly value="{{ autoCommutLink }}" onclick="this.select();">
-                                    <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
-                                        <i class="bi bi-copy"></i>
-                                    </button>
-                                </div>
-                                <span class="form-text">
-                                    Cette source change automatiquement de caméra selon qui est en train de parler.<br>
-                                    <b class="text-info">Seules les sources de la scène 1 seront visibles.</b>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label class="col-form-label col-3" for="vdoSourceLinkPictureByPicture">
-                                <i class="bi bi-layout-split"></i>
-                                Picture-by-Picture
-                            </label>
-                            <div class="col-9">
-                                <div class="input-group">
-                                    <input type="text" id="vdoSourceLinkPictureByPicture" class="form-control" readonly value="{{ pictureByPictureLink }}" onclick="this.select();">
-                                    <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
-                                        <i class="bi bi-copy"></i>
-                                    </button>
-                                </div>
-                                <span class="form-text">
-                                    Affiche 2 caméras côte-à-côte.<br>
-                                    <b class="text-info">Seules les sources de la scène 1 seront visibles.</b>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label class="col-form-label col-3" for="vdoSourceLinkPictureByPictureFullscreen">
-                                <i class="bi bi-layout-split"></i>
-                                Picture-by-Picture plein écran
-                            </label>
-                            <div class="col-9">
-                                <div class="input-group">
-                                    <input type="text" id="vdoSourceLinkPictureByPictureFullscreen" class="form-control" readonly value="{{ pictureByPictureFullscreenLink }}" onclick="this.select();">
-                                    <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
-                                        <i class="bi bi-copy"></i>
-                                    </button>
-                                </div>
-                                <span class="form-text">
-                                    Affiche 2 caméras côte-à-côte en plein écran.<br>
-                                    <b class="text-info">Seules les sources de la scène 1 seront visibles.</b>
-                                </span>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
 

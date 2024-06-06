@@ -335,52 +335,8 @@ def conductorsView(show_guid, cond_guid=None):
     if conductor.vdoPassword!="":
         urlParams["password"] = ""
     guestsLink = "https://vdo.ninja/?"+urlencode(urlParams)
-    
 
-    # On fabrique le lien autocommut
-    urlParams = {
-        "room": vdoRoomID, # Room ID
-        "scene": "1", # Seule la scène 1 est commutable
-        "solo": "", # Mode solo
-        "activespeaker": "3", # Mode speaker : une seule cam affichée à la fois mais pas les sources audio
-        "animated": "0", # Pas d'animation
-        "bitrate": "6144", # Bitrate vidéo
-    }
-    # On rajoute le mot de passe s'il y en a un
-    if conductor.vdoPassword!="":
-        urlParams["password"] = conductor.vdoPassword
-    autoCommutLink = "https://vdo.ninja/?"+urlencode(urlParams)
-    
 
-    # On fabrique le lien PbP
-    urlParams = {
-        "room": vdoRoomID, # Room ID
-        "scene": "1", # Seule la scène 1 est commutable
-        "solo": "", # Mode solo
-        "activespeaker": "4", # Mode speaker : plusieurs cams affichées à la fois mais pas les sources audio
-        "square": "", # On optimise l'affichage pour avoir un affichage plein écran (en colonnes)
-        "animated": "0", # Pas d'animation
-        "bitrate": "6144", # Bitrate vidéo
-    }
-    # On rajoute le mot de passe s'il y en a un
-    if conductor.vdoPassword!="":
-        urlParams["password"] = conductor.vdoPassword
-    pictureByPictureLink = "https://vdo.ninja/?"+urlencode(urlParams)
-
-    # On fabrique le lien PbP Fullscreen
-    urlParams = {
-        "room": vdoRoomID, # Room ID
-        "scene": "1", # Seule la scène 1 est commutable
-        "solo": "", # Mode solo
-        "activespeaker": "4", # Mode speaker : plusieurs cams affichées à la fois mais pas les sources audio
-        "cover": "", # On recouvre la totalité de la surface
-        "animated": "0", # Pas d'animation
-        "bitrate": "6144", # Bitrate vidéo
-    }
-    # On rajoute le mot de passe s'il y en a un
-    if conductor.vdoPassword!="":
-        urlParams["password"] = conductor.vdoPassword
-    pictureByPictureFullscreenLink = "https://vdo.ninja/?"+urlencode(urlParams)
 
     # On fabrique le lien director
     urlParams = {
@@ -394,7 +350,7 @@ def conductorsView(show_guid, cond_guid=None):
         urlParams["password"] = ""
     directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, autoCommutLink=autoCommutLink, pictureByPictureLink=pictureByPictureLink, pictureByPictureFullscreenLink=pictureByPictureFullscreenLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"])
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"])
 
 
 
