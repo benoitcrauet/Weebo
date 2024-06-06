@@ -17,6 +17,9 @@ ENV/
 # Configuration du script
 config.env
 
+# Configuration des liens
+links.yaml
+
 # Base de données
 database.db
 database.db-journal

@@ -10,3 +10,4 @@ setuptools
 proglog
 requests
 colorama
+pyyaml

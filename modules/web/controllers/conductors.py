@@ -21,6 +21,7 @@ from lib.dict import model_to_dict
 from lib.vdo import generateVdoGuestHash, generateVdoRoomID, generateVdoRemoteHash, generateVdoCoDirectorHash
 from lib.config import config
 from lib.picture import ResizeMaximal
+from lib.links import getLinksConstraints
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -353,8 +354,11 @@ def conductorsView(show_guid, cond_guid=None):
     if conductor.vdoPassword!="":
         urlParams["password"] = ""
     directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
+
+    # On récupère les contraintes de lien
+    linksConstraints = getLinksConstraints()
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"])
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"], linksConstraints=linksConstraints)
 
 
 
