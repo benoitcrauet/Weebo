@@ -298,9 +298,13 @@ def conductorsView(show_guid, cond_guid=None):
             "room": vdoRoomID, # Room ID
             "view": streamID, # Stream ID
             "solo": "", # Vue solo
-            "remote": obsRemote, # Token de pilotage OBS
             "password": conductor.vdoPassword
         }
+
+        # On rajoute le token OBS mais uniquement sur le premier lien
+        if k==0:
+            soloParams["remote"] = obsRemote # Token de pilotage OBS
+        
         # On rajoute le mot de passe s'il y en a un
         if conductor.vdoPassword!="":
             soloParams["password"] = conductor.vdoPassword
