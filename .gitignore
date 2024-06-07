@@ -14,11 +14,8 @@ venv/
 env/
 ENV/
 
-# Configuration du script
-config.env
-
-# Configuration des liens
-links.yaml
+# Configuration de l'app
+config.yaml
 
 # Base de données
 database.db
