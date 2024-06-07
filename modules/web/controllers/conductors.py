@@ -21,7 +21,6 @@ from lib.dict import model_to_dict
 from lib.vdo import generateVdoGuestHash, generateVdoRoomID, generateVdoRemoteHash, generateVdoCoDirectorHash
 from lib.config import config
 from lib.picture import ResizeMaximal
-from lib.links import getLinksConstraints
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -356,9 +355,9 @@ def conductorsView(show_guid, cond_guid=None):
     directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
 
     # On récupère les contraintes de lien
-    linksConstraints = getLinksConstraints()
+    linksConstraints = config["linksConstraints"]
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["medias_dir"], linksConstraints=linksConstraints)
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["directories"]["medias"], linksConstraints=linksConstraints)
 
 
 
@@ -682,8 +681,8 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
                 # On enregistre l'image
                 filename_main = filename + ".webp"
                 filename_tmb = filename + ".tmb.webp"
-                imgMain.save(config["medias_dir"]+"/"+filename_main, quality=65)
-                imgTmb.save(config["medias_dir"]+"/"+filename_tmb, quality=55)
+                imgMain.save(config["directories"]["medias"]+"/"+filename_main, quality=65)
+                imgTmb.save(config["directories"]["medias"]+"/"+filename_tmb, quality=55)
 
                 image.close()
                 imgMain.close()
@@ -699,7 +698,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
                 metadata = {
                     "media_id": media.id
                 }
-                meta_path = config["medias_dir"]+"/" + filename + ".meta.txt"
+                meta_path = config["directories"]["medias"]+"/" + filename + ".meta.txt"
                 with open(meta_path, "w") as meta_file:
                     json.dump(metadata, meta_file, indent=4)
 
@@ -707,7 +706,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
             try:
                 # On sauvegarde le fichier renommé avec son extension
                 filename_main = filename + "." + extension
-                file.save(config["medias_tmp"]+"/"+filename_main)
+                file.save(config["directories"]["mediasTmp"]+"/"+filename_main)
 
             except Exception as e:
                 abort(500, description=e)
@@ -721,7 +720,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
                     "media_id": media.id,
                     "transcode": transcode
                 }
-                meta_path = config["medias_tmp"]+"/" + filename + ".meta.txt"
+                meta_path = config["directories"]["mediasTmp"]+"/" + filename + ".meta.txt"
                 with open(meta_path, "w") as meta_file:
                     json.dump(metadata, meta_file, indent=4)
                 
@@ -914,7 +913,7 @@ def mediaBroadcast(cond_guid, media_guid):
         if ext=="webp":
             args = {
                 "type": "picture",
-                "src": "/"+config["medias_dir"]+"/"+media.path,
+                "src": "/"+config["directories"]["medias"]+"/"+media.path,
                 "source": media.source,
                 "volume": None,
                 "volumeAfterLoop": None,
@@ -924,7 +923,7 @@ def mediaBroadcast(cond_guid, media_guid):
         else:
             args = {
                 "type": "video",
-                "src": "/"+config["medias_dir"]+"/"+media.path,
+                "src": "/"+config["directories"]["medias"]+"/"+media.path,
                 "source": media.source,
                 "volume": media.volume,
                 "volumeAfterLoop": media.volumeAfterLoop,

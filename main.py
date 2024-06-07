@@ -17,9 +17,9 @@ print()
 
 
 # En cas d'absence de fichier config
-if not os.path.isfile("config.env"):
+if not os.path.isfile("config.yaml"):
     print("ERREUR :")
-    print("Impossible de trouver le fichier config.env. Peut-être devriez-vous modifier et renommer le fichier config.sample.env ?")
+    print("Impossible de trouver le fichier config.yaml. Peut-être devriez-vous modifier et renommer le fichier config.sample.yaml ?")
     quit()
 
 
@@ -53,11 +53,11 @@ if arguments.reinit_database:
             print("  > Répertoire des images : {}/".format(config["images_dir"]))
             clean_media_dir(config["images_dir"])
             time.sleep(0.5)
-            print("  > Répertoire des médias : {}/".format(config["medias_dir"]))
-            clean_media_dir(config["medias_dir"])
+            print("  > Répertoire des médias : {}/".format(config["directories"]["medias"]))
+            clean_media_dir(config["directories"]["medias"])
             time.sleep(0.5)
-            print("  > Répertoire temporaire des médias : {}/".format(config["medias_tmp"]))
-            clean_media_dir(config["medias_tmp"])
+            print("  > Répertoire temporaire des médias : {}/".format(config["directories"]["mediasTmp"]))
+            clean_media_dir(config["directories"]["mediasTmp"])
             time.sleep(1)
             print("")
 
