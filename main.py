@@ -10,6 +10,7 @@ from lib.arguments import arguments
 from lib.file import clean_media_dir
 
 
+def main():
     from modules import web, video, cleaner
 
     welcome()
@@ -115,3 +116,6 @@ from lib.file import clean_media_dir
         thread_vid.join()
         thread_cle.join()
 
+
+if __name__ ==  "__main__":
+    main()
