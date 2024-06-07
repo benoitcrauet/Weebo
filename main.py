@@ -10,8 +10,8 @@ from lib.arguments import arguments
 from lib.file import clean_media_dir
 
 
+
 def main():
-    from modules import web, video, cleaner
 
     welcome()
     print()
@@ -98,6 +98,7 @@ def main():
 
     # Pas de --reinit-database
     else:
+        from modules import web, video, cleaner
 
         # Thread web
         thread_web = threading.Thread(target=web.main, args=())
