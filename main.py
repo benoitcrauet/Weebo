@@ -39,7 +39,7 @@ def main():
                 time.sleep(5)
                 print()
 
-                db_file = config["database_file"]
+                db_file = config["database"]["file"]
 
                 if os.path.exists(db_file):
                     print(f"Suppression du fichier '{db_file}'...")

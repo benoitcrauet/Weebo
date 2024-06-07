@@ -23,7 +23,7 @@ def main():
     
     # Initialisation du serveur web
     app = Flask("modules.web")
-    app.config["SECRET_KEY"] = config["web_secret_key"]
+    app.config["SECRET_KEY"] = config["web"]["secretKey"]
     socketio = SocketIOInstance(app)
     CORS(app, origins="*") # CORS from all
 
