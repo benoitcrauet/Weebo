@@ -99,7 +99,7 @@ def main():
                                 # On envoie un évènement de mise à jour au web
                                 try:
                                     if media.line_id:
-                                        requests.get("{}/api/conductor/media/update/{}".format(config["web_base"], media.id), timeout=0.5)
+                                        requests.get("{}/api/conductor/media/update/{}".format(config["web"]["baseUrl"], media.id), timeout=0.5)
                                 except Exception as e:
                                     print("ERROR while sending event to web: {}".format(e))
 

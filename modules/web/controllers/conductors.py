@@ -286,7 +286,7 @@ def conductorsView(show_guid, cond_guid=None):
         }
         # On rajoute l'image de bienvenue s'il y en a une
         if show.logo:
-            inviteParams["welcomeimage"] = config["web_base"]+"/"+config["directories"]["images"]+"/"+show.logo
+            inviteParams["welcomeimage"] = config["web"]["baseUrl"]+"/"+config["directories"]["images"]+"/"+show.logo
         # On rajoute le mot de passe s'il y en a un
         if conductor.vdoPassword!="":
             inviteParams["password"] = ""
@@ -357,7 +357,7 @@ def conductorsView(show_guid, cond_guid=None):
     # On récupère les contraintes de lien
     linksConstraints = config["linksConstraints"]
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web_base"], medias_dir=config["directories"]["medias"], linksConstraints=linksConstraints)
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web"]["baseUrl"], medias_dir=config["directories"]["medias"], linksConstraints=linksConstraints)
 
 
 

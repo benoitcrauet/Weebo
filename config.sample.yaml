@@ -1,15 +1,19 @@
-# Fichier de base de données
-database_file: database.db
+database:
+  # Fichier de base de données
+  file: database.db
 
-# IP et port d'écoute du serveur web
-web_host: 127.0.0.1
-web_port: 8000
 
-# URL de base du serveur
-web_base: http://127.0.0.1:8000
+# Module web
+web:
+  # IP d'écoute (0.0.0.0 pour toutes les IP)
+  host: 127.0.0.1
+  # Port d'écoute
+  port: 9999
+  # URL de base de l'application (sans le slash final)
+  baseUrl: http://127.0.0.1:9999
+  # Clé secrète Flask
+  secretKey: qwertyuiop1234567890
 
-# Clé secrète Flask
-web_secret_key: qwertyuiop1234567890
 
 # Répertoires
 directories:
@@ -24,6 +28,7 @@ directories:
 # Paramètres de transcodage
 transcoding:
   maxRetry: 20
+
 
 # Paramètres des conducteurs
 conductors:

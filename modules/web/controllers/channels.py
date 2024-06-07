@@ -104,7 +104,7 @@ def channelsMediasEdit(show_guid, channel_guid=None):
         return redirect(url_for("channels.channelsMedias", show_guid=show_guid))
 
     
-    return render_template("channels/channelsMediasEdit.jinja2", form=form, show=show, channel=channel, web_base=config["web_base"])
+    return render_template("channels/channelsMediasEdit.jinja2", form=form, show=show, channel=channel, web_base=config["web"]["baseUrl"])
 
 
 
@@ -223,7 +223,7 @@ def channelsWebEdit(show_guid, channel_guid=None):
         return redirect(url_for("channels.channelsWeb", show_guid=show_guid))
     
     
-    return render_template("channels/channelsWebEdit.jinja2", form=form, show=show, channel=channel, web_base=config["web_base"])
+    return render_template("channels/channelsWebEdit.jinja2", form=form, show=show, channel=channel, web_base=config["web"]["baseUrl"])
 
 
 
@@ -298,8 +298,8 @@ def viewerWeb(guid):
             "id": c.id,
             "name": c.name,
             "urls": {
-                "all_links": config["web_base"]+url_for("channels.viewerWebLinks", chan_guid=guid, cond_guid=c.id),
-                "conductor_details": config["web_base"]+url_for("channels.viewerWebConductor", guid=c.id)
+                "all_links": config["web"]["baseUrl"]+url_for("channels.viewerWebLinks", chan_guid=guid, cond_guid=c.id),
+                "conductor_details": config["web"]["baseUrl"]+url_for("channels.viewerWebConductor", guid=c.id)
             }
         })
     
