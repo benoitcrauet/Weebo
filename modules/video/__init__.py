@@ -14,8 +14,8 @@ from lib.config import config
 from lib.video import convertVideo, getThumbnailPicture
 
 
-dirTmpMedias = config["medias_tmp"] # Temporary medias folder without last /
-dirMedias = config["medias_dir"] # Temporary medias folder without last /
+dirTmpMedias = config["directories"]["mediasTmp"] # Temporary medias folder without last /
+dirMedias = config["directories"]["medias"] # Temporary medias folder without last /
 
 # On défini le dossier temporaire pour ffmpeg
 ffmpeg_temporary = "{}/{}".format(os.getcwd(), dirTmpMedias)
@@ -90,7 +90,7 @@ def main():
                         print("    > Media name: {}".format(media.name))
 
                         # Si on est dans les retry acceptables
-                        if media.passes <= int(config["medias_max_retry"]):
+                        if media.passes <= int(config["transcoding"]["maxRetry"]):
                             print("    > Pass {}/{}...".format(media.passes, config["medias_max_retry"]))
                             print("")
 
@@ -221,3 +221,4 @@ def print(*args, **kwargs):
     end = kwargs.get('end', '\n')
     message = sep.join(map(str, args)) + end
     sys.stdout.write("🎞️  " + Back.RED + Fore.WHITE + Style.BRIGHT + "[MEDIA CONVERTER]" + Style.RESET_ALL + " " + message)
+

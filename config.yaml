@@ -1,5 +1,41 @@
-constraints: # Contraintes de liens
-  # pour chaque objet :
+# Fichier de base de données
+database_file: database.db
+
+# IP et port d'écoute du serveur web
+web_host: 127.0.0.1
+web_port: 9999
+
+# URL de base du serveur
+web_base: http://127.0.0.1:9999
+
+# Clé secrète Flask
+web_secret_key: qwertyuiop1234567890
+
+# Répertoires
+directories:
+  # Répertoire contenant les images de l'app (sans le slash final)
+  images: images
+  # Répertoire contenant les médias transcodés (sans le slash final)
+  medias: medias
+  # Répertoire contenant les médias temporaires en attente de transcodage (sans le flash final)
+  mediasTmp: tmp_medias
+
+
+# Paramètres de transcodage
+transcoding:
+  maxRetry: 20
+
+# Paramètres des conducteurs
+conductors:
+  # Heure à laquelle le nettoyage des conducteurs doit s'opérer
+  cleanerSchedule: 4
+  # Ancienneté maximale des conducteurs en jours pour la suppression automatique
+  retention: 90
+
+
+# Contraintes de liens
+linksConstraints:
+  # pour chaque contrainte :
   # - pattern: regexp permettant de déclencher la contrainte
   #   ignoreCase: true/false. Définit si le pattern est ignore ou non la casse
   #   description: une description, pour vous y retrouver
@@ -89,6 +125,12 @@ constraints: # Contraintes de liens
     description: Lien vers une vidéo TikTok.
     refuse: false
     alert: "Merci de télécharger cette vidéo TikTok dans le conducteur en tant que média."
+
+  - pattern: ^https?://(www\.)?linkedin\.com/posts/.*$
+    ignoreCase: true
+    description: Lien vers un post LinkedIn.
+    refuse: false
+    alert: "Si le contenu important dans ce post LinkedIn est une image ou une vidéo, merci de la télécharger dans le conducteur en tant que média. Si vous souhaitez diffuser le post entier, merci de privilégier les captures d'écran."
 
   - pattern: ^.*\.(jpg|jpeg|png|webp)(\?.*)?$
     ignoreCase: true

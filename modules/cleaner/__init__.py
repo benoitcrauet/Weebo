@@ -35,8 +35,8 @@ def deleteOldConductors(daysLimit):
 # Routine de nettoyage
 def cleanAll():
 
-    print("Suppression conducteurs vieux de {} jours...".format(config["conductor_retention"]))
-    deleteOldConductors(config["conductor_retention"])
+    print("Suppression conducteurs vieux de {} jours...".format(config["conductors"]["retention"]))
+    deleteOldConductors(config["conductors"]["retention"])
     time.sleep(1);
 
     print("Terminé.")
@@ -52,7 +52,7 @@ def main():
         currentTime = datetime.now()
 
         # Si il est l'heure configurée, on clean
-        if currentTime.hour == config["cleaner_schedule"] and currentTime.minute == 0:
+        if currentTime.hour == config["conductors"]["cleanerSchedule"] and currentTime.minute == 0:
             cleanAll()
 
         # On attend le début de la minute suivante

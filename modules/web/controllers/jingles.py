@@ -156,7 +156,7 @@ def jingleEdit(show_guid, guid=None):
                 if extension!="":
                     # On sauvegarde le fichier renommé avec son extension
                     filename_main = filename + "." + extension
-                    file.save(config["medias_tmp"]+"/"+filename_main)
+                    file.save(config["directories"]["mediasTmp"]+"/"+filename_main)
 
                     # On crée le fichier méta
                     metadata = {
@@ -175,7 +175,7 @@ def jingleEdit(show_guid, guid=None):
                             "meta": media.id + ".meta.txt"
                         }
 
-                    meta_path = config["medias_tmp"]+"/" + filename + ".meta.txt"
+                    meta_path = config["directories"]["mediasTmp"]+"/" + filename + ".meta.txt"
                     with open(meta_path, "w") as meta_file:
                         json.dump(metadata, meta_file, indent=4)
                     
@@ -250,7 +250,7 @@ def api_jingleLaunch(guid):
 
     # Building args list
     args = {
-        "src": "/"+config["medias_dir"]+"/"+media.path,
+        "src": "/"+config["directories"]["medias"]+"/"+media.path,
         "volume": media.volume
     }
     

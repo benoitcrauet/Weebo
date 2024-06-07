@@ -161,11 +161,11 @@ def delete_media_files(mapper, connection, target):
             basename, extension = filename.split(".")
 
             # Paths pour les différents fichiers
-            pathFinal = config["medias_dir"] + "/" + str(filename)
-            pathThumbnail = config["medias_dir"] + "/" + str(target.tmb)
-            pathTemporary = config["medias_tmp"] + "/" + str(target.path)
-            pathMeta1 = config["medias_tmp"] + "/" + str(basename) + ".meta.txt"
-            pathMeta2 = config["medias_dir"] + "/" + str(basename) + ".meta.txt"
+            pathFinal = config["directories"]["medias"] + "/" + str(filename)
+            pathThumbnail = config["directories"]["medias"] + "/" + str(target.tmb)
+            pathTemporary = config["directories"]["mediasTmp"] + "/" + str(target.path)
+            pathMeta1 = config["directories"]["mediasTmp"] + "/" + str(basename) + ".meta.txt"
+            pathMeta2 = config["directories"]["medias"] + "/" + str(basename) + ".meta.txt"
 
             # On supprime chaque fichier s'il existe
             try:
