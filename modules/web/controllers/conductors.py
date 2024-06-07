@@ -286,7 +286,7 @@ def conductorsView(show_guid, cond_guid=None):
         }
         # On rajoute l'image de bienvenue s'il y en a une
         if show.logo:
-            inviteParams["welcomeimage"] = config["web_base"]+"/"+config["images_dir"]+"/"+show.logo
+            inviteParams["welcomeimage"] = config["web_base"]+"/"+config["directories"]["images"]+"/"+show.logo
         # On rajoute le mot de passe s'il y en a un
         if conductor.vdoPassword!="":
             inviteParams["password"] = ""
