@@ -51,7 +51,7 @@ def main():
     conductors.init(app)
     jingles.init(app)
 
-    server = pywsgi.WSGIServer((config["web_host"], int(config["web_port"])), app, handler_class=WebSocketHandler)
+    server = pywsgi.WSGIServer((config["web"]["host"], int(config["web"]["port"])), app, handler_class=WebSocketHandler)
     server.serve_forever()
 
 
