@@ -639,10 +639,10 @@ function mediaElementsRegisterEventListeners(elements) {
                     displayGenericToast("Lien copié", "Le lien a bien été copié dans le presse-papier !");
                 })
                 .catch(err => {
-                    displayGenericToast("Erreur", "Une erreur est survenue lors de la copie du lien dans le presse-papier.", "danger");
+                    displayGenericToast("Erreur", "Une erreur est survenue lors de la copie du lien dans le presse-papier. Vous pouvez le copier ici :\n\n"+mediaPath, "danger");
                 });
         } else {
-            displayGenericToast("API Clipboard indisponible", "Impossible de copier le lien sur ce navigateur.", "warning");
+            displayGenericToast("API Clipboard indisponible", "Impossible de copier le lien sur ce navigateur. Vous pouvez le copier ici :\n\n"+mediaPath, "warning");
         }
     });
 
