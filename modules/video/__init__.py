@@ -91,7 +91,7 @@ def main():
 
                         # Si on est dans les retry acceptables
                         if media.passes <= int(config["transcoding"]["maxRetry"]):
-                            print("    > Pass {}/{}...".format(media.passes, config["medias_max_retry"]))
+                            print("    > Pass {}/{}...".format(media.passes, config["transcoding"]["maxRetry"]))
                             print("")
 
                             # Fonction anonyme permettant d'envoyer une update

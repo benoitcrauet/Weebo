@@ -1,16 +1,12 @@
-from flask import Flask, send_from_directory
-from flask_socketio import SocketIO
+from flask import Flask, send_from_directory, abort, request
 from flask_cors import CORS
-import time
 import sys
 import os
-import logging
 from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
 from colorama import Back, Fore, Style
 
 from lib.config import config
-from lib.arguments import arguments
 from lib.socketio import SocketIOInstance
 
 
