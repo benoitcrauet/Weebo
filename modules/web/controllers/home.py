@@ -37,7 +37,7 @@ def home():
         desc(Conductor.year),
         desc(Conductor.month),
         desc(Conductor.day)
-    ).limit(4).all();
+    ).limit(5).all();
 
     # Trier les résultats par la propriété virtuelle date en utilisant Python
     conductors = sorted(conductors, key=lambda x: x.date, reverse=True)
