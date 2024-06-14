@@ -1106,6 +1106,21 @@ function clickLineEdit(id=null, insertAfter=null) {
 
 
 
+/**
+ * Remplace les URL par des liens cliquables
+ **/
+function textToLinks(input) {
+    // Expression régulière pour détecter les liens dans le texte
+    var regex = /(https?:\/\/[^\s]+)/g;
+
+    // Remplacer chaque lien détecté par une balise <a>
+    return input.replace(regex, function(lien) {
+        return '<a href="' + lien + '" onclick="window.open(this.href); return false;">' + lien + '</a>';
+    });
+}
+
+
+
 
 /**
  * Parse du markdown pour le transformer en HTML.
@@ -1119,8 +1134,14 @@ function parseMarkdown(markdown) {
     markdown = markdown.replace(/\*(.*?)\*/g, '<em>$1</em>'); // italique
     // Remplace le souligné
     markdown = markdown.replace(/__(.*?)__/g, '<u>$1</u>');
+
+    // Ajout des liens
+    markdown = textToLinks(markdown);
+
     return markdown;
 }
+
+
 
 
 /**

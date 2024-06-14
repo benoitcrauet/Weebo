@@ -427,6 +427,9 @@ function lineSetDatas(element, line) {
     else
         element.querySelector(".cond-line-desc").innerText = text;
 
+    // On ajoute les liens
+    element.querySelector(".cond-line-desc").innerHTML = textToLinks(element.querySelector(".cond-line-desc").innerHTML);
+
     // On édite les boutons
     element.querySelector(".cond-line-action-edit").dataset.id = id;
     element.querySelector(".cond-line-action-delete").dataset.id = id;
