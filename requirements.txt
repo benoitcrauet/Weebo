@@ -11,3 +11,4 @@ proglog
 requests
 colorama
 pyyaml
+hashlib

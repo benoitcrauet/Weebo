@@ -1,5 +1,6 @@
 import hashlib
 import codecs
+import hashlib
 
 def generateVdoRoomID(guid):
     guid_bytes = guid.encode("utf-8")
@@ -25,3 +26,13 @@ def generateVdoGuestHash(guid, key):
     hash_object = hashlib.sha256(guid_bytes)
     hash_hex = hash_object.hexdigest()
     return hash_hex[:12]
+
+def generateVdoHash(password, salt="vdo.ninja", length=4):
+    encoded_text = "{}{}".format(password, salt).encode('utf-8')
+    hash_object = hashlib.sha256(encoded_text)
+    hash_hex = hash_object.hexdigest()
+
+    if length:
+        hash_hex = hash_hex[:length]
+
+    return hash_hex

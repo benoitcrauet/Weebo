@@ -18,7 +18,7 @@ from lib.db import session
 from lib.models import Show, Conductor, Line, Media
 from lib.guid import generate_guid
 from lib.dict import model_to_dict
-from lib.vdo import generateVdoGuestHash, generateVdoRoomID, generateVdoRemoteHash, generateVdoCoDirectorHash
+from lib.vdo import generateVdoGuestHash, generateVdoRoomID, generateVdoRemoteHash, generateVdoCoDirectorHash, generateVdoHash
 from lib.config import config
 from lib.picture import ResizeMaximal
 
@@ -304,7 +304,7 @@ def conductorsView(show_guid, cond_guid=None):
             inviteParams["welcomeimage"] = config["web"]["baseUrl"]+"/"+config["directories"]["images"]+"/"+show.logo
         # On rajoute le mot de passe s'il y en a un
         if conductor.vdoPassword!="":
-            inviteParams["password"] = ""
+            inviteParams["hash"] = generateVdoHash(conductor.vdoPassword)
         
         inviteLink = "https://vdo.ninja/?"+urlencode(inviteParams)
 
@@ -356,7 +356,7 @@ def conductorsView(show_guid, cond_guid=None):
     }
     # On rajoute le mot de passe s'il y en a un
     if conductor.vdoPassword!="":
-        urlParams["password"] = ""
+        urlParams["hash"] = generateVdoHash(conductor.vdoPassword)
     guestsLink = "https://vdo.ninja/?"+urlencode(urlParams)
 
 
@@ -370,19 +370,13 @@ def conductorsView(show_guid, cond_guid=None):
     }
     # On rajoute le mot de passe s'il y en a un
     if conductor.vdoPassword!="":
-        urlParams["password"] = ""
+        urlParams["hash"] = generateVdoHash(conductor.vdoPassword)
     directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
 
     # On récupère les contraintes de lien
     linksConstraints = config["linksConstraints"]
     
     return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web"]["baseUrl"], medias_dir=config["directories"]["medias"], linksConstraints=linksConstraints)
-
-
-
-
-
-
 
 
 
