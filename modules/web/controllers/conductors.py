@@ -6,7 +6,7 @@ from flask_socketio import SocketIO
 from flask_cors import CORS
 import wtforms
 import wtforms.validators as validators
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from urllib.parse import urlencode
 import locale
 import json
@@ -125,7 +125,6 @@ def conductorsEdit(show_guid, cond_guid=None):
     
     form = FormConductorEdit(obj=conductor)
 
-
     # On récupère les templates de l'émission et on les ajoute au champ template
     templates = session.query(Conductor).filter(Conductor.type == "template").filter(Conductor.show_id == show.id).order_by(Conductor.name).all()
     templateList = [(t.id, t.name) for t in templates]
@@ -134,48 +133,60 @@ def conductorsEdit(show_guid, cond_guid=None):
 
     # Validation du formulaire
     if form.validate_on_submit():
-        # Si on a un ID on récupère l'objet
-        if form.id.data!="":
-            conductor = session.query(Conductor).filter(Conductor.id == form.id.data).first()
-            if conductor==None:
-                return "Invalid conductor ID"
-        else:
-            conductor = Conductor()
         
-        conductor.type = form.type.data
-        conductor.name = form.name.data.strip()
-        conductor.day = form.day.data
-        conductor.month = form.month.data
-        conductor.year = form.year.data
-        conductor.guests = form.guests.data
+        # On récupère les différentes dates de diffusion déjà existantes
+        conductors = session.query(Conductor).filter(Conductor.type == "operational").filter(Conductor.show_id == show.id).filter(Conductor.id != conductor.id).all()
+        dateList = ["{}-{}-{}".format(c.year, c.month, c.day) for c in conductors]
 
-        conductor.vdoEnable = form.vdoEnable.data
-        conductor.vdoPassword = form.vdoPassword.data.strip()
+        # On vérifie que la date n'existe pas déjà
+        selectedDate = "{}-{}-{}".format(form.year.data, form.month.data, form.day.data)
 
-        conductor.show = show
-
-
-        guests_cleaner = [l.strip() for l in conductor.guests.splitlines() if l.strip()]
-        conductor.guests = '\n'.join(guests_cleaner)
-
-
-        if form.id.data=="":
-            session.add(conductor)
+        if selectedDate in dateList:
+            form.day.errors.append("This date is already taken by another conductor in database.")
         else:
-            session.merge(conductor)
-        session.commit()
+
+            # Si on a un ID on récupère l'objet
+            if form.id.data!="":
+                conductor = session.query(Conductor).filter(Conductor.id == form.id.data).first()
+                if conductor==None:
+                    return "Invalid conductor ID"
+            else:
+                conductor = Conductor()
+        
+            conductor.type = form.type.data
+            conductor.name = form.name.data.strip()
+            conductor.day = form.day.data
+            conductor.month = form.month.data
+            conductor.year = form.year.data
+            conductor.guests = form.guests.data
+
+            conductor.vdoEnable = form.vdoEnable.data
+            conductor.vdoPassword = form.vdoPassword.data.strip()
+
+            conductor.show = show
+
+            guests_cleaner = [l.strip() for l in conductor.guests.splitlines() if l.strip()]
+            conductor.guests = '\n'.join(guests_cleaner)
 
 
-        # Si c'est une création et qu'on a un fromTemplate
-        if not editMode and form.fromTemplate.data!="":
-            lines = session.query(Line).filter(Line.conductor_id == form.fromTemplate.data).all()
-            # On insert toutes les lignes
-            for l in lines:
-                newLine = Line(type=l.type, name=l.name, text=l.text, order=l.order, jingle=l.jingle, conductor=conductor, done=False)
-                session.add(newLine)
+
+            if form.id.data=="":
+                session.add(conductor)
+            else:
+                session.merge(conductor)
             session.commit()
 
-        return redirect(url_for("conductors.conductorsList", show_guid=show_guid))
+
+            # Si c'est une création et qu'on a un fromTemplate
+            if not editMode and form.fromTemplate.data!="":
+                lines = session.query(Line).filter(Line.conductor_id == form.fromTemplate.data).all()
+                # On insert toutes les lignes
+                for l in lines:
+                    newLine = Line(type=l.type, name=l.name, text=l.text, order=l.order, jingle=l.jingle, conductor=conductor, done=False)
+                    session.add(newLine)
+                session.commit()
+
+            return redirect(url_for("conductors.conductorsList", show_guid=show_guid))
     
     return render_template("conductors/conductorsEdit.jinja2", show=show, conductor=conductor, form=form, editMode=editMode)
 
@@ -282,7 +293,7 @@ def conductorsView(show_guid, cond_guid=None):
             "nohangupbutton": "", # On cache le bouton raccrocher pour éviter les erreurs
             "fullscreenbutton": "", # On permet l'affichage en plein écran
             "grid": "", # Ajout de la grille des tiers
-            "channelcount": "1", # Micro en mono
+            "channelcount": "1", # Micro en mono"
         }
         # On rajoute l'image de bienvenue s'il y en a une
         if show.logo:
