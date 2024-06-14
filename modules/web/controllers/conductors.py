@@ -293,7 +293,11 @@ def conductorsView(show_guid, cond_guid=None):
             "nohangupbutton": "", # On cache le bouton raccrocher pour éviter les erreurs
             "fullscreenbutton": "", # On permet l'affichage en plein écran
             "grid": "", # Ajout de la grille des tiers
-            "channelcount": "1", # Micro en mono"
+            "channelcount": "1", # Micro en mono
+            "agc": "1", # Auto-gain control ON
+            "gain": "70", # Volume de l'invité en %
+            "limiter": "", # Activation du limiteur audio
+            "gate": "1", # Activation du noise gate
         }
         # On rajoute l'image de bienvenue s'il y en a une
         if show.logo:
@@ -345,6 +349,10 @@ def conductorsView(show_guid, cond_guid=None):
         "nohangupbutton": "", # On cache le bouton raccrocher pour éviter les erreurs
         "grid": "", # Ajout de la grille des tiers
         "channelcount": "1", # Micro en mono
+        "agc": "1", # Auto-gain control ON
+        "gain": "70", # Volume de l'invité en %
+        "limiter": "", # Activation du limiteur audio
+        "gate": "1", # Activation du noise gate
     }
     # On rajoute le mot de passe s'il y en a un
     if conductor.vdoPassword!="":
