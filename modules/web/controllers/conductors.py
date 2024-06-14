@@ -653,6 +653,27 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
         transcode = {}
         if data.get("transcode"):
             transcode = data.get("transcode")
+        
+
+
+        # On simplifie la rotation
+        if not isinstance(transcode, dict):
+            transcode = {
+                "rotate": 0
+            }
+        
+        rotate_value = transcode.get("rotate", 0)
+        try:
+            rotate_value = int(rotate_value)
+        except (ValueError, TypeError):
+            rotate_value = 0
+        
+        if rotate_value not in {0, 90, 180, 270}:
+            rotate_value = 0
+        
+        transcode["rotate"] = rotate_value
+
+
 
         # On stocke l'objet du fichier
         file = request.files["file"]
@@ -669,6 +690,9 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
                 # On ouvre l'image
                 picture_bytes = file.read()
                 image = Image.open(BytesIO(picture_bytes))
+
+                # On pivote l'image
+                image = image.rotate(0-transcode["rotate"], expand=True)
 
                 # On redimensionne l'image pour le main et pour la miniature
                 w,h = image.size
