@@ -199,6 +199,7 @@ class FormDelete(FlaskForm):
     submit = wtforms.SubmitField("Supprimer")
 
 
+
 @bp.route("/conductors/<string:show_guid>/<string:cond_guid>/delete", methods=["GET", "POST"])
 def conductorsDelete(show_guid, cond_guid=None):# On check si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -226,7 +227,6 @@ def conductorsDelete(show_guid, cond_guid=None):# On check si l'émission existe
         return redirect(url_for("conductors.conductorsList", show_guid=show.id))
     
     return render_template("conductors/conductorsDelete.jinja2", show=show, conductor=conductor, form=form)
-
 
 
 
@@ -274,6 +274,8 @@ def conductorsView(show_guid, cond_guid=None):
         # On fabrique le hash de l'utilisateur
         streamID = generateVdoGuestHash(conductor.id, k)
 
+
+
         # On fabrique le lien d'invitation
         inviteParams = {
             "room": vdoRoomID, # Room ID
@@ -308,12 +310,13 @@ def conductorsView(show_guid, cond_guid=None):
         
         inviteLink = "https://vdo.ninja/?"+urlencode(inviteParams)
 
+
+
         # On fabrique le lien solo
         soloParams = {
             "room": vdoRoomID, # Room ID
             "view": streamID, # Stream ID
             "solo": "", # Vue solo
-            "password": conductor.vdoPassword
         }
 
         # On rajoute le token OBS mais uniquement sur le premier lien
@@ -325,6 +328,13 @@ def conductorsView(show_guid, cond_guid=None):
             soloParams["password"] = conductor.vdoPassword
         soloLink = "https://vdo.ninja/?"+urlencode(soloParams)
 
+
+
+        # On fabrique le lien permanent
+        soloPermalink = config["web"]["baseUrl"]+url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=k+1)
+
+
+
         # On compile le tout et on ajoute à la liste
         obj = {
             "name": guestName,
@@ -332,9 +342,12 @@ def conductorsView(show_guid, cond_guid=None):
             "cam_number": k,
             "link_invite": inviteLink,
             "link_solo": soloLink,
+            "permalink_solo": soloPermalink,
         }
         vdoLinks.append(obj)
     
+
+
 
     # On fabrique le lien guests
     urlParams = {
@@ -373,10 +386,73 @@ def conductorsView(show_guid, cond_guid=None):
         urlParams["hash"] = generateVdoHash(conductor.vdoPassword)
     directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
 
+
+
     # On récupère les contraintes de lien
     linksConstraints = config["linksConstraints"]
     
     return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web"]["baseUrl"], medias_dir=config["directories"]["medias"], linksConstraints=linksConstraints)
+
+
+
+@bp.route("/cameraslink/<string:show_guid>/<int:cam_number>")
+def vdoPermalink(show_guid, cam_number):
+    # Est-ce que le show existe ?
+    show = session.query(Show).filter(Show.id == show_guid).first()
+    if not show:
+        abort(404, description="Cette émission n'existe pas.")
+    
+    # On liste les conducteurs dans l'ordre de diffusion
+    conductors = session.query(Conductor).filter(Conductor.type == "operational").filter(Conductor.show_id == show.id).order_by(Conductor.year, Conductor.month, Conductor.day).all()
+    
+    # On prend la date de référence
+    ref = datetime.now() - timedelta(hours=6)
+
+    selectedConductor = None
+    # On explore la liste des conducteurs et on garde le dernier en date
+    for c in conductors:
+        selectedConductor = c
+
+        # Si la date correspond, on s'arrête là
+        if c.year==ref.year and c.month==ref.month and c.day==ref.day:
+            break
+    
+    # Si on a pas de conducteur trouvé, on renvoie un 503
+    if selectedConductor:
+        # On génère l'ID de la room VDO
+        vdoRoomID = generateVdoRoomID(selectedConductor.id)
+
+        # On génère le streamID
+        streamID = generateVdoGuestHash(selectedConductor.id, cam_number-1)
+
+        # Code de remote OBS
+        obsRemote = generateVdoRemoteHash(selectedConductor.id)
+
+        # On fabrique le lien solo
+        soloParams = {
+            "room": vdoRoomID, # Room ID
+            "view": streamID, # Stream ID
+            "solo": "" # Vue solo
+        }
+
+        # On rajoute le token OBS mais uniquement sur le premier lien
+        if cam_number-1 <= 0:
+            soloParams["remote"] = obsRemote # Token de pilotage OBS
+        
+        # On rajoute le mot de passe s'il y en a un
+        if selectedConductor.vdoPassword!="":
+            soloParams["password"] = selectedConductor.vdoPassword
+        redirectLink = "https://vdo.ninja/?"+urlencode(soloParams)
+
+        # On redirige
+        return redirect(redirectLink, code=307)
+        return "Redirect to {}<br><br>Conductor name: {}".format(redirectLink, selectedConductor.name)
+
+    abort(503, description="Il n'y a pas encore de conducteurs dans cette émission.")
+    return ""
+
+
+
 
 
 

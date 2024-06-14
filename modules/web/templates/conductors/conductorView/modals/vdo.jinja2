@@ -136,7 +136,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col" width="25%">Participant</th>
-                                    <th scope="col">Caméra</th>
+                                    <th scope="col">Source</th>
                                     <th scope="col">Lien</th>
                                 </tr>
                             </thead>
@@ -148,11 +148,23 @@
                                             {{ l.name }}
                                         </th>
                                         <td>
-                                            <code>CAM {{ l.cam_number + 1 }}</code>
+                                            <code>CAM {{ l.cam_number+1 }}</code>
                                         </td>
                                         <td>
                                             <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="bi bi-link" title="Lien permanent"></i>
+                                                </span>
                                                 <input type="text" class="form-control font-monospace" readonly value="{{ l.link_solo }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="bi bi-magic" title="Lien intelligent"></i>
+                                                </span>
+                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.permalink_solo }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
