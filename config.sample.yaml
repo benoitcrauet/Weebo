@@ -99,7 +99,7 @@ linksConstraints:
     ignoreCase: true
     description: Lien vers un post instagram.
     refuse: false
-    alert: "Merci de télécharger ce post Instagram dans le conducteur en tant que média."
+    alert: "Merci de télécharger ce post Instagram dans le conducteur en tant que média. Aidez-vous du site https://snapinsta.app pour télécharger des images et vidéos Instagram."
 
   - pattern: ^https?://(www\.)?facebook\.com/.*/posts/.*$
     ignoreCase: true
@@ -113,17 +113,17 @@ linksConstraints:
     refuse: true
     alert: "Lien refusé. Merci de télécharger cette photo Facebook dans le conducteur en tant que média."
 
-  - pattern: ^https?://.*\.fbcdn\.net/.*$
-    ignoreCase: true
-    description: Lien vers un asset sur le CDN Facebook.
-    refuse: true
-    alert: "Lien refusé. Merci de télécharger cette photo ou cette vidéo Facebook dans le conducteur en tant que média."
-
   - pattern: ^https?://(www\.)?facebook\.com/.*/videos/.*$
     ignoreCase: true
     description: Lien vers une vidéo Facebook.
     refuse: false
     alert: "Merci de télécharger cette vidéo Facebook dans le conducteur en tant que média."
+
+  - pattern: ^https?://.*\.fbcdn\.net/.*$
+    ignoreCase: true
+    description: Lien vers un asset sur le CDN Facebook.
+    refuse: true
+    alert: "Lien refusé. Merci de télécharger cette photo ou cette vidéo Facebook dans le conducteur en tant que média."
 
   - pattern: ^https?://(www\.)?tiktok\.com/.*/video/.*$
     ignoreCase: true
