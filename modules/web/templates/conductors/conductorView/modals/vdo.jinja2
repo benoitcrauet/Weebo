@@ -48,7 +48,7 @@
                                                     <i class="bi bi-box-arrow-up-right"></i>
                                                     Accéder
                                                 </a>
-                                                <input type="text" class="form-control" readonly value="{{ l.link_invite }}" onclick="this.select();">
+                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.link_invite }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
@@ -70,7 +70,7 @@
                             </label>
                             <div class="col-9">
                                 <div class="input-group">
-                                    <input type="text" id="vdoInviteLinkOtherGuests" class="form-control" readonly value="{{ guestsLink }}" onclick="this.select();">
+                                    <input type="text" id="vdoInviteLinkOtherGuests" class="form-control font-monospace" readonly value="{{ guestsLink }}" onclick="this.select();">
                                     <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                         <i class="bi bi-copy"></i>
                                     </button>
@@ -94,7 +94,7 @@
                                         <i class="bi bi-box-arrow-up-right"></i>
                                         Accéder
                                     </a>
-                                    <input type="text" id="vdoDirectorLink" class="form-control" readonly value="{{ directorLink }}" onclick="this.select();">
+                                    <input type="text" id="vdoDirectorLink" class="form-control font-monospace" readonly value="{{ directorLink }}" onclick="this.select();">
                                     <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                         <i class="bi bi-copy"></i>
                                     </button>
@@ -105,6 +105,28 @@
                                 </span>
                             </div>
                         </div>
+
+                        {% if conductor.vdoPassword | trim != "" %}
+                            <hr>
+
+                            <div class="row mb-3">
+                                <label class="col-form-label col-3" for="vdoPassword">
+                                    <i class="bi bi-key-fill"></i>
+                                    Mot de passe
+                                </label>
+                                <div class="col-9">
+                                    <div class="input-group">
+                                        <input type="text" id="vdoPassword" class="form-control font-monospace" readonly value="{{ conductor.vdoPassword }}" onclick="this.select();">
+                                        <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                            <i class="bi bi-copy"></i>
+                                        </button>
+                                    </div>
+                                    <span class="form-text">
+                                        Ce mot de passe vous est indispensable pour accéder à la room VDO.
+                                    </span>
+                                </div>
+                            </div>
+                        {% endif %}
 
 
                     </div>
@@ -130,7 +152,7 @@
                                         </td>
                                         <td>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" readonly value="{{ l.link_solo }}" onclick="this.select();">
+                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.link_solo }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
