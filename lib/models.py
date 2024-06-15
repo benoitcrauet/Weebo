@@ -20,6 +20,7 @@ class Show(Base):
     webChannels = relationship("WebChannel", back_populates="show", cascade="all, delete")
     conductors = relationship("Conductor", back_populates="show", cascade="all, delete")
     medias = relationship("Media", back_populates="show", cascade="all, delete")
+    events = relationship("Event", back_populates="show", cascade="all, delete")
 
 def delete_show_avatar(mapper, connection, target):
     if target.logo:
@@ -80,6 +81,9 @@ class Conductor(Base):
     type = Column(Enum("operational", "template", name="type_enum"), default="operational")
     currentMediaWeb = Column(String)
     currentMedia = Column(String)
+
+    recording = Column(Boolean, default=False)
+    streaming = Column(Boolean, default=False)
 
     year = Column(Integer)
     month = Column(Integer)
@@ -183,3 +187,26 @@ def delete_media_files(mapper, connection, target):
                 print("ERROR WHILE DELETING MEDIA FILES FOR ID {}:\n{}".format(target.id, e))
         
 event.listen(Media, "before_delete", delete_media_files)
+
+
+
+
+
+
+class Event(Base):
+    __tablename__ = "Events"
+
+    id = Column(String, primary_key=True, default=lambda: str(generate_guid()))
+    date = Column(DateTime)
+    description = Column(String)
+    type = Column(String)
+
+    show_id = Column(String, ForeignKey("Shows.id"), nullable=True)
+    show = relationship("Show", back_populates="events")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.date:
+            self.date = datetime.now()
+        if not self.id:
+            self.id = generate_guid()

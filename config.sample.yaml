@@ -30,12 +30,14 @@ transcoding:
   maxRetry: 20
 
 
-# Paramètres des conducteurs
-conductors:
-  # Heure à laquelle le nettoyage des conducteurs doit s'opérer
-  cleanerSchedule: 4
-  # Ancienneté maximale des conducteurs en jours pour la suppression automatique
-  retention: 90
+# Paramètres de l'auto nettoyage
+cleaner:
+  # Heure à laquelle l'auto nettoyage doit s'opérer
+  schedule: 4
+  # Ancienneté maximale des conducteurs en jours
+  conductorRetention: 90
+  # Nombre maximal d'évènements à conserver pour une émission
+  maxEvents: 350
 
 
 # Contraintes de liens

@@ -12,6 +12,7 @@ from lib.db import session
 from lib.models import Show
 from lib.guid import generate_guid
 from lib.picture import ResizeMinimal
+from lib.config import config
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -116,7 +117,7 @@ def showEdit(guid=None):
 
         return redirect(url_for("shows.shows"))
     
-    return render_template("shows/showEdit.jinja2", guid=guid, show=show, form=form)
+    return render_template("shows/showEdit.jinja2", guid=guid, show=show, form=form, config=config)
 
 
 

@@ -21,6 +21,8 @@ from lib.dict import model_to_dict
 from lib.vdo import generateVdoGuestHash, generateVdoRoomID, generateVdoRemoteHash, generateVdoCoDirectorHash, generateVdoHash
 from lib.config import config
 from lib.picture import ResizeMaximal
+from lib.conductors import getActiveConductor
+from lib.events import createNewEvent
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -386,8 +388,6 @@ def conductorsView(show_guid, cond_guid=None):
         urlParams["hash"] = generateVdoHash(conductor.vdoPassword)
     directorLink = "https://vdo.ninja/?"+urlencode(urlParams)
 
-
-
     # On récupère les contraintes de lien
     linksConstraints = config["linksConstraints"]
     
@@ -402,20 +402,7 @@ def vdoPermalink(show_guid, cam_number):
     if not show:
         abort(404, description="Cette émission n'existe pas.")
     
-    # On liste les conducteurs dans l'ordre de diffusion
-    conductors = session.query(Conductor).filter(Conductor.type == "operational").filter(Conductor.show_id == show.id).order_by(Conductor.year, Conductor.month, Conductor.day).all()
-    
-    # On prend la date de référence
-    ref = datetime.now() - timedelta(hours=6)
-
-    selectedConductor = None
-    # On explore la liste des conducteurs et on garde le dernier en date
-    for c in conductors:
-        selectedConductor = c
-
-        # Si la date correspond, on s'arrête là
-        if c.year==ref.year and c.month==ref.month and c.day==ref.day:
-            break
+    selectedConductor = getActiveConductor(show.id)
     
     # Si on a pas de conducteur trouvé, on renvoie un 503
     if selectedConductor:
@@ -569,11 +556,25 @@ def api_conductorsLinesListInsert(cond_guid):
 def api_conductorsLineEdit(line_guid):
     # On check si la ligne existe
     line = session.query(Line).filter(Line.id == line_guid).first()
+    conductor = None
     if line==None:
         abort(404)
+    else:
+        # On récupère le conducteur
+        conductor = session.query(Conductor).filter(Conductor.id == line.conductor_id).first()
+
+    show_id = None
+    if not conductor:
+        abort(500, description="Cette ligne est orpheline")
+    else:
+        # On récupère le show_id
+        show_id = conductor.show_id
         
     if request.is_json:
         data = request.json
+
+        # On stocke l'ancien état done
+        oldDone = line.done
 
         if "type" in data:
             line.type = data["type"];
@@ -588,7 +589,20 @@ def api_conductorsLineEdit(line_guid):
         if "done" in data:
             line.done = data["done"];
         
+
+        # On crée l'évènement si l'état "done" est différent
+        if line.type=="classic" and line.done != oldDone:
+            if line.done:
+                newEvent = createNewEvent(show_id, "line.done", "Line \"{}\" is done.".format(line.name))
+            else:
+                newEvent = createNewEvent(show_id, "line.undone", "Line \"{}\" is undone.".format(line.name))
+            # On ajoute l'évènement à la base
+            session.add(newEvent)
+        
+        # On modifie la ligne
         session.merge(line)
+
+        # On enregistre toutes les modifications dans la database
         session.commit()
 
 
@@ -1069,7 +1083,20 @@ def mediaBroadcast(cond_guid, media_guid):
 
     # Sending information to media command
     socketio.emit("conductor_command", conductorWebSocketBase(action="currentMedia", conductor=conductor.id, data_line=None, data_media=model_to_dict(media)))
+
+
+    # On crée un nouvel évènement
+    if media.type=="media":
+        newEvent = createNewEvent(conductor.show_id, "media.start", "Starting media \"{}\"".format(media.name))
+    elif media.type=="web":
+        newEvent = createNewEvent(conductor.show_id, "web.start", "Displaying web page \"{}\"".format(media.name))
     
+    session.add(newEvent)
+
+    # On met à jour la DB
+    session.commit()
+
+
     return model_to_dict(media)
 
 
@@ -1114,5 +1141,17 @@ def mediaStop(cond_guid, media_guid):
 
     # Sending information to media command
     socketio.emit("conductor_command", conductorWebSocketBase(action="currentMedia", conductor=conductor.id, data_line=None, data_media=False))
+
+
+    # On crée un nouvel évènement
+    if media.type=="media":
+        newEvent = createNewEvent(conductor.show_id, "media.stop", "Stopping media \"{}\"".format(media.name))
+    elif media.type=="web":
+        newEvent = createNewEvent(conductor.show_id, "web.stop", "Stopping web page \"{}\"".format(media.name))
+    
+    session.add(newEvent)
+
+    # On met à jour la DB
+    session.commit()
     
     return model_to_dict(media)
