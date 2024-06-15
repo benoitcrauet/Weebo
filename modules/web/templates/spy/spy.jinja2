@@ -1,0 +1,103 @@
+<html>
+    <head>
+        <title>Spy</title>
+        <style>
+            body {
+                font-family: monospace;
+                font-size: 16px;
+                color: black;
+                background: white;
+            }
+
+            #debug {
+                display: none;
+                position: absolute;
+                z-index: 10;
+                top: 0px;
+                left: 0px;
+                background: rgba(255,255,255,.75);
+                padding: 10px;
+            }
+
+            body.debug #debug {
+                display: block;
+            }
+
+            .item-name {
+                font-weight: bold;
+                display: block;
+            }
+
+            .item-name::after {
+                content: ":";
+            }
+
+            .item-value {
+                display: block;
+            }
+
+            #alert {
+                position: absolute;
+                z-index: 0;
+                top: 0px;
+                left: 0px;
+                right: 0px;
+                bottom: 0px;
+                background-color: red;
+                animation: redBlink 1s 0s alternate infinite;
+                display: none;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #alert.info {
+                background-color: transparent;
+                animation: none;
+            }
+
+            #alert.show {
+                display: flex;
+            }
+
+            #alertContent {
+                display: inline-block;
+                padding: 15px;
+                font-size: 24px;
+                background-color: rgba(0,0,0,.6);
+                color: white;
+                max-width: 90vw;
+            }
+
+            #alertContent h1 {
+                margin: 0px 0px 10px 0px;
+                text-align: center;
+            }
+
+            @keyframes redBlink {
+                from { background: red; }
+                to { background: darkred; }
+            }
+        </style>
+        <script src="/static/js/jquery.min.js"></script>
+        <script src="/static/js/socket/socket.io.min.js"></script>
+    </head>
+    <body class="">
+        <div id="debug">
+            <h1>Debug</h1>
+            <ul id="debuglist">
+            </ul>
+        </div>
+        <div id="alert">
+            <span id="alertContent"></span>
+        </div>
+        <script>
+            const show = "{{ show.id if show else "" }}";
+            const conductor = "{{ conductor.id if conductor else "" }}";
+
+            const url = {
+                "setStatus": "{{ url_for("spy.setStatus", show_guid=show.id) }}"
+            };
+        </script>
+        <script src="/static/js/spy/spy.js"></script>
+    </body>
+</html>

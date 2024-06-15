@@ -1,27 +1,27 @@
 {% extends "_layout.jinja2" %}
 
 {% block title %}
-    Jingles - Sélectionnez une émission
+    Évènements - Sélectionnez une émission
 {% endblock %}
 
 {% block content %}
     <div class="container">
-        <h1>Jingles</h1>
+        <h1>Évènements</h1>
 
-        <p class="lead">Cliquez sur une émission pour voir les jingles disponibles.</p>
+        <p class="lead">Cliquez sur une émission pour voir ses évènements.</p>
 
         <div class="shows-list">
             {% for s in shows %}
                 <div class="card" style="width: 18rem;">
                     {% if s.logo!=None and s.logo!="" %}
-                        <a href="{{ url_for("jingles.jinglesList", show_guid=s.id) }}">
+                        <a href="{{ url_for("events.eventsList", show_guid=s.id) }}">
                             <img src="/images/{{ s.logo }}" class="card-img-top bg-dark" alt="" style="max-height: 150px; object-fit: cover;">
                         </a>
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title">{{ s.name }}</h5>
                         <p class="card-text">{{ s.description }}</p>
-                        <a href="{{ url_for("jingles.jinglesList", show_guid=s.id) }}" class="btn btn-primary">Gérer les jingles</a>
+                        <a href="{{ url_for("events.eventsList", show_guid=s.id) }}" class="btn btn-primary">Voir les évènements</a>
                     </div>
                 </div>
             {% endfor %}

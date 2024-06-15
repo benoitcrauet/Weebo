@@ -16,6 +16,7 @@ from lib.models import Show, Media, MediaChannel
 from lib.guid import generate_guid
 from lib.config import config
 from lib.dict import model_to_dict
+from lib.events import createNewEvent
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -241,6 +242,13 @@ def jingleDelete(show_guid, guid):
 def api_jingleLaunch(guid):
     # On check si le jingle existe
     media = session.query(Media).filter(Media.id == guid).first()
+    if not media:
+        abort(404, description="Ce média n'existe pas")
+    else:
+        # On récupère le show
+        show = session.query(Show).filter(Show.id == Media.show_id).first()
+        if not show:
+            abort(500, description="Ce jingle est orphelin.")
     
     # On met à jour le champ média
     media.currentMedia = media.id
@@ -263,6 +271,14 @@ def api_jingleLaunch(guid):
 
     # Sending object
     socketio.emit("media_command", object_to_send)
+
+
+    # On crée un nouvel évènement
+    newEvent = createNewEvent(show.id, "jingle.start", "{}".format(media.name))
+    session.add(newEvent)
+
+    # On met à jour la DB
+    session.commit()
     
     return model_to_dict(media)
 

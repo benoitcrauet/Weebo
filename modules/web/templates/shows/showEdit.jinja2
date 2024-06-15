@@ -24,6 +24,64 @@
             </div>
         </div>
 
+        {% if not guid == None %}
+            <div class="accordion mb-3" id="accordionDetails">
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#channelDetails" aria-expanded="false" aria-controls="collapseOne">
+                            Comment intégrer l'espion de cette émission sur OBS ?
+                        </button>
+                    </div>
+                    <div id="channelDetails" class="accordion-collapse collapse" data-bs-parent="#accordionDetails">
+                        <div class="accordion-body">
+                            <p>
+                                Afin d'avoir les fonctionnalités complètes de Weebo sur cette émission, vous devez intégrer une source spéciale qui "espionne" votre logiciel OBS.<br>
+                                Pour l'intégrer, vous devez simplement ajouter une source "<b><i>Navigateur Web</i></b>" (ou "<b><i>Browser</i></b>") dans votre configuration.<br>
+                                Vous trouverez ci-dessous les paramètres à saisir dans la source OBS :
+                            </p>
+
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">
+                                            URL (à copier/coller)
+                                        </th>
+                                        <td>
+                                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("spy.spy", show_guid=show.id) }}" onclick="this.select();">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Désactiver la source quand elle n'est pas visible
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Rafraîchir le navigateur lorsque la scène devient active
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Permissions de la page
+                                        </th>
+                                        <td>
+                                            Accès complet à OBS
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
         <form action="" method="post" enctype="multipart/form-data">
 
             {% if form.errors.values() %}
