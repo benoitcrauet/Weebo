@@ -10,6 +10,9 @@ const timecodeOutput = document.getElementById("timecodesOutput");
 // Conteneur des filtres de type
 const filtersTypeContainer = document.getElementById("filtersType");
 
+// Checkbox de recalcul à partir de la première scène
+const checkboxResetOnFirstScene = document.getElementById("eventsResetOnFirstScene");
+
 
 // Liste des types à cocher automatiquement
 const autoCheckTypes = [
@@ -18,6 +21,8 @@ const autoCheckTypes = [
     "jingle.start",
 ];
 
+// Mode de recalcul depuis la première scène rencontrée (intro)
+let resetOnFirstScene = false;
 
 /**
  * Enregistrement des eventListeners des évènements
@@ -38,6 +43,17 @@ function registerEventListeners() {
             timecodeOutput.value = tcReadable;
         });
     });
+
+    // Case à cocher pour le recalcul depuis la première scène
+    checkboxResetOnFirstScene.addEventListener("input", (e) => {
+        resetOnFirstScene = e.target.checked;
+
+        // On génère les timecodes
+        let tc = generateTimecodes();
+        let tcReadable = timecodeToText(tc);
+        // On affiche les timecodes
+        timecodeOutput.value = tcReadable;
+    });
 }
 
 
@@ -45,14 +61,16 @@ function registerEventListeners() {
  * Fonction d'auto-sélection des évènements
  */
 function autoSelectLastBroadcast() {
+    let streamingStart = false;
     let streamingEnd = false;
+    let firstScene = true;
 
     let idList = []; // Liste des IDs à cocher
 
     // On remonte la liste
     eventsList.querySelectorAll(".event-item").forEach((element) => {
         // On récupère l'ID
-        const id = element.getAttribute("id");
+        const id = element.dataset.id;
         // Le type
         const type = element.dataset.type;
 
@@ -60,6 +78,9 @@ function autoSelectLastBroadcast() {
         if(type=="streaming.start") {
             // On reset la liste
             idList = [];
+
+            // On reset le flag de première scène
+            firstScene = false;
             
             // On marque le flag
             streamingStart = true;
@@ -69,6 +90,15 @@ function autoSelectLastBroadcast() {
         
         // Tant qu'un streaming end n'a pas été trouvé...
         if(!streamingEnd) {
+
+            if(streamingStart) {
+                if(!firstScene && type=="scene.change") {
+                    // C'est un changement de scène : on coche le premier uniquement
+                    idList.push(id);
+
+                    firstScene = true;
+                }
+            }
 
             if(autoCheckTypes.includes(type))
                 idList.push(id);
@@ -82,16 +112,25 @@ function autoSelectLastBroadcast() {
     });
 
     // On coche toutes les cases sélectionnées
-    for(let k in idList) {
-        const id = idList[k];
-        const element = document.getElementById(id);
+    eventsList.querySelectorAll(".event-item").forEach((element) => {
+        const id = element.dataset.id;
         const checkbox = element.querySelector(".event-item-checkbox input");
 
-        checkbox.checked = true;
+        if(idList.includes(id)) {
+            // On affiche l'élément
+            element.style.display = "table-row";
+
+            // On coche la case
+            checkbox.checked = true;
+        }
+        else {
+            // On décoche la case
+            checkbox.checked = false;
+        }
         // On diffuse l'évènement
         let event = new Event("input");
         checkbox.dispatchEvent(event);
-    }
+    });
 }
 
 
@@ -101,6 +140,9 @@ function autoSelectLastBroadcast() {
 function generateTimecodes() {
     // Évènement de référence
     let reference = null;
+
+    // Flag de première scène
+    let firstScene = false;
 
     // Liste des évènements
     let list = [];
@@ -121,9 +163,32 @@ function generateTimecodes() {
             // Si on a pas de référence, on l'enregistre
             if(reference === null)
                 reference = event;
+            
+            // Si on rencontre une scène pour la première fois
+            // et que le mode est actif, on reset la référence
+            if(resetOnFirstScene && !firstScene && event.type=="scene.change") {
+                firstScene = true;
+
+                // On calcule le delta avec la référence
+                let tmpDelta = Math.floor((event.date.getTime() - reference.date.getTime()) / 1000);
+
+                // On défini le delta calculé
+                const separator = {
+                    id: "",
+                    date: event.date,
+                    delta: tmpDelta,
+                    type: "intro.end",
+                    description: "#################### INTRO END ####################"
+                }
+                list.push(separator);
+
+                reference = event;
+                
+
+            }
 
             // On calcule le delta avec la référence
-            const delta = Math.floor((event.date.getTime() - reference.date.getTime()) / 1000);
+            let delta = Math.floor((event.date.getTime() - reference.date.getTime()) / 1000);
 
             // On défini le delta calculé
             event.delta = delta;
@@ -217,7 +282,7 @@ function filterType(pattern, show) {
             console.debug(type, regexp, test, show!==false);
 
             if(test) {
-                if(show===false)
+                if(show===false && element.dataset.checked=="false")
                     element.style.display = "none";
                 else
                     element.style.display = "table-row";
@@ -237,12 +302,15 @@ function filterType(pattern, show) {
 document.addEventListener("DOMContentLoaded", (e) => {
     eventsContainer.scrollTop = eventsContainer.scrollHeight;
 
+    // On stocke l'option de reset automatique du timing
+    resetOnFirstScene = checkboxResetOnFirstScene.checked;
+
+    // On initialise les filtres
+    initFilters();
+
     // On crée les event listeners
     registerEventListeners();
 
     // On coche automatiquement la dernière diffusion
     autoSelectLastBroadcast();
-
-    // On initialise les filtres
-    initFilters();
 });
