@@ -37,7 +37,7 @@ cleaner:
   # Ancienneté maximale des conducteurs en jours
   conductorRetention: 90
   # Nombre maximal d'évènements à conserver pour une émission
-  maxEvents: 350
+  maxEvents: 400
 
 
 # Contraintes de liens
