@@ -13,13 +13,14 @@ from lib.dict import model_to_dict
 from lib.models import Conductor, Show, Event
 from lib.conductors import getActiveConductor
 from lib.events import createNewEvent
+from lib.websocket import conductorWebSocketBase
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
 app = None
 socketio = None
 def init(flaskapp):
-    global app, bp
+    global app, bp, socketio
     app = flaskapp
     socketio = SocketIOInstance().socketio
     app.register_blueprint(bp)
@@ -71,6 +72,10 @@ def setStatus(show_guid):
 
                         session.add(newEvent)
 
+                        # Sending information to media command
+                        socketio.emit("conductor_command", conductorWebSocketBase(action=eventType, conductor=conductor.id, data_line=None, data_media=None))
+
+
                 elif "streaming" in data and isinstance(data["streaming"], bool):
                     # On crée l'évènement seulement s'il y a un changement
                     if not conductor.streaming == data["streaming"]:
@@ -82,6 +87,9 @@ def setStatus(show_guid):
                         newEvent = createNewEvent(show.id, eventType, eventDesc)
 
                         session.add(newEvent)
+
+                        # Sending information to media command
+                        socketio.emit("conductor_command", conductorWebSocketBase(action=eventType, conductor=conductor.id, data_line=None, data_media=None))
                 
                 elif "currentScene" in data and isinstance(data["currentScene"], str):
                     # On crée l'évènement

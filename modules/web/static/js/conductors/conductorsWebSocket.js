@@ -88,6 +88,30 @@ socket.on('conductor_command', function(data) {
                         reorderMedias();
                 }
             }
+
+
+            // Dans tous les cas
+            switch(action) {
+                case "recording.start":
+                    // Démarrage du recording
+                    recordingEnable(true);
+                    break;
+                case "recording.stop":
+                    // Arrêt du recording
+                    recordingEnable(false);
+                    break;
+                case "streaming.start":
+                    // Démarrage du streaming
+                    streamingEnable(true);
+                    break;
+                case "streaming.stop":
+                    // Arrêt du streaming
+                    streamingEnable(false);
+                    break;
+                default:
+                    updateLines(data_line);
+                    reorderLines();
+            }
         }
     }
     else {

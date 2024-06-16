@@ -18,9 +18,14 @@ const conductorMediasTableQuery = ".cond-line-medias-table tbody";
 // Query représentant le dragger des lignes de conducteurs
 const conductorMediasDraggerQuery = ".cond-medias-line-dragger";
 
-
-// ID du toast générique
+// Query du toast générique
 const genericToastQuery = "#genericToast";
+
+// Query de la toolbar
+const toolsbarQuery = "#toolsbar";
+
+
+
 
 
 
@@ -440,10 +445,41 @@ function calculateMediasOrder(lineID) {
 }
 
 
+
+/**
+ * Active ou désactive le mode recording
+ */
+function recordingEnable(enable) {
+    console.debug("Enable recording", enable);
+
+    if(enable) {
+        document.body.classList.add("recording");
+    }
+    else {
+        document.body.classList.remove("recording");
+    }
+}
+
+
+
+/**
+ * Active ou désactive le mode streaming
+ */
+function streamingEnable(enable) {
+    console.debug("Enable streaming", enable);
+    if(enable) {
+        document.body.classList.add("streaming");
+    }
+    else {
+        document.body.classList.remove("streaming");
+    }
+}
+
+
 /**
  * Remet à jour l'ensemble du DOM du conducteur
  */
-function refreshAllConductor(callback=null) {
+async function refreshAllConductor(callback=null) {
     console.debug("Refresh all...");
 
     // Effectue la requête GET
@@ -460,9 +496,13 @@ function refreshAllConductor(callback=null) {
                 element.remove();
             });
 
+            // On redéfini les modes recording et streaming
+            recordingEnable(data.conductor.recording);
+            streamingEnable(data.conductor.streaming);
+
             // On récupère chaque data et on place dans le tableau
-            for(let k in data) {
-                let line = data[k];
+            for(let k in data.lines) {
+                let line = data.lines[k];
                 
                 // On crée la structure DOM et on l'ajoute
                 let elements = lineStructure(activateMedias);
@@ -1030,6 +1070,36 @@ function mediasSendReorder(lineID, reorder) {
         .catch(error => {
             console.error('Erreur lors de la mise à jour de l\'ordre des médias :', error);
         });
+}
+
+
+
+
+/**
+ * Récupère les données d'un conducteur sur le serveur
+ * @param {string} id ID du conducteur à récupérer sur le serveur
+ */
+async function conductorGet(id) {
+    // Options de la requête
+    var options = {
+        method: "GET"
+    };
+    
+    // URL de l'API
+    var url = "/api/conductor/"+id;
+    
+    // Effectue la requête GET et renvoie le résultat
+    return fetch(url)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erreur lors de la récupération du conducteur');
+        }
+        return response.json();
+    })
+    .catch(error => {
+        console.error('Une erreur s\'est produite :', error);
+        return null;
+    });
 }
 
 
