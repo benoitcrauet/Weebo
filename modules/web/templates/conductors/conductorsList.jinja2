@@ -37,8 +37,10 @@
             </thead>
             <tbody>
                 {% for c in conductors %}
-                    <tr>
+                    <tr class="{{ "recording" if c.recording }} {{ "streaming" if c.streaming }}">
                         <td class="h4">
+                            <i class="bi bi-record-fill icon-record"></i>
+                            <i class="bi bi-broadcast icon-stream"></i>
                             <a href="{{ url_for("conductors.conductorsView", show_guid=show.id, cond_guid=c.id) }}">
                                 {{ c.name }}
                             </a>
@@ -72,6 +74,34 @@
                 {% endfor %}
             </tbody>
         </table>
+        <style>
+            tr.recording td, tr.streaming td {
+                animation: onAirGlow 2s alternate infinite;
+            }
+
+            @keyframes onAirGlow {
+                from { background-color: rgba(255,0,0,.1); }
+                to { background-color: rgba(255,0,0,.3); }
+            }
+
+            .icon-record {
+                color: red;
+                display: none;
+            }
+
+            .icon-stream {
+                color: cyan;
+                display: none;
+            }
+
+            .recording .icon-record {
+                display: inline;
+            }
+
+            .streaming .icon-stream {
+                display: inline;
+            }
+        </style>
 
         <hr>
 
