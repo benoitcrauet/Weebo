@@ -23,6 +23,7 @@ from lib.config import config
 from lib.picture import ResizeMaximal
 from lib.conductors import getActiveConductor
 from lib.events import createNewEvent
+from lib.websocket import conductorWebSocketBase
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -39,24 +40,6 @@ def init(flaskapp):
 
 # Définit la locale française
 locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
-
-
-
-# Génère un objet WebSocket de base pour les conducteurs
-def conductorWebSocketBase(action, conductor, data_line, data_media):
-    object = {
-        "action": None,
-        "conductor": None,
-        "data_line": {},
-        "data_media": {}
-    }
-
-    object["action"] = action
-    object["conductor"] = conductor
-    object["data_line"] = data_line
-    object["data_media"] = data_media
-
-    return object
 
 
 
@@ -446,11 +429,22 @@ def vdoPermalink(show_guid, cam_number):
 
 
 
+@bp.route("/api/conductor/<string:cond_guid>", methods=["GET"])
+def api_conductorGet(cond_guid):
+    # On check si le conducteur existe
+    conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if not cond_guid:
+        abort(404)
+    
+    # On renvoie la ligne
+    return jsonify(model_to_dict(conductor))
+
+
 @bp.route("/api/conductor/line/<string:line_guid>", methods=["GET"])
 def api_conductorsLineGet(line_guid):
     # On check si la ligne existe
     line = session.query(Line).filter(Line.id == line_guid).first()
-    if line==None:
+    if not line:
         abort(404)
     
     # On renvoie la ligne
@@ -489,7 +483,13 @@ def api_conductorsLinesList(cond_guid):
     # On récupère les lignes
     lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
 
-    return jsonify([model_to_dict(obj) for obj in lines])
+    # On compile l'objet conducteur avec les lignes encapsulées dedans
+    output = {
+        "conductor": model_to_dict(conductor),
+        "lines": [model_to_dict(obj) for obj in lines]
+    }
+
+    return jsonify(output)
 
 
 @bp.route("/api/conductor/<string:cond_guid>/lines", methods=["PUT"])

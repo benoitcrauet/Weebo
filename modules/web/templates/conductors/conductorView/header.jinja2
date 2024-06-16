@@ -22,9 +22,17 @@
                 </div>
                 <div class="col-4 text-center d-flex flex-column justify-content-center">
                     {% if conductor.type != "template" %}
-                        <h1>{{ conductor.name }}</h1>
-                        <h2>{{ show.name }}</h2>
-                        <h3>Le {{ conductor.date.strftime("%A %d %B %Y") | lower }}</h3>
+                        <h1>
+                            <i class="bi bi-record-fill" id="conductorIconRecord"></i>
+                            <i class="bi bi-broadcast" id="conductorIconStream"></i>
+                            {{ conductor.name }}
+                        </h1>
+                        <h2>
+                            {{ show.name }}
+                        </h2>
+                        <h3>
+                            Le {{ conductor.date.strftime("%A %d %B %Y") | lower }}
+                        </h3>
                     {% else %}
                         <h1>Modèle de conducteur</h1>
                         <h2>{{ conductor.name }}</h2>

@@ -1,5 +1,5 @@
 #toolsbar {
-    background-color: rgba(var(--bs-dark-rgb), 0.7) !important;
+    background-color: rgba(var(--bs-dark-rgb), 0.7);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     -moz-backdrop-filter: blur(10px);
@@ -8,6 +8,19 @@
     height: 60px;
     padding: 0px 15px;
     box-sizing: border-box;
+}
+
+.streaming #toolsbar {
+    animation: onAir 2s alternate infinite;
+}
+
+.recording #toolsbar {
+    animation: onAir 2s alternate infinite;
+}
+
+@keyframes onAir {
+    from { background-color: rgba(255, 0, 81, 0.1); }
+    to { background-color: rgba(255, 0, 81, 0.3); }
 }
 
     #toolsbar h1 {
@@ -33,6 +46,30 @@
         height: 50px;
         margin: 5px 2px;
     }
+
+
+#conductorIconRecord {
+    color: red;
+    animation: glowIcon 1s alternate infinite;
+    display: none;
+}
+.recording #conductorIconRecord {
+    display: inline;
+}
+
+#conductorIconStream {
+    color: cyan;
+    animation: glowIcon 1s alternate infinite;
+    display: none;
+}
+.streaming #conductorIconStream {
+    display: inline;
+}
+
+@keyframes glowIcon {
+    from { opacity: .5; }
+    to { opacity: 1; }
+}
 
 
 .cond-line-dragger {
