@@ -108,9 +108,6 @@ socket.on('conductor_command', function(data) {
                     // Arrêt du streaming
                     streamingEnable(false);
                     break;
-                default:
-                    updateLines(data_line);
-                    reorderLines();
             }
         }
     }
