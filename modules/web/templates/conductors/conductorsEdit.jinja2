@@ -76,13 +76,15 @@
 
                 <div id="showFieldsContainer">
 
-                    <div class="mb-3 row">
-                        {{ form.fromTemplate.label(class="col-form-label col-sm-3") }}
-                        <div class="col-sm-9">
-                            {{ form.fromTemplate(class="form-control") }}
-                            {% if form.fromTemplate.description %}<div class="form-text">{{ form.fromTemplate.description }}</div>{% endif %}
+                    {% if not conductor.id %}
+                        <div class="mb-3 row">
+                            {{ form.fromTemplate.label(class="col-form-label col-sm-3") }}
+                            <div class="col-sm-9">
+                                {{ form.fromTemplate(class="form-control") }}
+                                {% if form.fromTemplate.description %}<div class="form-text">{{ form.fromTemplate.description }}</div>{% endif %}
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
 
                     <div class="mb-3 row">
                         {{ form.day.label(class="col-form-label col-sm-3") }}
