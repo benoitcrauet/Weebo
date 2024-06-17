@@ -141,7 +141,7 @@ Args:
 """
 def getThumbnailPicture(input, output, maxborder):
     clipStart = 10
-    clipDuration = 5
+    clipDuration = 8
     try:
         # Charger la vidéo
         with VideoFileClip(input) as video:
@@ -171,7 +171,7 @@ def getThumbnailPicture(input, output, maxborder):
             clip = clip.resize(newSize)
 
             # On enregistre le GIF
-            clip.write_gif(os.getcwd()+"/"+output, fps=8, fuzz=40, program="ffmpeg")
+            clip.write_gif(os.getcwd()+"/"+output, fps=7, fuzz=40, program="ffmpeg")
 
             clip.close()
 
