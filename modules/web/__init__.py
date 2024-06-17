@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, abort, request
+from flask import Flask, send_from_directory, abort, request, Response
 from flask_cors import CORS
 import sys
 import os
@@ -14,6 +14,13 @@ from lib.socketio import SocketIOInstance
 ##### MODULE WEB #####
 ######################
 
+def parse_range_header(range_header, file_size):
+    # Fonction utilitaire pour analyser l'en-tête Range et retourner les positions de début et de fin
+    ranges = range_header.strip().lower().replace('bytes=', '').split('-')
+    start = int(ranges[0]) if ranges[0] else 0
+    end = int(ranges[1]) if ranges[1] else file_size - 1
+    return start, end
+
 def main():
     print("Starting web thread...")
     
@@ -28,7 +35,8 @@ def main():
     def medias_static(filename):
         root_path = os.path.dirname(os.path.abspath(__file__))
         medias_folder = os.path.abspath(os.path.join(root_path, "..", "..", config["directories"]["medias"]))
-        return send_from_directory(medias_folder, filename)
+        return send_from_directory(medias_folder, filename, conditional=False)
+
 
 
     # Ajouter une règle de route pour servir les fichiers statiques du dossier '/images'
@@ -49,7 +57,7 @@ def main():
     spy.init(app)
     events.init(app)
 
-    server = pywsgi.WSGIServer((config["web"]["host"], int(config["web"]["port"])), app, handler_class=WebSocketHandler)
+    server = pywsgi.WSGIServer((config["web"]["host"], int(config["web"]["port"])), app, handler_class=WebSocketHandler, log=None)
     server.serve_forever()
 
 

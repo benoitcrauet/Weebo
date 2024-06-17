@@ -5,9 +5,6 @@ from flask_wtf.file import FileAllowed
 from flask_cors import CORS
 import wtforms
 import wtforms.validators as validators
-from PIL import Image
-from io import BytesIO
-from sqlalchemy import func
 import json
 
 from lib.socketio import SocketIOInstance
