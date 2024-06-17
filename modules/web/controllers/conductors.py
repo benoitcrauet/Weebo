@@ -89,6 +89,8 @@ class FormConductorEdit(FlaskForm):
 
     submit = wtforms.SubmitField("Valider")
 
+
+
 @bp.route("/conductors/<string:show_guid>/create", methods=["GET", "POST"])
 @bp.route("/conductors/<string:show_guid>/<string:cond_guid>/edit", methods=["GET", "POST"])
 def conductorsEdit(show_guid, cond_guid=None):
@@ -109,11 +111,15 @@ def conductorsEdit(show_guid, cond_guid=None):
         conductor = Conductor(year=today.year, month=today.month, day=today.day)
     
     form = FormConductorEdit(obj=conductor)
-
-    # On récupère les templates de l'émission et on les ajoute au champ template
-    templates = session.query(Conductor).filter(Conductor.type == "template").filter(Conductor.show_id == show.id).order_by(Conductor.name).all()
-    templateList = [(t.id, t.name) for t in templates]
-    form.fromTemplate.choices += templateList
+    
+    # Suppression du template si c'est une édition
+    if editMode:
+        del form.fromTemplate
+    else:
+        # On récupère les templates de l'émission et on les ajoute au champ template
+        templates = session.query(Conductor).filter(Conductor.type == "template").filter(Conductor.show_id == show.id).order_by(Conductor.name).all()
+        templateList = [(t.id, t.name) for t in templates]
+        form.fromTemplate.choices += templateList
 
 
     # Validation du formulaire
