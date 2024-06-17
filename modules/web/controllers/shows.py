@@ -6,6 +6,7 @@ import wtforms
 import wtforms.validators as validators
 from PIL import Image
 from io import BytesIO
+import math
 
 from lib.socketio import SocketIOInstance
 from lib.db import session
@@ -39,6 +40,10 @@ class FormShowEdit(FlaskForm):
     description = wtforms.StringField("Description", description="Une simple description, juste pour vous, pour vous y retrouver.", validators=[], render_kw={"maxlength": 150})
     logo = wtforms.FileField("Logo", description="Permet d'associer un logo à l'émission.", validators=[FileAllowed(["jpg","jpeg","png"])])
     logo_delete = wtforms.BooleanField("Supprimer le logo actuel")
+
+    videoWidth = wtforms.IntegerField("Largeur", description="Largeur en pixels des vidéos transcodées pour cette émission.", validators=[validators.DataRequired(), validators.NumberRange(min=300, max=3840)])
+    videoHeight = wtforms.IntegerField("Hauteur", description="Hauteur en pixels des vidéos transcodées pour cette émission.", validators=[validators.DataRequired(), validators.NumberRange(min=300, max=2160)])
+    videoQuality = wtforms.FloatField("Qualité vidéo", description="Qualité du transcodage pour cette émission. Attention : plus la qualité est élevée, plus les vidéos seront lourdes.", validators=[validators.DataRequired(), validators.NumberRange(min=0.0, max=1.0)])
 
     submit = wtforms.SubmitField("Valider")
 
@@ -75,6 +80,9 @@ def showEdit(guid=None):
         
         show.name = form.name.data
         show.description = form.description.data
+        show.videoWidth = form.videoWidth.data
+        show.videoHeight = form.videoHeight.data
+        show.videoQuality = max(0, min(1, form.videoQuality.data))
 
         # On supprime le logo en cours ?
         try:
@@ -117,7 +125,7 @@ def showEdit(guid=None):
 
         return redirect(url_for("shows.shows"))
     
-    return render_template("shows/showEdit.jinja2", guid=guid, show=show, form=form, config=config)
+    return render_template("shows/showEdit.jinja2", guid=guid, show=show, form=form, config=config, math=math)
 
 
 

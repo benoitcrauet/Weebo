@@ -16,11 +16,25 @@ class Show(Base):
     description = Column(String)
     logo = Column(String)
 
+    videoWidth = Column(Integer, default=1920)
+    videoHeight = Column(Integer, default=1080)
+    videoQuality = Column(Float, default=0.5)
+
     mediasChannels = relationship("MediaChannel", back_populates="show", cascade="all, delete")
     webChannels = relationship("WebChannel", back_populates="show", cascade="all, delete")
     conductors = relationship("Conductor", back_populates="show", cascade="all, delete")
     medias = relationship("Media", back_populates="show", cascade="all, delete")
     events = relationship("Event", back_populates="show", cascade="all, delete")
+
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.videoWidth:
+            self.videoWidth = 1920
+        if not self.videoHeight:
+            self.videoHeight = 1080
+        if not self.videoQuality:
+            self.videoQuality = 0.5
 
 def delete_show_avatar(mapper, connection, target):
     if target.logo:
