@@ -820,7 +820,7 @@ function insertMediaInConductor(medias, autoDelete=false) {
 
     // Liste des ID reçus
     id_list = [];
-
+    
     for(let k in medias) {
         let media = medias[k];
         
@@ -866,8 +866,9 @@ function insertMediaInConductor(medias, autoDelete=false) {
             let id = media.dataset.id;
 
             // Si l'ID n'existe pas, on supprime l'élément
-            if(id_list.includes(id))
+            if(id_list.includes(id)) {
                 media.remove();
+            }
         });
     }
 }
