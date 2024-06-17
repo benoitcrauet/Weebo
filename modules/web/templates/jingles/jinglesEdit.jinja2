@@ -78,6 +78,26 @@
                         {% if form.fileRaw.description %}<div class="form-text">{{ form.fileRaw.description }}</div>{% endif %}
                     </div>
                 </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", () => {
+                        let fileRawChk = document.getElementById("{{ form.fileRaw.id }}");
+                        let fileRawChkAlert = document.getElementById("{{ form.fileRaw.id }}Alert");
+                        fileRawChk.addEventListener("input", (e) => {
+                            if(e.target.checked)
+                                fileRawChkAlert.style.removeProperty("display");
+                            else
+                                fileRawChkAlert.style.display = "none";
+                        });
+                    });
+                </script>
+
+                <div class="alert alert-warning" style="display: none;" id="{{ form.fileRaw.id }}Alert">
+                    Si vous souhaitez utiliser une vidéo transparente pour votre jingle, il est <b>primordial</b> de respecter les paramètres suivants :
+                    <ul>
+                        <li><b>Format des pixels :</b> Planar 4:2:0 YUV</li>
+                    </ul>
+                    Vous pouvez vous assurer de ces paramètres en ouvrant la vidéo dans VLC Media Player et en vous rendant dans "Fenêtre > Informations sur le média > Codecs".
+                </div>
 
                 <div class="mb-3 row">
                     {{ form.volume.label(class="col-form-label col-sm-3") }}

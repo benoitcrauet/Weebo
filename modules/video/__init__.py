@@ -161,11 +161,18 @@ def main():
                                 if media_raw:
                                     # On copie le fichier
                                     print("    ⚙️ Just copying file {} to {}".format(filename, dirMedias + "/" + final_filename))
-                                    shutil.copy(dirTmpMedias + "/" + filename, dirMedias + "/" + final_filename)
+                                    try:
+                                        shutil.copyfile(dirTmpMedias + "/" + filename, dirMedias + "/" + final_filename)
+                                        time.sleep(1)
+                                        print("    ⚙️ Done.")
+                                        media.error = None
+                                    except Exception as e:
+                                        print("Error occured while copying the file: {}".format(e))
+                                        media.error = str(e)
                                     media.progress = 100
                                     media.path = final_filename
-                                    media.error = None
                                     session.merge(media)
+                                    session.commit()
 
                                     videoConversion = True
                                 else:
