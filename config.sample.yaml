@@ -27,7 +27,10 @@ directories:
 
 # Paramètres de transcodage
 transcoding:
+  # Nombre d'essais max avant suppression du fichier
   maxRetry: 20
+  # Nombre de threads à utiliser pour le transcodage
+  threads: 1
 
 
 # Paramètres de l'auto nettoyage

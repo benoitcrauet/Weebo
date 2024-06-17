@@ -137,6 +137,42 @@
 
             </fieldset>
 
+            <fieldset>
+                <legend>Paramètres de transcodage vidéo</legend>
+
+                <div class="mb-3 row">
+                    {{ form.videoWidth.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.videoWidth(class="form-control") }}
+                        {% if form.videoWidth.description %}<div class="form-text">{{ form.videoWidth.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.videoHeight.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.videoHeight(class="form-control") }}
+                        {% if form.videoHeight.description %}<div class="form-text">{{ form.videoHeight.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.videoQuality.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        <div class="row">
+                            <div class="col-10">
+                                <input type="range" class="form-range" name="videoQuality" id="{{ form.videoQuality.id }}" min="0" max="1" step="0.1" value="{{ show.videoQuality or 0.5 }}" oninput="document.getElementById('videoQualityOutput').innerText = this.value*100 + ' %';">
+                            </div>
+                            <div class="col-2 text-nowrap" id="videoQualityOutput">
+                                {{ math.floor((show.videoQuality or 0)*100 or 50) }} %
+                            </div>
+                        </div>
+                        {% if form.videoQuality.description %}<div class="form-text">{{ form.videoQuality.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+            </fieldset>
+
             <div class="col-12">
                 {{ form.hidden_tag() }}
                 {{ form.id }}

@@ -36,11 +36,16 @@ Args:
     maxborder (int): bord le plus large de la vidéo de sortie. False pour désactiver le redimensionnement.
     progressCallback (Callable)
     transcodeParams (dict): paramètres additionnels de transcodage (cutBegin [secondes], cutEnd [secondes], rotate [0, 90, 180, 270])
+    quality (float): qualité de transcodage, de 0.0 (moins bonne qualité) à 1.0 (meilleure qualité)
+    threads (int): nombre de threads à utiliser pour le transcodage
 """
-def convertVideo(input, output, maxborder, progressCallback, transcodeParams={}):
+def convertVideo(input, output, maxborder, progressCallback, transcodeParams={}, quality=0.5, threads=1):
     try:
         # Charger la vidéo
         with VideoFileClip(input) as video:
+
+            # On protège le champ qualité
+            quality = min(1, max(0, quality))
 
             # On récupère la durée
             videoDuration = video.duration
@@ -101,12 +106,14 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={})
 
             # Personnaliser les options de l'encodeur FFmpeg
             ffmpeg_params = [
-                "-b:v", "1M",                               # Débit binaire vidéo
-                "-crf", "22",                               # Facteur de qualité Constant Rate Factor (CRF)
-                "-q:v", "10",                               # Qualité vidéo (ici 10, 0 étant la meilleure qualité)
+                "-b:v", "2M",                               # Débit binaire vidéo
+                "-qmin", "10",                              # Quantisation minimale (VBR - 0 pour moins bonne qualité et 63 pour meilleure qualité)
+                "-qmax", "42",                              # Quantisation maximale (VBR - 0 pour moins bonne qualité et 63 pour meilleure qualité)
+                "-crf", "30",                               # Facteur de qualité Constant Rate Factor (CRF)
+                "-q:v", str(10*(1-quality)),                # Qualité vidéo (10 étant la moins bonne qualité, 0 étant la meilleure qualité)
                 "-quality", "good",                         # Qualité globale de l'encodage (options: fast, good, best)
-                "-speed", "1",                              # Vitesse de l'encodage (plus la valeur est élevée, plus l'encodage est rapide)
-                "-threads", "1",                            # Nombre de threads à utiliser pour l'encodage
+                "-cpu-used", "3",                           # Vitesse de l'encodage (plus la valeur est élevée, plus l'encodage est rapide) - VP8: 0 (lent)/5(rapide) - VP9: 0(lent)/8(rapide)
+                "-threads", str(threads),                   # Nombre de threads à utiliser pour l'encodage
                 "-vf", f"scale={newSize[0]}:{newSize[1]}",  # Redimensionner la vidéo
             ];
 
