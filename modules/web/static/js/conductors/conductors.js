@@ -24,6 +24,10 @@ const genericToastQuery = "#genericToast";
 // Query de la toolbar
 const toolsbarQuery = "#toolsbar";
 
+// Query de la progressbar disk usage
+const diskUsageProgressbarQuery = "#diskUsageProgress";
+const diskFreeProgressbarQuery = "#diskFreeProgress";
+
 
 
 
@@ -174,6 +178,7 @@ const mediaModalTypeContainer = document.getElementById("gTypeContainer");
 const mediaModalNameContainer = document.getElementById("gNameContainer");
 const mediaModalSourceContainer = document.getElementById("gSourceContainer");
 const mediaModalFileContainer = document.getElementById("gFileContainer");
+const mediaDiskUsageContainer = document.getElementById("gDiskUsageContainer");
 const mediaModalRotateContainer = document.getElementById("gRotateContainer");
 const mediaModalLoopContainer = document.getElementById("gLoopContainer");
 const mediaModalVolumeContainer = document.getElementById("gVolumeContainer");
@@ -1292,6 +1297,7 @@ function mediaEditUpdateDisplay(type) {
         case "media":
             mediaModalSourceContainer.style.display = "block";
             mediaModalFileContainer.style.display = "block";
+            mediaDiskUsageContainer.style.display = "block";
             mediaModalUrlContainer.style.display = "none";
             mediaModalLoopContainer.style.display = "block";
             mediaModalVolumeContainer.style.display = "block";
@@ -1310,6 +1316,7 @@ function mediaEditUpdateDisplay(type) {
         case "web":
             mediaModalSourceContainer.style.display = "none";
             mediaModalFileContainer.style.display = "none";
+            mediaDiskUsageContainer.style.display = "none";
             mediaModalUrlContainer.style.display = "block";
             mediaModalLoopContainer.style.display = "none";
             mediaModalVolumeContainer.style.display = "none";
@@ -1328,6 +1335,7 @@ function mediaEditUpdateDisplay(type) {
         default:
             mediaModalSourceContainer.style.display = "none";
             mediaModalFileContainer.style.display = "none";
+            mediaDiskUsageContainer.style.display = "none";
             mediaModalUrlContainer.style.display = "none";
             mediaModalLoopContainer.style.display = "none";
             mediaModalVolumeContainer.style.display = "none";
@@ -1430,6 +1438,28 @@ function setCurrentMedia(mediaID="") {
     document.querySelectorAll(".cond-medias-line").forEach((element) => {
         element.dataset.currentMedia = element.dataset.id == currentMedia;
     });
+}
+
+
+
+
+/**
+ * Fonction de mise à jour de l'espace disque
+ */
+function updateDiskUsage(total, used, free) {
+    let percentageUsed = (total>0 ? used/total : 0.0) * 100
+    let percentageFree = (total>0 ? free/total : 0.0) * 100
+
+    usedGB = (used/1024/1024/1024).toFixed(2);
+    freeGB = (free/1024/1024/1024).toFixed(2);
+
+    const progressbarUsed = document.querySelector(diskUsageProgressbarQuery);
+    const progressbarFree = document.querySelector(diskFreeProgressbarQuery);
+    progressbarUsed.style.width = percentageUsed+"%";
+    progressbarUsed.innerText = usedGB+" GB";
+
+    progressbarFree.style.width = percentageFree+"%";
+    progressbarFree.innerText = freeGB+" GB";
 }
 
 
@@ -1726,4 +1756,27 @@ $(function() {
             console.debug("Shift released");
         }
     });
+    
+
+    // On met à jour l'espace disque utilisé
+    updateDiskUsage(diskTotal, diskUsed, diskFree);
+
+    // On lance l'interval de mise à jour de l'espace disque
+    window.setInterval(() => {
+        fetch("/api/diskusage")
+            .then(response => {
+                if(!response.ok) {
+                    console.error("Error occured while getting server disk usage datas.");
+                }
+                return response.json();
+            })
+            .then(data => {
+                diskTotal = data.capacity;
+                diskUsed = data.used;
+                diskFree = data.free;
+                dataPercentage = data.percentage*100;
+
+                updateDiskUsage(diskTotal, diskUsed, diskFree);
+            })
+    }, 60000);
 });
