@@ -10,7 +10,6 @@ from lib.arguments import arguments
 from lib.file import clean_media_dir
 
 
-
 def main():
 
     welcome()

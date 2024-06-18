@@ -56,9 +56,10 @@ def main():
     jingles.init(app)
     spy.init(app)
     events.init(app)
-
+    print(WebSocketHandler)
     server = pywsgi.WSGIServer((config["web"]["host"], int(config["web"]["port"])), app, handler_class=WebSocketHandler, log=None)
     server.serve_forever()
+
 
 
 
