@@ -1,0 +1,192 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Utilisation du disque
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <h1>Utilisation du disque</h1>
+            </div>
+            <div class="col-2 text-end">
+                
+            </div>
+        </div>
+
+        <p class="lead">
+            Retrouvez ici un détail de l'utilisation du disque du serveur.
+        </p>
+
+        <style>
+            .legend-item {
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                align-items: center;
+                gap: 10px;
+            }
+            .legend-color {
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                border: 1px solid black;
+            }
+        </style>
+
+        <div class="progress" style="height: 50px;">
+            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ diskUsage.percentage-appUsage.percentage }}%; overflow: hidden;">{{ diskUsage.used-appUsage.total }} GB</div>
+            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ appUsage.percentage }}%; overflow: hidden;">{{ appUsage.total }} GB</div>
+            <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ 100-diskUsage.percentage }}%; overflow: hidden;">{{ diskUsage.free }} GB</div>
+        </div>
+        
+        <div class="d-flex flex-row flex-wrap justify-content-center align-items-start" style="gap: 30px;">
+            <div class="legend-item">
+                <span class="legend-color bg-primary"></span>
+                <span class="legend-name">Espace disque utilisé par le système</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color bg-warning"></span>
+                <span class="legend-name">Espace disque utilisé par Weebo</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color bg-secondary"></span>
+                <span class="legend-name">Espace disque restant</span>
+            </div>
+        </div>
+
+        <table class="table table-stripped">
+            <tbody>
+                <tr>
+                    <th scope="row" style="width: 25%;">
+                        Capacité totale
+                    </th>
+                    <td>
+                        <code>{{ diskUsage.capacity }} GB</code>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Espace utilisé
+                    </th>
+                    <td>
+                        <code>{{ diskUsage.used-appUsage.total }} GB</code>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Espace libre
+                    </th>
+                    <td>
+                        <code>{{ diskUsage.free }} GB</code>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Espace utilisé par Weebo
+                    </th>
+                    <td>
+                        <code>{{ appUsage.total }} GB</code>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
+        <h2>Usage de Weebo</h2>
+
+        <div class="progress" style="height: 50px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: {{ appUsageMB.medias.percentage }}%; overflow: hidden;">{{ appUsageMB.medias.size }} MB</div>
+            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ appUsageMB.mediasTmp.percentage }}%; overflow: hidden;">{{ appUsageMB.mediasTmp.size }} MB</div>
+            <div class="progress-bar bg-info" role="progressbar" style="width: {{ appUsageMB.images.percentage }}%; overflow: hidden;">{{ appUsageMB.images.size }} MB</div>
+            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ appUsageMB.database.percentage }}%; overflow: hidden;">{{ appUsageMB.database.size }} MB</div>
+        </div>
+        
+        <div class="d-flex flex-row flex-wrap justify-content-center align-items-start" style="gap: 30px;">
+            <div class="legend-item">
+                <span class="legend-color bg-success"></span>
+                <span class="legend-name">Médias</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color bg-danger"></span>
+                <span class="legend-name">Médias en attente de transcodage</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color bg-info"></span>
+                <span class="legend-name">Images</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color bg-primary"></span>
+                <span class="legend-name">Base de données</span>
+            </div>
+        </div>
+
+        <table class="table table-stripped">
+            <tbody>
+                <tr>
+                    <th scope="row" style="width: 25%;">
+                        Total
+                    </th>
+                    <td>
+                        {% if appUsage.total>1024 %}
+                            <code>{{ appUsage.total }} GB</code>
+                        {% else %}
+                            <code>{{ appUsageMB.total }} MB</code>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Médias
+                    </th>
+                    <td>
+                        {% if appUsage.medias.size>1024 %}
+                            <code>{{ appUsage.medias.size }} GB</code>
+                        {% else %}
+                            <code>{{ appUsageMB.medias.size }} MB</code>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Médias en attente de transcodage
+                    </th>
+                    <td>
+                        {% if appUsage.mediasTmp.size>1024 %}
+                            <code>{{ appUsage.mediasTmp.size }} GB</code>
+                        {% else %}
+                            <code>{{ appUsageMB.mediasTmp.size }} MB</code>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Images
+                    </th>
+                    <td>
+                        {% if appUsage.images.size>1024 %}
+                            <code>{{ appUsage.images.size }} GB</code>
+                        {% else %}
+                            <code>{{ appUsageMB.images.size }} MB</code>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Base de données
+                    </th>
+                    <td>
+                        {% if appUsage.database.size>1024 %}
+                            <code>{{ appUsage.database.size }} GB</code>
+                        {% else %}
+                            <code>{{ appUsageMB.database.size }} MB</code>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+    </div>
+{% endblock %}

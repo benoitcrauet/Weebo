@@ -1447,11 +1447,11 @@ function setCurrentMedia(mediaID="") {
  * Fonction de mise à jour de l'espace disque
  */
 function updateDiskUsage(total, used, free) {
-    let percentageUsed = (total>0 ? used/total : 0.0) * 100
+    let percentageUsed = (total>0 ? used/total : 0.0) * 100;
     let percentageFree = 100 - percentageUsed;
 
-    usedGB = (used/1024/1024/1024).toFixed(2);
-    freeGB = (free/1024/1024/1024).toFixed(2);
+    usedGB = Number(used).toFixed(2);
+    freeGB = Number(free).toFixed(2);
 
     const progressbarUsed = document.querySelector(diskUsageProgressbarQuery);
     const progressbarFree = document.querySelector(diskFreeProgressbarQuery);
@@ -1771,10 +1771,10 @@ $(function() {
                 return response.json();
             })
             .then(data => {
-                diskTotal = data.capacity;
-                diskUsed = data.used;
-                diskFree = data.free;
-                dataPercentage = data.percentage*100;
+                diskTotal = data.diskUsage.capacity;
+                diskUsed = data.diskUsage.used;
+                diskFree = data.diskUsage.free;
+                dataPercentage = data.diskUsage.percentage;
 
                 updateDiskUsage(diskTotal, diskUsed, diskFree);
             })
