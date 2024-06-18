@@ -36,23 +36,23 @@
         </style>
 
         <div class="progress" style="height: 50px;">
-            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ diskUsage.percentage-appUsage.percentage }}%; overflow: hidden;">{{ diskUsage.withoutApp }} GB</div>
-            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ appUsage.percentage }}%; overflow: hidden;">{{ appUsage.total }} GB</div>
-            <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ 100-diskUsage.percentage }}%; overflow: hidden;">{{ diskUsage.free }} GB</div>
+            <div class="progress-bar bg-primary" role="progressbar" title="Utilisé par le système" style="width: {{ diskUsage.percentage-appUsage.percentage }}%; overflow: hidden;">{{ diskUsage.withoutApp }} GB</div>
+            <div class="progress-bar bg-warning" role="progressbar" title="Utilisé par Weebo" style="width: {{ appUsage.percentage }}%; overflow: hidden;">{{ appUsage.total }} GB</div>
+            <div class="progress-bar bg-secondary" role="progressbar" title="Disponible" style="width: {{ 100-diskUsage.percentage }}%; overflow: hidden;">{{ diskUsage.free }} GB</div>
         </div>
         
         <div class="d-flex flex-row flex-wrap justify-content-center align-items-start" style="gap: 30px;">
             <div class="legend-item">
                 <span class="legend-color bg-primary"></span>
-                <span class="legend-name">Espace disque utilisé par le système</span>
+                <span class="legend-name">Utilisé par le système</span>
             </div>
             <div class="legend-item">
                 <span class="legend-color bg-warning"></span>
-                <span class="legend-name">Espace disque utilisé par Weebo</span>
+                <span class="legend-name">Utilisé par Weebo</span>
             </div>
             <div class="legend-item">
                 <span class="legend-color bg-secondary"></span>
-                <span class="legend-name">Espace disque restant</span>
+                <span class="legend-name">Espace disponible sur le disque</span>
             </div>
         </div>
 
@@ -98,10 +98,10 @@
         <h2>Usage de Weebo</h2>
 
         <div class="progress" style="height: 50px;">
-            <div class="progress-bar bg-success" role="progressbar" style="width: {{ appUsageMB.medias.percentage }}%; overflow: hidden;">{{ appUsageMB.medias.size }} MB</div>
-            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ appUsageMB.mediasTmp.percentage }}%; overflow: hidden;">{{ appUsageMB.mediasTmp.size }} MB</div>
-            <div class="progress-bar bg-info" role="progressbar" style="width: {{ appUsageMB.images.percentage }}%; overflow: hidden;">{{ appUsageMB.images.size }} MB</div>
-            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ appUsageMB.database.percentage }}%; overflow: hidden;">{{ appUsageMB.database.size }} MB</div>
+            <div class="progress-bar bg-success" role="progressbar" title="Médias" style="width: {{ appUsageMB.medias.percentage }}%; overflow: hidden;">{{ appUsageMB.medias.size }} MB</div>
+            <div class="progress-bar bg-danger" role="progressbar" title="Médias en attente de transcodage" style="width: {{ appUsageMB.mediasTmp.percentage }}%; overflow: hidden;">{{ appUsageMB.mediasTmp.size }} MB</div>
+            <div class="progress-bar bg-info" role="progressbar" title="Images (logos d'émissions...)" style="width: {{ appUsageMB.images.percentage }}%; overflow: hidden;">{{ appUsageMB.images.size }} MB</div>
+            <div class="progress-bar bg-primary" role="progressbar" title="Base de données" style="width: {{ appUsageMB.database.percentage }}%; overflow: hidden;">{{ appUsageMB.database.size }} MB</div>
         </div>
         
         <div class="d-flex flex-row flex-wrap justify-content-center align-items-start" style="gap: 30px;">
@@ -115,7 +115,7 @@
             </div>
             <div class="legend-item">
                 <span class="legend-color bg-info"></span>
-                <span class="legend-name">Images</span>
+                <span class="legend-name">Images (logos d'émissions...)</span>
             </div>
             <div class="legend-item">
                 <span class="legend-color bg-primary"></span>
@@ -189,4 +189,14 @@
         </table>
         
     </div>
+
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(function () {
+            $('[role="progressbar"]').tooltip({
+                placement: "top"
+            })
+        })
+    </script>
 {% endblock %}
