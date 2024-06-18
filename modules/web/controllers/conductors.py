@@ -380,7 +380,7 @@ def conductorsView(show_guid, cond_guid=None):
     # On récupère les contraintes de lien
     linksConstraints = config["linksConstraints"]
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web"]["baseUrl"], medias_dir=config["directories"]["medias"], linksConstraints=linksConstraints, disk=get_disk_usage())
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web"]["baseUrl"], medias_dir=config["directories"]["medias"], linksConstraints=linksConstraints, disk=get_disk_usage("GB"))
 
 
 
@@ -936,23 +936,6 @@ def api_conductorsLineMediaGet(media_guid):
     
     # On renvoie la ligne
     return jsonify(model_to_dict(media))
-
-
-
-diskUsage = {}
-diskUsageLastUpdate = 0
-@bp.route("/api/diskusage", methods=["GET"])
-def api_diskUsage():
-    global diskUsage, diskUsageLastUpdate
-
-    currentTime = time.time()
-
-    # Si la dernière update remonte à plus de 60 secondes
-    if currentTime-diskUsageLastUpdate > 60:
-        diskUsage = get_disk_usage()
-        diskUsageLastUpdate = currentTime
-    
-    return jsonify(diskUsage)
 
 
 @bp.route("/api/conductor/media/update/<string:media_guid>", methods=["GET"])

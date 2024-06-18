@@ -48,7 +48,7 @@ def main():
 
 
     # Import des sous-modules de controleurs
-    from .controllers import home, channels, shows, conductors, jingles, spy, events
+    from .controllers import home, channels, shows, conductors, jingles, spy, events, disk
     home.init(app)
     channels.init(app)
     shows.init(app)
@@ -56,7 +56,8 @@ def main():
     jingles.init(app)
     spy.init(app)
     events.init(app)
-    print(WebSocketHandler)
+    disk.init(app)
+    
     server = pywsgi.WSGIServer((config["web"]["host"], int(config["web"]["port"])), app, handler_class=WebSocketHandler, log=None)
     server.serve_forever()
 
