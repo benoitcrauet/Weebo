@@ -36,7 +36,7 @@
         </style>
 
         <div class="progress" style="height: 50px;">
-            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ diskUsage.percentage-appUsage.percentage }}%; overflow: hidden;">{{ diskUsage.used-appUsage.total }} GB</div>
+            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ diskUsage.percentage-appUsage.percentage }}%; overflow: hidden;">{{ diskUsage.withoutApp }} GB</div>
             <div class="progress-bar bg-warning" role="progressbar" style="width: {{ appUsage.percentage }}%; overflow: hidden;">{{ appUsage.total }} GB</div>
             <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ 100-diskUsage.percentage }}%; overflow: hidden;">{{ diskUsage.free }} GB</div>
         </div>
@@ -71,7 +71,7 @@
                         Espace utilisé
                     </th>
                     <td>
-                        <code>{{ diskUsage.used-appUsage.total }} GB</code>
+                        <code>{{ diskUsage.withoutApp }} GB</code>
                     </td>
                 </tr>
                 <tr>

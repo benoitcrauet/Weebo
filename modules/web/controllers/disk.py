@@ -38,6 +38,8 @@ def diskUsage():
     
     diskUsage["percentage"] = round(diskUsage["percentage"], 2)
 
+    diskUsage["withoutApp"] = round(diskUsage["used"] - appUsage["total"], 2)
+
     appUsage["percentage"] = round((appUsage["total"]/diskUsage["capacity"])*100, 2)
 
     appUsageMB = get_app_usage("MB", 2)
