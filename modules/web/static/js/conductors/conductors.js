@@ -1448,7 +1448,7 @@ function setCurrentMedia(mediaID="") {
  */
 function updateDiskUsage(total, used, free) {
     let percentageUsed = (total>0 ? used/total : 0.0) * 100
-    let percentageFree = (total>0 ? free/total : 0.0) * 100
+    let percentageFree = 100 - percentageUsed;
 
     usedGB = (used/1024/1024/1024).toFixed(2);
     freeGB = (free/1024/1024/1024).toFixed(2);
