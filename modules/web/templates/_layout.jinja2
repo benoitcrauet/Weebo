@@ -78,7 +78,7 @@
                             <a href="{{ url_for("events.shows") }}" class="nav-link px-2 link-body-emphasis">Évènements</a>
                         </li>
                         <li class="dropdown">
-                            <a href="#" class="nav-link px-2 link-body-emphasis dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Configuration</a>
+                            <a href="#" class="nav-link px-2 link-body-emphasis dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ressources</a>
                             <ul class="dropdown-menu">
                                 <li>
                                     <a class="dropdown-item" href="{{ url_for("shows.shows") }}">Gestion des émissions</a>
@@ -86,23 +86,17 @@
                                 <li>
                                     <a class="dropdown-item" href="{{ url_for("jingles.shows") }}">Gestion des jingles</a>
                                 </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link px-2 link-body-emphasis dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Configuration</a>
+                            <ul class="dropdown-menu">
                                 <li>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="{{ url_for("disk.diskUsage") }}">Utilisation du disque</a>
+                                    <a class="dropdown-item" href="{{ url_for("server.diskUsage") }}">Utilisation du disque</a>
                                 </li>
-                                <!--
                                 <li>
-                                    <a class="dropdown-item dropdown-item-submenu" href="#">Canaux</a>
-                                    <ul class="dropdown-menu dropdown-submenu">
-                                        <li>
-                                            <a class="dropdown-item" href="#">Canaux vidéo</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="#">Canaux web</a>
-                                        </li>
-                                    </ul>
+                                    <a class="dropdown-item" href="{{ url_for("server.resources") }}">Ressources du serveur</a>
                                 </li>
-                                -->
                             </ul>
                         </li>
                     </ul>

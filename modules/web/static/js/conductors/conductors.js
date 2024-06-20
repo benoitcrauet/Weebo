@@ -1763,7 +1763,7 @@ $(function() {
 
     // On lance l'interval de mise à jour de l'espace disque
     window.setInterval(() => {
-        fetch("/api/diskusage")
+        fetch("/api/server/diskusage")
             .then(response => {
                 if(!response.ok) {
                     console.error("Error occured while getting server disk usage datas.");
