@@ -1,0 +1,106 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Ressources du serveur
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <h1>Ressources du serveur</h1>
+            </div>
+            <div class="col-2 text-end">
+                
+            </div>
+        </div>
+
+        <p class="lead">
+            Retrouvez ici un détail des ressources de calcul du serveur.
+        </p>
+
+        <h2>CPU</h2>
+
+
+        <h3>Informations globales CPU</h3>
+
+        <ul>
+            <li>
+                <b>Fréquence minimale :</b>
+                <code>{{ cpu.frequency.min }} MHz</code>
+            </li>
+            <li>
+                <b>Fréquence actuelle :</b>
+                <code>{{ cpu.frequency.current }} MHz</code>
+            </li>
+            <li>
+                <b>Fréquence maximale :</b>
+                <code>{{ cpu.frequency.max }} MHz</code>
+            </li>
+            <li>
+                <b>Cores physiques :</b>
+                <code>{{ cpu.cores.physical }}</code>
+            </li>
+            <li>
+                <b>Cores logiques :</b>
+                <code>{{ cpu.cores.logical }}</code>
+            </li>
+        </ul>
+
+        <div class="progress" style="height: 50px;">
+            <div class="progress-bar" role="progressbar" style="width: {{ cpu.percentage }}%; overflow: hidden;">{{ cpu.percentage }} %</div>
+        </div>
+
+        <h3>Détail des coeurs CPU</h3>
+
+        <table class="table table-stripped">
+            <thead>
+                <th scope="col" style="width: 50px;">
+                    Core
+                </th>
+                <th scope="col">
+                    Charge
+                </th>
+            </thead>
+            <tbody>
+                {% for core in cores %}
+                    <tr>
+                        <th scope="row">
+                            #{{ core.number }}
+                        </th>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" title="Charge du core #{{ core.number }}" style="width: {{ core.percentage }}%; overflow: hidden;">{{ core.percentage }} %</div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>RAM</h2>
+
+
+        <h3>Informations globales RAM</h3>
+
+        <ul>
+            <li>
+                <b>Capacité totale :</b>
+                <code>{{ ram.total }} GB</code>
+            </li>
+            <li>
+                <b>Mémoire utilisée :</b>
+                <code>{{ ram.used }} GB</code>
+            </li>
+            <li>
+                <b>Mémoire disponible :</b>
+                <code>{{ ram.free }} GB</code>
+            </li>
+        </ul>
+
+        <div class="progress" style="height: 50px;">
+            <div class="progress-bar" role="progressbar" style="width: {{ ram.percentage }}%; overflow: hidden;">{{ ram.used }} GB</div>
+        </div>
+
+    </div>
+{% endblock %}
