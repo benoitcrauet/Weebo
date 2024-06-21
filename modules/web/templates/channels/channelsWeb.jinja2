@@ -32,7 +32,7 @@
                     <th scope="col">Canal</th>
                     <th scope="col">Description</th>
                     <th scope="col">Par défaut</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col" class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,7 +51,7 @@
                                 Non
                             {% endif %}
                         </td>
-                        <td class="text-center">
+                        <td class="text-end">
                             <div class="btn-group" role="group">
                                 <a href="{{ url_for("channels.channelsWebEdit", show_guid=show.id, channel_guid=c.id) }}" class="btn btn-secondary"><i class="bi bi-pen-fill"></i></a>
                                 <a href="{{ url_for("channels.channelsWebDelete", show_guid=show.id, channel_guid=c.id) }}" class="btn btn-danger"><i class="bi bi-trash-fill"></i></a>

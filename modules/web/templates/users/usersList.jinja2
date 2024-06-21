@@ -1,0 +1,58 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Utilisateurs
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Utilisateurs</h1>
+
+        <p class="lead">Gérez ici les différents utilisateurs de Weebo.</p>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a class="btn btn-primary" href="{{ url_for("users.usersEdit") }}">
+                <i class="bi bi-plus-square-fill"></i> Créer un utilisateur
+            </a>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col" style="width: 40%;">Nom</th>
+                    <th scope="col">Login</th>
+                    <th scope="col" class="text-end" style="width: 15%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                    <tr>
+                        <td class="h4">
+                            {% if u.id == current_user.id %}
+                                <i class="bi bi-person-fill" title="C'est vous !"></i>
+                            {% elif u.active==False %}
+                                <i class="bi bi-person-slash" title="Utilisateur désactivé"></i>
+                            {% else %}
+                                <i class="bi bi-person"></i>
+                            {% endif %}
+                            {% if u.isAdmin %}
+                                <i class="bi bi-wrench-adjustable" title="Administrateur"></i>
+                            {% endif %}
+                            {{ u.firstname }}
+                            {{ u.lastname }}
+                        </td>
+                        <td>
+                            <span class="font-monospace">{{ u.username }}</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for("users.usersEdit", user_guid=u.id) }}" class="btn btn-secondary" title="Modifier"><i class="bi bi-pen-fill"></i></a>
+                                <a href="{{ url_for("users.usersDelete", user_guid=u.id) }}" class="btn btn-danger" title="Supprimer"><i class="bi bi-trash-fill"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

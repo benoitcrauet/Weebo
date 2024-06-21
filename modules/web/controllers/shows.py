@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, abort
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
+from flask_login import login_required
 import wtforms
 import wtforms.validators as validators
 from PIL import Image
@@ -14,6 +15,7 @@ from lib.models import Show
 from lib.guid import generate_guid
 from lib.picture import ResizeMinimal
 from lib.config import config
+from lib.users import for_admins
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -27,6 +29,8 @@ def init(flaskapp):
 
 
 @bp.route("/shows")
+@login_required
+@for_admins
 def shows():
     shows = session.query(Show).all()
     return render_template("shows/shows.jinja2", shows=shows)
@@ -50,6 +54,8 @@ class FormShowEdit(FlaskForm):
 
 @bp.route("/shows/create", methods=["GET","POST"])
 @bp.route("/shows/<string:guid>/edit", methods=["GET","POST"])
+@login_required
+@for_admins
 def showEdit(guid=None):
 
     editMode = False
@@ -137,6 +143,8 @@ class FormShowDelete(FlaskForm):
 
 
 @bp.route("/shows/<string:guid>/delete", methods=["GET","POST"])
+@login_required
+@for_admins
 def showDelete(guid):
 
     show = session.query(Show).filter(Show.id == guid).first()

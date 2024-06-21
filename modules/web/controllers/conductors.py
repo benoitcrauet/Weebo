@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
 from flask_wtf import FlaskForm
 from flask_cors import CORS
+from flask_login import login_required
 import wtforms
 import wtforms.validators as validators
 from datetime import datetime, timedelta
@@ -24,8 +25,11 @@ from lib.conductors import getActiveConductor
 from lib.events import createNewEvent
 from lib.websocket import conductorWebSocketBase
 from lib.disk import get_disk_usage
+from lib.users import for_admins
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
+
+
 
 app = None
 socketio = None
@@ -45,6 +49,7 @@ locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
 
 @bp.route("/conductors")
+@login_required
 def showsList():
     shows = session.query(Show).all()
     return render_template("conductors/showsList.jinja2", shows=shows)
@@ -52,6 +57,7 @@ def showsList():
 
 
 @bp.route("/conductors/<string:show_guid>")
+@login_required
 def conductorsList(show_guid):
     # On check si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -93,6 +99,7 @@ class FormConductorEdit(FlaskForm):
 
 @bp.route("/conductors/<string:show_guid>/create", methods=["GET", "POST"])
 @bp.route("/conductors/<string:show_guid>/<string:cond_guid>/edit", methods=["GET", "POST"])
+@login_required
 def conductorsEdit(show_guid, cond_guid=None):
     # On check si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -132,7 +139,7 @@ def conductorsEdit(show_guid, cond_guid=None):
         # On vérifie que la date n'existe pas déjà
         selectedDate = "{}-{}-{}".format(form.year.data, form.month.data, form.day.data)
 
-        if selectedDate in dateList:
+        if selectedDate in dateList and form.type.data=="operational":
             form.day.errors.append("This date is already taken by another conductor in database.")
         else:
 
@@ -192,6 +199,7 @@ class FormDelete(FlaskForm):
 
 
 @bp.route("/conductors/<string:show_guid>/<string:cond_guid>/delete", methods=["GET", "POST"])
+@login_required
 def conductorsDelete(show_guid, cond_guid=None):# On check si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
     if show==None:
@@ -222,6 +230,7 @@ def conductorsDelete(show_guid, cond_guid=None):# On check si l'émission existe
 
 
 @bp.route("/conductors/<string:show_guid>/<string:cond_guid>")
+@login_required
 def conductorsView(show_guid, cond_guid=None):
     # On check si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -384,6 +393,8 @@ def conductorsView(show_guid, cond_guid=None):
 
 
 
+
+# Pas de login ici : c'est les liens VDO pour OBS
 @bp.route("/cameraslink/<string:show_guid>/<int:cam_number>")
 def vdoPermalink(show_guid, cam_number):
     # Est-ce que le show existe ?
@@ -436,6 +447,7 @@ def vdoPermalink(show_guid, cam_number):
 
 
 @bp.route("/api/conductor/<string:cond_guid>", methods=["GET"])
+@login_required
 def api_conductorGet(cond_guid):
     # On check si le conducteur existe
     conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
@@ -447,6 +459,7 @@ def api_conductorGet(cond_guid):
 
 
 @bp.route("/api/conductor/line/<string:line_guid>", methods=["GET"])
+@login_required
 def api_conductorsLineGet(line_guid):
     # On check si la ligne existe
     line = session.query(Line).filter(Line.id == line_guid).first()
@@ -459,6 +472,7 @@ def api_conductorsLineGet(line_guid):
 
 
 @bp.route("/api/conductor/line/<string:line_guid>", methods=["DELETE"])
+@login_required
 def api_conductorsLineDelete(line_guid):
     # On check si la ligne existe
     line = session.query(Line).filter(Line.id == line_guid).first()
@@ -480,6 +494,7 @@ def api_conductorsLineDelete(line_guid):
 
 
 @bp.route("/api/conductor/<string:cond_guid>/lines", methods=["GET"])
+@login_required
 def api_conductorsLinesList(cond_guid):
     # On check si le conducteur existe
     conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
@@ -499,6 +514,7 @@ def api_conductorsLinesList(cond_guid):
 
 
 @bp.route("/api/conductor/<string:cond_guid>/lines", methods=["PUT"])
+@login_required
 def api_conductorsLinesListInsert(cond_guid):
     # On check si le conducteur existe
     conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
@@ -559,6 +575,7 @@ def api_conductorsLinesListInsert(cond_guid):
 
 
 @bp.route("/api/conductor/line/<string:line_guid>", methods=["PATCH"])
+@login_required
 def api_conductorsLineEdit(line_guid):
     # On check si la ligne existe
     line = session.query(Line).filter(Line.id == line_guid).first()
@@ -626,6 +643,7 @@ def api_conductorsLineEdit(line_guid):
 
 
 @bp.route("/api/conductor/<string:cond_guid>/orders", methods=["PATCH"])
+@login_required
 def api_conductorsLinesReorder(cond_guid):
     # On check si le conducteur existe
     conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
@@ -672,6 +690,7 @@ def api_conductorsLinesReorder(cond_guid):
 
 
 @bp.route("/api/conductor/<string:cond_guid>/medias", methods=["GET"])
+@login_required
 def api_conductorsMediasList(cond_guid):
     # On check si le conducteur existe
     conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
@@ -689,6 +708,7 @@ def api_conductorsMediasList(cond_guid):
 
 
 @bp.route("/api/conductor/<string:cond_guid>/line/<string:line_guid>/medias", methods=["PUT"])
+@login_required
 def api_conductorsLineMediaAdd(cond_guid, line_guid):
     # On check si la ligne existe et que l'ID du conducteur correspond
     line = session.query(Line).filter(Line.id == line_guid).first()
@@ -882,6 +902,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
 
 
 @bp.route("/api/conductor/<string:cond_guid>/medias/<string:media_guid>", methods=["PATCH"])
+@login_required
 def api_conductorsMediaEdit(cond_guid, media_guid):
     # On check si le conducteur existe
     conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
@@ -928,6 +949,7 @@ def api_conductorsMediaEdit(cond_guid, media_guid):
 
 
 @bp.route("/api/conductor/media/<string:media_guid>", methods=["GET"])
+@login_required
 def api_conductorsLineMediaGet(media_guid):
     # On check si la ligne existe
     media = session.query(Media).filter(Media.id == media_guid).first()
@@ -954,6 +976,7 @@ def api_conductorsMediasUpdate(media_guid):
 
 
 @bp.route("/api/conductor/medias/<string:line_guid>/orders", methods=["PATCH"])
+@login_required
 def api_conductorsMediasReorder(line_guid):
     # On check si la ligne de conducteur existe
     line = session.query(Line).filter(Line.id == line_guid).first()
@@ -994,6 +1017,7 @@ def api_conductorsMediasReorder(line_guid):
 
 
 @bp.route("/api/conductor/<string:cond_guid>/media/<string:media_guid>", methods=["DELETE"])
+@login_required
 def api_conductorsMediaDelete(cond_guid, media_guid):
     # On check si le conducteur existe
     cond = session.query(Conductor).filter(Conductor.id == cond_guid).first()
@@ -1021,6 +1045,7 @@ def api_conductorsMediaDelete(cond_guid, media_guid):
 
 
 @bp.route("/api/conductors/<string:cond_guid>/medias/<string:media_guid>/armtake")
+@login_required
 def mediaBroadcast(cond_guid, media_guid):
     # On vérifie si le conducteur éxiste
     conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
@@ -1109,6 +1134,7 @@ def mediaBroadcast(cond_guid, media_guid):
 
 
 @bp.route("/api/conductors/<string:cond_guid>/medias/<string:media_guid>/stop")
+@login_required
 def mediaStop(cond_guid, media_guid):
     # On vérifie si le conducteur éxiste
     conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()

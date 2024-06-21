@@ -70,48 +70,74 @@
                         <img src="/static/img/logo.svg" alt="" class="bi me-2" width="40" height="32">
                     </a>
 
-                    <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-                        <li>
-                            <a href="{{ url_for("conductors.showsList") }}" class="nav-link px-2 link-body-emphasis">Conducteurs</a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for("events.shows") }}" class="nav-link px-2 link-body-emphasis">Évènements</a>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link px-2 link-body-emphasis dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Ressources</a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for("shows.shows") }}">Gestion des émissions</a>
+                    {% if current_user.is_authenticated %}
+                        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                            <li>
+                                <a href="{{ url_for("conductors.showsList") }}" class="nav-link px-2 link-body-emphasis"><i class="bi bi-broadcast-pin"></i> Conducteurs</a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for("jingles.shows") }}" class="nav-link px-2 link-body-emphasis"><i class="bi bi-easel-fill"></i> Jingles</a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for("links.linksShows") }}" class="nav-link px-2 link-body-emphasis"><i class="bi bi-link"></i> Intégration</a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for("events.shows") }}" class="nav-link px-2 link-body-emphasis"><i class="bi bi-list-check"></i> Évènements</a>
+                            </li>
+                            {% if current_user.isAdmin %}
+                                <li class="dropdown">
+                                    <a href="#" class="nav-link px-2 link-body-emphasis dropdown-toggle text-danger" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-lock-fill"></i> Administrateur</a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for("shows.shows") }}"><i class="bi bi-broadcast"></i> Émissions</a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for("users.usersList") }}"><i class="bi bi-people-fill"></i> Utilisateurs</a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for("server.diskUsage") }}"><i class="bi bi-device-hdd-fill"></i> Disque</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for("server.resources") }}"><i class="bi bi-cpu-fill"></i> CPU/RAM</a>
+                                        </li>
+                                    </ul>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for("jingles.shows") }}">Gestion des jingles</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link px-2 link-body-emphasis dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Configuration</a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for("server.diskUsage") }}">Utilisation du disque</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for("server.resources") }}">Ressources du serveur</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-
-                    <div class="dropdown text-end">
-                        <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            Benoît Crauet
-                        </a>
-                        <ul class="dropdown-menu text-small">
-                            <li><a class="dropdown-item" href="#">Sign out</a></li>
+                            {% endif %}
                         </ul>
-                    </div>
+
+                        <div class="dropdown text-end">
+                            <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{ current_user.firstname }}
+                                {{ current_user.lastname }}
+                            </a>
+                            <ul class="dropdown-menu text-small">
+                                <li><a class="dropdown-item" href="{{ url_for("users.logout") }}">Sign out</a></li>
+                            </ul>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if not category or category=="" or category=="message" %}
+                        {% set category = "info" %}
+                    {% endif %}
+                    <div class="container alert alert-{{ category }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
         
 

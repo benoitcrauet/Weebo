@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, abort, redirect, url_for,
 from flask_socketio import SocketIO
 from flask_wtf import FlaskForm
 from flask_cors import CORS
+from flask_login import login_required
 import wtforms
 import wtforms.validators as validators
 from sqlalchemy import asc
@@ -14,6 +15,7 @@ from lib.config import config
 from lib.db import session
 from lib.models import MediaChannel, WebChannel, Show, Media, Conductor, Line
 from lib.dict import model_to_dict
+from lib.users import for_admins
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -29,6 +31,8 @@ def init(flaskapp):
 
 
 @bp.route("/shows/<string:show_guid>/channels/medias")
+@login_required
+@for_admins
 def channelsMedias(show_guid):
     # On test si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -56,6 +60,8 @@ class FormMediaChannelEdit(FlaskForm):
 
 @bp.route("/shows/<string:show_guid>/channels/medias/create", methods=["GET","POST"])
 @bp.route("/shows/<string:show_guid>/channels/medias/<string:channel_guid>/edit", methods=["GET","POST"])
+@login_required
+@for_admins
 def channelsMediasEdit(show_guid, channel_guid=None):
     # On test si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -116,6 +122,8 @@ class FormDelete(FlaskForm):
 
 
 @bp.route("/shows/<string:show_guid>/channels/medias/<string:channel_guid>/delete", methods=["GET","POST"])
+@login_required
+@for_admins
 def channelsMediasDelete(show_guid, channel_guid):
     # On test si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -154,6 +162,8 @@ def channelsMediasDelete(show_guid, channel_guid):
 
 
 @bp.route("/shows/<string:show_guid>/channels/web")
+@login_required
+@for_admins
 def channelsWeb(show_guid):
     # On test si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -177,6 +187,8 @@ class FormWebChannelEdit(FlaskForm):
 
 @bp.route("/shows/<string:show_guid>/channels/web/create", methods=["GET","POST"])
 @bp.route("/shows/<string:show_guid>/channels/web/<string:channel_guid>/edit", methods=["GET","POST"])
+@login_required
+@for_admins
 def channelsWebEdit(show_guid, channel_guid=None):
     # On test si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -229,6 +241,8 @@ def channelsWebEdit(show_guid, channel_guid=None):
 
 
 @bp.route("/shows/<string:show_guid>/channels/web/<string:channel_guid>/delete", methods=["GET","POST"])
+@login_required
+@for_admins
 def channelsWebDelete(show_guid, channel_guid):
     # On test si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()

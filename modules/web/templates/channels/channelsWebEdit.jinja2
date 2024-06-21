@@ -25,45 +25,12 @@
         </div>
         {% if channel.id == None %}
             <p class="lead">
-                Entrez ici les détails de ce tout nouveau canal.<br>
-                Vous pourrez ensuite revenir sur cette page pour visualiser les détails d'intégration de ce canal.
+                Entrez ici les détails de ce tout nouveau canal.
             </p>
         {% else %}
-
             <p class="lead">
                 Ici, vous pouvez consulter et modifier les détails du canal web {{ channel.name }}.
             </p>
-
-            <div class="accordion mb-3" id="accordionDetails">
-                <div class="accordion-item">
-                    <div class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#channelDetails" aria-expanded="false" aria-controls="collapseOne">
-                            Comment intégrer ce canal à mon navigateur ?
-                        </button>
-                    </div>
-                    <div id="channelDetails" class="accordion-collapse collapse" data-bs-parent="#accordionDetails">
-                        <div class="accordion-body">
-                            <p>
-                                Vous pouvez intégrer ce canal à tout navigateur basé sur Chromium (Google Chrome, Brave, Arc...).<br>
-                                Afin de finaliser l'intégration, vous devrez entrer les paramètres suivants dans l'extension Chrome :
-                            </p>
-
-                            <table class="table table-striped">
-                                <tbody>
-                                    <tr>
-                                        <th scope="row">
-                                            URL
-                                        </th>
-                                        <td>
-                                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ web_base }}{{ url_for("channels.viewerWeb", guid=channel.id) }}" onclick="this.select();">
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
         {% endif %}
 
         <form action="" method="post">

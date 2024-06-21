@@ -13,3 +13,4 @@ colorama
 pyyaml
 hashlib
 psutil
+Flask-Login

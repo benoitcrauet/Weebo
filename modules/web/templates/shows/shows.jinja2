@@ -22,7 +22,7 @@
                     <th scope="col">Émission</th>
                     <th scope="col">Description</th>
                     <th scope="col">Canaux</th>
-                    <th scope="col">Actions</th>
+                    <th scope="col" class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -48,7 +48,7 @@
                                     </span>
                                 </a>
                         </td>
-                        <td class="text-center">
+                        <td class="text-end">
                             <div class="btn-group" role="group">
                                 <a href="{{ url_for("shows.showEdit", guid=s.id) }}" class="btn btn-secondary" title="Modifier"><i class="bi bi-pen-fill"></i></a>
                                 <a href="{{ url_for("shows.showDelete", guid=s.id) }}" class="btn btn-danger" title="Supprimer"><i class="bi bi-trash-fill"></i></a>

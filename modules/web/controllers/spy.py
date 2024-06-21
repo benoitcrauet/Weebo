@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, render_template, request, abort, jsonify
+from flask_login import login_required
 from datetime import datetime, timedelta
 from sqlalchemy import desc
 import locale
@@ -14,6 +15,7 @@ from lib.models import Conductor, Show, Event
 from lib.conductors import getActiveConductor
 from lib.events import createNewEvent
 from lib.websocket import conductorWebSocketBase
+from lib.users import for_admins
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
