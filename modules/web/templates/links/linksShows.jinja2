@@ -21,7 +21,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ s.name }}</h5>
                         <p class="card-text">{{ s.description }}</p>
-                        <a href="{{ url_for("links.linksList", show_guid=s.id) }}" class="btn btn-primary">Voir les évènements</a>
+                        <a href="{{ url_for("links.linksList", show_guid=s.id) }}" class="btn btn-primary">Voir les liens d'intégration</a>
                     </div>
                 </div>
             {% endfor %}
