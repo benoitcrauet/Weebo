@@ -86,7 +86,10 @@
                 <div class="mb-3 row">
                     {{ form.password1.label(class="col-form-label col-sm-3") }}
                     <div class="col-sm-9">
-                        {{ form.password1(class="form-control") }}
+                        <div class="input-group">
+                            {{ form.password1(class="form-control") }}
+                            <button type="button" class="btn btn-primary" onclick="let newPassword = generatePassword(); fPassword1.value = newPassword; fPassword2.value = newPassword; fPassword1.setAttribute('type', 'text');"><i class="bi bi-gear-fill"></i> Générer un mot de passe</button>
+                        </div>
                         {% if form.password1.description %}<div class="form-text">{{ form.password1.description }}</div>{% endif %}
                     </div>
                 </div>
@@ -105,6 +108,8 @@
                 const fFirstname = document.getElementById("{{ form.firstname.id }}");
                 const fLastname = document.getElementById("{{ form.lastname.id }}");
                 const fUsername = document.getElementById("{{ form.username.id }}");
+                const fPassword1 = document.getElementById("{{ form.password1.id }}");
+                const fPassword2 = document.getElementById("{{ form.password2.id }}");
 
                 const aUsernameExists = document.getElementById("usernameAlertExists");
                 const aUsernameInvalid = document.getElementById("usernameAlertInvalid");
@@ -154,6 +159,47 @@
                 function isValidUsername(input) {
                     return usernameRegex.test(input);
                 }
+
+                function generatePassword() {
+                    const length = 10;
+                    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+
+                    let password = "";
+                    for (let i = 0; i < length; i++) {
+                        const randomIndex = Math.floor(Math.random() * charset.length);
+                        password += charset[randomIndex];
+                    }
+
+                    return password;
+                }
+
+                // Génération aléatoire de mot de passe
+                function generatePassword(length=10) {
+                    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+';
+
+                    let password = '';
+                    let hasDigit = false;
+                    let hasLetter = false;
+                    let hasSpecial = false;
+
+                    while (password.length < length) {
+                        const randomChar = charset[Math.floor(Math.random() * charset.length)];
+                        if (!hasDigit && /[0-9]/.test(randomChar)) {
+                            hasDigit = true;
+                            password += randomChar;
+                        } else if (!hasLetter && /[a-zA-Z]/.test(randomChar)) {
+                            hasLetter = true;
+                            password += randomChar;
+                        } else if (!hasSpecial && /[!@#$%^&*()-_=+]/.test(randomChar)) {
+                            hasSpecial = true;
+                            password += randomChar;
+                        } else if (hasDigit && hasLetter && hasSpecial) {
+                            password += randomChar;
+                        }
+                    }
+
+                    return password;
+                }
                 
                 window.addEventListener("DOMContentLoaded", () => {
                     if(fUsername.value == "") {
@@ -192,6 +238,10 @@
                             else
                                 aUsernameInvalid.style.display = "none";
                         });
+
+                        fPassword1.addEventListener("input", (e) => {
+                            e.target.setAttribute("type", "password");
+                        })
                     }
                 });
             </script>
