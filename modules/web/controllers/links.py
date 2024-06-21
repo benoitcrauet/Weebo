@@ -33,7 +33,7 @@ def init(flaskapp):
 @bp.route("/links")
 @login_required
 def linksShows():
-    shows = session.query(Show).order_by(Show.name).all()
+    shows = session.query(Show).all()
     return render_template("links/linksShows.jinja2", shows=shows)
 
 
@@ -55,7 +55,7 @@ def linksList(show_guid):
     cameras = []
     for i in range(10):
         # On fabrique le lien permanent
-        permalink = config["web"]["baseUrl"]+url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=i+1)
+        permalink = url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=i+1)
 
         cameras.append({
             "number": i+1,
