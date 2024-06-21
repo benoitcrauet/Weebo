@@ -117,7 +117,15 @@
                                 {{ current_user.lastname }}
                             </a>
                             <ul class="dropdown-menu text-small">
-                                <li><a class="dropdown-item" href="{{ url_for("users.logout") }}">Sign out</a></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for("users.passwordChange") }}">Changer mon mot de passe</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for("users.logout") }}">Déconnexion</a>
+                                </li>
                             </ul>
                         </div>
                     {% endif %}

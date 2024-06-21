@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort,
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
 from flask_cors import CORS
-from flask_login import login_required, logout_user, login_user
+from flask_login import login_required, logout_user, login_user, current_user
 import wtforms
 import wtforms.validators as validators
 import json
@@ -66,6 +66,58 @@ def usersList():
 
     return render_template("users/usersList.jinja2", users=users)
 
+
+
+
+# Classe de formulaire d'édition USER
+class FormPasswordChange(FlaskForm):
+    oldPassword = wtforms.PasswordField("Ancien mot de passe", description="Saisissez votre mot de passe actuel.", validators=[
+        validators.DataRequired(),
+    ])
+    password1 = wtforms.PasswordField("Nouveau mot de passe", description="Saisissez votre nouveau mot de passe. Le mot de passe doit faire au moins 10 caractères, contenir au minimum une lettre, un chiffre et un caractère spécial.", validators=[
+        validators.DataRequired(),
+        validators.Length(min=10, message="Password must be at least 10 characters long."),
+        validators.Regexp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&+\-])[A-Za-z\d@$!%*?&+\-]{10,}$', message='Password must contain at least one letter, one number, and one special character.'),
+    ])
+    password2 = wtforms.PasswordField("Confirmer le mot de passe", description="Saisissez à nouveau le mot de passe à définir pour l'utilisateur.", validators=[
+        validators.DataRequired(),
+        validators.EqualTo('password1', message='Passwords must match.'),
+    ])
+    
+    submit = wtforms.SubmitField("Valider")
+
+
+@bp.route("/changepassword", methods=["GET", "POST"])
+@login_required
+def passwordChange():
+    # Chargement du formulaire
+    form = FormPasswordChange()
+    
+    # Si le formulaire est validé
+    if form.validate_on_submit():
+        oldPassword = form.oldPassword.data
+        newPassword1 = form.password1.data
+        newPassword2 = form.password2.data
+
+        # On vérifie l'ancien mot de passe
+        if not current_user.verify_password(oldPassword):
+            form.oldPassword.errors.append("The old password must match your current password.")
+        else:
+            # On vérifie que les 2 mots de passe sont les même
+            if newPassword1==newPassword2:
+                # On défini le mot de passe
+                current_user.password = newPassword1
+
+                session.merge(current_user)
+                session.commit()
+                
+                flash("Votre mot de passe a bien été changé.", "success")
+                return redirect(url_for("home.home"))
+            else:
+                form.password1.errors.append("The two password must be the same.")
+
+    
+    return render_template("users/passwordChange.jinja2", user=current_user, form=form)
 
 
 
