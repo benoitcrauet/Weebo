@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, render_template, request, jsonify
+from flask_login import login_required
 from datetime import datetime, timedelta
 from sqlalchemy import desc
 import locale
@@ -13,6 +14,7 @@ from lib.config import config
 from lib.db import session
 from lib.models import Conductor
 from lib.disk import get_disk_usage, get_app_usage, convert_file_size
+from lib.users import for_admins
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -50,6 +52,8 @@ def updateAllDiskStats():
 
 
 @bp.route("/server/diskusage", methods=["GET"])
+@login_required
+@for_admins
 def diskUsage():
     global diskUsage, diskUsageLastUpdate, appUsage, appUsageMB
 
@@ -64,6 +68,8 @@ def diskUsage():
 
 
 @bp.route("/server/resources", methods=["GET"])
+@login_required
+@for_admins
 def resources():
     # On récupère le nombre de coeurs physiques et logiques
     coresPhysical = psutil.cpu_count(logical=False)
@@ -110,6 +116,7 @@ def resources():
 
 
 @bp.route("/api/server/diskusage", methods=["GET"])
+@login_required
 def api_diskUsage():
     global diskUsage, diskUsageLastUpdate, appUsage
 

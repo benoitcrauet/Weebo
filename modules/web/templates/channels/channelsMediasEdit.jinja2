@@ -25,85 +25,12 @@
         </div>
         {% if channel.id == None %}
             <p class="lead">
-                Entrez ici les détails de ce tout nouveau canal.<br>
-                Vous pourrez ensuite revenir sur cette page pour visualiser les détails d'intégration de ce canal.
+                Entrez ici les détails de ce tout nouveau canal.
             </p>
         {% else %}
-
             <p class="lead">
                 Ici, vous pouvez consulter et modifier les détails du canal médias {{ channel.name }}.
             </p>
-
-            <div class="accordion mb-3" id="accordionDetails">
-                <div class="accordion-item">
-                    <div class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#channelDetails" aria-expanded="false" aria-controls="collapseOne">
-                            Comment intégrer ce canal à OBS ?
-                        </button>
-                    </div>
-                    <div id="channelDetails" class="accordion-collapse collapse" data-bs-parent="#accordionDetails">
-                        <div class="accordion-body">
-                            <p>
-                                Pour intégrer ce canal à OBS, vous devez ajouter une source "<b><i>Navigateur Web</i></b>" (ou "<b><i>Browser</i></b>") dans votre scène.<br>
-                                Vous trouverez ci-dessous les paramètres adéquats à saisir dans la source OBS :
-                            </p>
-
-                            <table class="table table-striped">
-                                <tbody>
-                                    <tr>
-                                        <th scope="row">
-                                            URL (à copier/coller)
-                                        </th>
-                                        <td>
-                                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ web_base }}/viewer/medias/{{ channel.id }}" onclick="this.select();">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row" width="40%">
-                                            Largeur
-                                        </th>
-                                        <td>
-                                            <code>{{ channel.width }}</code>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">
-                                            Hauteur
-                                        </th>
-                                        <td>
-                                            <code>{{ channel.height }}</code>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">
-                                            Désactiver la source quand elle n'est pas visible
-                                        </th>
-                                        <td>
-                                            Non
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">
-                                            Rafraîchir le navigateur lorsque la scène devient active
-                                        </th>
-                                        <td>
-                                            Non
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">
-                                            Permissions de la page
-                                        </th>
-                                        <td>
-                                            Accès complet à OBS
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
         {% endif %}
 
         <form action="" method="post">

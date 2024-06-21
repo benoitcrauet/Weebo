@@ -1,11 +1,52 @@
 from sqlalchemy import Column, Integer, String, DateTime, Enum, Boolean, JSON, Float, CheckConstraint, ForeignKey, event
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, sessionmaker
 import os
 from datetime import datetime
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from lib.db import engine, Base, session
 from lib.guid import generate_guid
 from lib.config import config
+from lib.password import generate_password
+
+
+class User(UserMixin, Base):
+    __tablename__ = "Users"
+
+    id = Column(String, primary_key=True, default=lambda: str(generate_guid()))
+    username = Column(String(150), unique=True, nullable=False)
+    password_hash = Column(String(150), nullable=False)
+    firstname = Column(String(50), nullable=False)
+    lastname = Column(String(50), nullable=False)
+    isAdmin = Column(Boolean, nullable=False)
+
+    active = Column(Boolean, nullable=False)
+
+    @property
+    def password(self):
+        raise AttributeError("password is not a readable attribute")
+    
+
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+    
+    def __repr__(self):
+        return f"<User {self.username}>"
+    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.active:
+            self.active = True
+        if not self.isAdmin:
+            self.active = False
+
+
 
 
 class Show(Base):

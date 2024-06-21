@@ -1,0 +1,33 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Bienvenue
+{% endblock title %}
+
+{% block content %}
+    <section class="w-100 p-4 d-flex justify-content-center pb-4">
+        <form method="post" style="width: 22rem;">
+
+            <fieldset>
+                <legend>Connexion</legend>
+
+                <div class="form-group my-3">
+                    <label for="loginUsername">Nom d'utilisateur</label>
+                    <input type="text" name="username" id="loginUsername" class="form-control form-control-lg" autofocus>
+                </div>
+
+                <div class="form-group my-3">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" name="password" id="loginPassword" class="form-control form-control-lg">
+                </div>
+
+                <!-- Submit button -->
+                <div class="form-group my-3">
+                    <button type="submit"  class="btn btn-primary btn-lg btn-block" data-mdb-button-initialized="true">
+                        Valider
+                    </button>
+                </div>
+            </fieldset>
+        </form>
+    </section>
+{% endblock %}

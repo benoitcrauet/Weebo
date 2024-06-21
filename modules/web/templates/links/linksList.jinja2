@@ -1,0 +1,324 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Liens d'intégration - {{ show.name }}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <h1>Liens d'intégration</h1>
+                <h2>{{ show.name }}</h2>
+            </div>
+            <div class="col-2 text-end">
+                <a href="{{ url_for("links.linksShows") }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+        
+        <p class="lead">
+            Vous trouverez ici tous les liens d'intégration relatifs à l'émission {{ show.name }}.
+        </p>
+
+
+        <h3><i class="bi bi-eye-fill"></i> Espion OBS</h3>
+
+        <p>
+            Afin d'avoir les fonctionnalités complètes de Weebo sur cette émission, vous devez intégrer une source spéciale qui "espionne" votre logiciel OBS.<br>
+            Pour l'intégrer, vous devez simplement ajouter une source "<b><i>Navigateur Web</i></b>" (ou "<b><i>Browser</i></b>") dans votre configuration.<br>
+            Vous trouverez ci-dessous les paramètres à saisir dans la source OBS :
+        </p>
+
+        <div class="accordion" id="accordionSpy">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionSpy-Details" aria-expanded="false" aria-controls="accordionSpy-Details">
+                        <i class="bi bi-eye"></i>&nbsp;Intégration de l'espion OBS
+                    </button>
+                </h2>
+                <div id="accordionSpy-Details" class="accordion-collapse collapse" data-bs-parent="#accordionSpy">
+                    <div class="accordion-body">
+                        
+                        <table class="table table-striped">
+                            <tbody>
+                                <tr>
+                                    <th scope="row" style="width: 35%;">
+                                        URL (à copier/coller)
+                                    </th>
+                                    <td>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("spy.spy", show_guid=show.id) }}" onclick="this.select();">
+                                            <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                <i class="bi bi-copy"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Largeur
+                                    </th>
+                                    <td>
+                                        <code>9</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Hauteur
+                                    </th>
+                                    <td>
+                                        <code>9</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Désactiver la source quand elle n'est pas visible
+                                    </th>
+                                    <td>
+                                        Non
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Contrôler l'audio via OBS
+                                    </th>
+                                    <td>
+                                        Oui
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Rafraîchir le navigateur lorsque la scène devient active
+                                    </th>
+                                    <td>
+                                        Non
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <h3><i class="bi bi-person-video"></i> Canaux vidéo</h3>
+
+        <p>
+            Les canaux médias sont des players web que Weebo génère pour vous permettre d'intégrer vos
+            médias, photos, jingles... sur OBS.<br>
+            Pour l'intégrer, vous devez simplement ajouter une source "<b><i>Navigateur Web</i></b>" (ou "<b><i>Browser</i></b>") dans votre configuration.<br>
+            Vous trouverez ci-dessous les paramètres à saisir dans la source OBS selon le canal média que vous souhaitez intégrer :
+        </p>
+
+        <div class="accordion" id="accordionMediaChannels">
+            {% for c in mediaChannels %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionMediaChannels-{{ c.id }}" aria-expanded="false" aria-controls="accordionMediaChannels-{{ c.id }}">
+                            <i class="bi bi-person-video"></i>&nbsp;{{ c.name }}
+                            {% if c.description.strip()!="" %}
+                                <span class="text-muted"><i>({{ c.description }})</i></span>
+                            {% endif %}
+                        </button>
+                    </h2>
+                    <div id="accordionMediaChannels-{{ c.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionMediaChannels">
+                        <div class="accordion-body">
+                            
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" style="width: 35%;">
+                                            URL (à copier/coller)
+                                        </th>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("channels.viewerWeb", guid=c.id) }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Largeur
+                                        </th>
+                                        <td>
+                                            <code>9</code>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Hauteur
+                                        </th>
+                                        <td>
+                                            <code>9</code>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Désactiver la source quand elle n'est pas visible
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Rafraîchir le navigateur lorsque la scène devient active
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <hr>
+
+        <h3><i class="bi bi-globe"></i> Canaux web</h3>
+
+        <p>
+            Vous pouvez intégrer ce canal à tout navigateur basé sur Chromium (Google Chrome, Brave, Arc...).<br>
+            Afin de finaliser l'intégration, vous devrez entrer les paramètres suivants dans l'extension Weebo Remote :
+        </p>
+
+        <div class="accordion" id="accordionWebChannels">
+            
+            {% for c in webChannels %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionWebChannels-{{ c.id }}" aria-expanded="false" aria-controls="accordionWebChannels-{{ c.id }}">
+                            <i class="bi bi-globe"></i>&nbsp;{{ c.name }}
+                            {% if c.description.strip()!="" %}
+                                <span class="text-muted"><i>({{ c.description }})</i></span>
+                            {% endif %}
+                        </button>
+                    </h2>
+                    <div id="accordionWebChannels-{{ c.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionWebChannels">
+                        <div class="accordion-body">
+                            
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" style="width: 35%;">
+                                            URL (à copier/coller)
+                                        </th>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ web_base }}{{ url_for("channels.viewerWeb", guid=c.id) }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <hr>
+
+        <h3><i class="bi bi-camera-video-fill"></i> Caméras</h3>
+
+        <p>
+            Pour intégrer les caméras VDO de cette émission, vous pouvez utiliser les liens ci-dessous :
+        </p>
+
+        <div class="accordion" id="accordionCameras">
+            
+            {% for c in cameras %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionCameras-{{ c.number }}" aria-expanded="false" aria-controls="accordionCameras-{{ c.number }}">
+                            <i class="bi bi-camera-video"></i>&nbsp;Caméra {{ c.number }}
+                        </button>
+                    </h2>
+                    <div id="accordionCameras-{{ c.number }}" class="accordion-collapse collapse" data-bs-parent="#accordionCameras">
+                        <div class="accordion-body">
+                            
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" style="width: 35%;">
+                                            URL (à copier/coller)
+                                        </th>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ web_base }}{{ c.permalink }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Largeur
+                                        </th>
+                                        <td>
+                                            <code>1920</code>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Hauteur
+                                        </th>
+                                        <td>
+                                            <code>1080</code>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Contrôler l'audio via OBS
+                                        </th>
+                                        <td>
+                                            Oui
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Désactiver la source quand elle n'est pas visible
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Rafraîchir le navigateur lorsque la scène devient active
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+
+
+
+        
+    </div>
+{% endblock %}

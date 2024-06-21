@@ -1,0 +1,39 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    Liens d'intégration - Sélectionnez une émission
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Liens d'intégration</h1>
+
+        <p class="lead">Cliquez sur une émission pour en voir les liens d'intégration.</p>
+
+        <div class="shows-list">
+            {% for s in shows %}
+                <div class="card" style="width: 18rem;">
+                    {% if s.logo!=None and s.logo!="" %}
+                        <a href="{{ url_for("links.linksList", show_guid=s.id) }}">
+                            <img src="/images/{{ s.logo }}" class="card-img-top bg-dark" alt="" style="max-height: 150px; object-fit: cover;">
+                        </a>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ s.name }}</h5>
+                        <p class="card-text">{{ s.description }}</p>
+                        <a href="{{ url_for("links.linksList", show_guid=s.id) }}" class="btn btn-primary">Voir les évènements</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <style>
+        .shows-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-gap: 20px;
+        }
+    </style>
+{% endblock %}

@@ -1,5 +1,6 @@
 from flask import Flask, send_from_directory, abort, request, Response
 from flask_cors import CORS
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import sys
 import os
 from gevent import pywsgi
@@ -8,6 +9,8 @@ from colorama import Back, Fore, Style
 
 from lib.config import config
 from lib.socketio import SocketIOInstance
+from lib.db import session
+from lib.models import User
 
 
 ######################
@@ -30,6 +33,18 @@ def main():
     socketio = SocketIOInstance(app)
     CORS(app, origins="*") # CORS from all
 
+
+    # Configuration du login manager
+    login_manager = LoginManager(app)
+    login_manager.login_view = "users.login"
+
+
+    # Manière dont on récupère l'utilisateur courant
+    @login_manager.user_loader
+    def load_user(user_id):
+        return session.query(User).filter(User.active == True).filter(User.id == user_id).first()
+
+
     # Ajouter une règle de route pour servir les fichiers statiques du dossier '/medias'
     @app.route('/medias/<path:filename>')
     def medias_static(filename):
@@ -48,11 +63,13 @@ def main():
 
 
     # Import des sous-modules de controleurs
-    from .controllers import home, channels, shows, conductors, jingles, spy, events, server
+    from .controllers import users, home, channels, shows, conductors, links, jingles, spy, events, server
+    users.init(app)
     home.init(app)
     channels.init(app)
     shows.init(app)
     conductors.init(app)
+    links.init(app)
     jingles.init(app)
     spy.init(app)
     events.init(app)

@@ -3,6 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort,
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
 from flask_cors import CORS
+from flask_login import login_required
 import wtforms
 import wtforms.validators as validators
 import json
@@ -14,6 +15,7 @@ from lib.guid import generate_guid
 from lib.config import config
 from lib.dict import model_to_dict
 from lib.events import createNewEvent
+from lib.users import for_admins
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -29,6 +31,7 @@ def init(flaskapp):
 
 
 @bp.route("/jingles")
+@login_required
 def shows():
     shows = session.query(Show).all()
     return render_template("jingles/showsList.jinja2", shows=shows)
@@ -36,6 +39,7 @@ def shows():
 
 
 @bp.route("/jingles/<string:show_guid>")
+@login_required
 def jinglesList(show_guid):
     # On vérifie que le show existe bien
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -82,6 +86,7 @@ class FormMediaEdit(FlaskForm):
 
 @bp.route("/jingles/<string:show_guid>/create", methods=["GET","POST"])
 @bp.route("/jingles/<string:show_guid>/<string:guid>/edit", methods=["GET","POST"])
+@login_required
 def jingleEdit(show_guid, guid=None):
     # On vérifie que le show existe bien
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -208,6 +213,7 @@ class FormJingleDelete(FlaskForm):
 
 
 @bp.route("/jingles/<string:show_guid>/<string:guid>/delete", methods=["GET","POST"])
+@login_required
 def jingleDelete(show_guid, guid):
     # On vérifie que le show existe bien
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -236,6 +242,7 @@ def jingleDelete(show_guid, guid):
 
 
 @bp.route("/api/jingle/<string:guid>/launch", methods=["GET"])
+@login_required
 def api_jingleLaunch(guid):
     # On check si le jingle existe
     media = session.query(Media).filter(Media.id == guid).first()
@@ -281,6 +288,7 @@ def api_jingleLaunch(guid):
 
 
 @bp.route("/api/jingles/<string:show_guid>/orders", methods=["PATCH"])
+@login_required
 def api_jinglesReorder(show_guid):
     # On check si l'émission existe
     show = session.query(Show).filter(Show.id == show_guid).first()

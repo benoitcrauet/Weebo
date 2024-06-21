@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, render_template, request
+from flask_login import login_required
 from datetime import datetime, timedelta
 from sqlalchemy import desc
 import locale
@@ -10,6 +11,7 @@ from lib.mime import get_mime, mime_extract_type
 from lib.config import config
 from lib.db import session
 from lib.models import Conductor
+from lib.users import for_admins
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -28,6 +30,7 @@ locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
 
 
 @bp.route("/")
+@login_required
 def home():
     # Date avant laquelle il ne faut pas afficher les conducteurs
     threshold_date = datetime.now() - timedelta(days=14)

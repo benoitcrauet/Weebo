@@ -1,0 +1,229 @@
+{% extends "_layout.jinja2" %}
+
+{% block title %}
+    {% if user.id == None %}
+        Nouvel utilisateur
+    {% else %}
+        Modifier un utilisateur
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                {% if user.id == None %}
+                    <h1>Nouvel utilisateur</h1>
+                {% else %}
+                    <h1>Modifier l'utilisateur</h1>
+                    <h2>{{ user.firstname }} {{ user.lastname }}</h2>
+                {% endif %}
+            </div>
+            <div class="col-2 text-end">
+                <a href="{{ url_for("users.usersList") }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
+            </div>
+        </div>
+        {% if user.id == None %}
+            <p class="lead">
+                Entrez ici les information du nouvel utilisateur.
+            </p>
+        {% else %}
+            <p class="lead">
+                Ici, vous pouvez consulter et modifier les détails de l'utilisateur {{ user.firstname }} {{ user.lastname }} (<span class="font-monospace">{{ user.username }}</span>).
+            </p>
+        {% endif %}
+
+        <form action="" method="post">
+
+            {% if form.errors.values() %}
+                <div class="alert alert-danger">
+                    Pas si vite ! Les erreurs suivantes ont été détectées :
+                    <ul class="mt-2">
+                        {% for field, errors in form.errors.items() %}
+                            {% for error in errors %}
+                                <li>{{ form[field].label.text }} : {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+
+            <fieldset>
+                <legend>Général</legend>
+
+                <div class="mb-3 row">
+                    {{ form.firstname.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.firstname(class="form-control") }}
+                        {% if form.firstname.description %}<div class="form-text">{{ form.firstname.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.lastname.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.lastname(class="form-control") }}
+                        {% if form.lastname.description %}<div class="form-text">{{ form.lastname.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.username.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.username(class="form-control font-monospace") }}
+                        {% if form.username.description %}<div class="form-text">{{ form.username.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div id="usernameAlertExists" class="alert alert-danger" style="display: none;">
+                    Ce nom d'utilisateur existe déjà.
+                </div>
+                <div id="usernameAlertInvalid" class="alert alert-danger" style="display: none;">
+                    Ce nom d'utilisateur est invalide.
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.password1.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.password1(class="form-control") }}
+                        {% if form.password1.description %}<div class="form-text">{{ form.password1.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.password2.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.password2(class="form-control") }}
+                        {% if form.password2.description %}<div class="form-text">{{ form.password2.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <script>
+                const fFirstname = document.getElementById("{{ form.firstname.id }}");
+                const fLastname = document.getElementById("{{ form.lastname.id }}");
+                const fUsername = document.getElementById("{{ form.username.id }}");
+
+                const aUsernameExists = document.getElementById("usernameAlertExists");
+                const aUsernameInvalid = document.getElementById("usernameAlertInvalid");
+
+                const usernameRegex = /^(?!.*\.\.)(?!.*\.$)(?!^\.)[a-z0-9]+(\.[a-z0-9]+)*$/;
+
+                const existingUsers = [
+                    {% for u in existingUsers %}
+                        "{{ u.username }}",
+                    {% endfor %}
+                ];
+
+                function normalizeString(str) {
+                    // Convertir les accents en caractères simples
+                    str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+
+                    // Transformer les majuscules en minuscules
+                    str = str.toLowerCase();
+
+                    // Remplacer les espaces, apostrophes et caractères spéciaux par des points ou les supprimer
+                    str = str.replace(/[^a-z0-9]/g, ".");
+
+                    // Remplacer les séquences de points par un seul point
+                    str = str.replace(/\.{2,}/g, ".");
+
+                    // Supprimer les points au début et à la fin de la chaîne
+                    str = str.replace(/^\./, "").replace(/\.$/, "");
+
+                    return str;
+                }
+
+                function generateUsername(firstName, lastName) {
+                    // Normaliser les noms
+                    const normalizedFirstName = normalizeString(firstName);
+                    const normalizedLastName = normalizeString(lastName);
+
+                    // Combiner pour obtenir prenom.nom
+                    if(normalizedFirstName=="")
+                        return `${normalizedLastName}`;
+                    else if(normalizedLastName=="")
+                        return `${normalizedFirstName}`;
+                    else
+                        return `${normalizedFirstName}.${normalizedLastName}`;
+                }
+
+                // Fonction de test de format username
+                function isValidUsername(input) {
+                    return usernameRegex.test(input);
+                }
+                
+                window.addEventListener("DOMContentLoaded", () => {
+                    if(fUsername.value == "") {
+                        let usernameInput = false;
+
+                        function autoUserName() {
+                            fUsername.value = generateUsername(fFirstname.value, fLastname.value);
+                            const eventInput = new CustomEvent("input", {
+                                detail: {
+                                    keepStatus: true
+                                }
+                            });
+                            fUsername.dispatchEvent(eventInput);
+                        }
+
+                        fFirstname.addEventListener("input", (e) => {
+                            if(!usernameInput)
+                                autoUserName();
+                        });
+                        fLastname.addEventListener("input", (e) => {
+                            if(!usernameInput)
+                                autoUserName();
+                        });
+
+                        fUsername.addEventListener("input", (e) => {
+                            if(e.detail === undefined || e.detail.keepStatus !== true)
+                                usernameInput = true;
+
+                            if(existingUsers.includes(e.target.value))
+                                aUsernameExists.style.removeProperty("display");
+                            else
+                                aUsernameExists.style.display = "none";
+
+                            if(!isValidUsername(e.target.value))
+                                aUsernameInvalid.style.removeProperty("display");
+                            else
+                                aUsernameInvalid.style.display = "none";
+                        });
+                    }
+                });
+            </script>
+
+            <fieldset>
+                <legend>Droits d'accès</legend>
+
+                <div class="mb-3 row">
+                    {{ form.isAdmin.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.isAdmin(class="form-check-input") }}
+                        {{ form.isAdmin.label(class="form-check-label text-danger") }}
+                        {% if form.isAdmin.description %}<div class="form-text">{{ form.isAdmin.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.active.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.active(class="form-check-input") }}
+                        {{ form.active.label(class="form-check-label") }}
+                        {% if form.active.description %}<div class="form-text">{{ form.active.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <div class="col-12">
+                {{ form.hidden_tag() }}
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+        
+    </div>
+{% endblock %}
