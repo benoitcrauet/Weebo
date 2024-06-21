@@ -16,6 +16,7 @@ from lib.config import config
 from lib.dict import model_to_dict
 from lib.events import createNewEvent
 from lib.users import for_admins, guest_required
+from lib.password import verify_password
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)
 
@@ -72,16 +73,14 @@ def usersList():
 # Classe de formulaire d'édition USER
 class FormPasswordChange(FlaskForm):
     oldPassword = wtforms.PasswordField("Ancien mot de passe", description="Saisissez votre mot de passe actuel.", validators=[
-        validators.DataRequired(),
+        validators.DataRequired()
     ])
     password1 = wtforms.PasswordField("Nouveau mot de passe", description="Saisissez votre nouveau mot de passe. Le mot de passe doit faire au moins 10 caractères, contenir au minimum une lettre, un chiffre et un caractère spécial.", validators=[
-        validators.DataRequired(),
-        validators.Length(min=10, message="Password must be at least 10 characters long."),
-        validators.Regexp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&+\-])[A-Za-z\d@$!%*?&+\-]{10,}$', message='Password must contain at least one letter, one number, and one special character.'),
+        validators.DataRequired()
     ])
     password2 = wtforms.PasswordField("Confirmer le mot de passe", description="Saisissez à nouveau le mot de passe à définir pour l'utilisateur.", validators=[
         validators.DataRequired(),
-        validators.EqualTo('password1', message='Passwords must match.'),
+        validators.EqualTo('password1', message='Passwords must match.')
     ])
     
     submit = wtforms.SubmitField("Valider")
@@ -105,14 +104,19 @@ def passwordChange():
         else:
             # On vérifie que les 2 mots de passe sont les même
             if newPassword1==newPassword2:
-                # On défini le mot de passe
-                current_user.password = newPassword1
+                passwordValid, passwordError = verify_password(form.password1.data)
 
-                session.merge(current_user)
-                session.commit()
-                
-                flash("Votre mot de passe a bien été changé.", "success")
-                return redirect(url_for("home.home"))
+                if passwordValid==False:
+                    form.password1.errors.append(passwordError)
+                else:
+                    # On défini le mot de passe
+                    current_user.password = newPassword1.strip()
+
+                    session.merge(current_user)
+                    session.commit()
+                    
+                    flash("Votre mot de passe a bien été changé.", "success")
+                    return redirect(url_for("home.home"))
             else:
                 form.password1.errors.append("The two password must be the same.")
 
@@ -128,9 +132,7 @@ class FormUserEdit(FlaskForm):
     username = wtforms.StringField("Login", description="Nom d'utilisateur unique que l'utilisateur devras entrer pour se connecter. Uniquement des lettres sans accents, des chiffres et des points.", validators=[validators.DataRequired(), validators.Regexp(r'^(?!.*\.\.)(?!.*\.$)(?!^\.)[a-z0-9]+(\.[a-z0-9]+)*$', message="Invalid username format.")])
 
     password1 = wtforms.PasswordField("Mot de passe", description="Saisissez un nouveau mot de passe à définir à l'utilisateur. Le nouveau mot de passe doit faire 10 caractères, contenir au minimum une lettre, un chiffre et un caractère spécial.", validators=[
-        validators.Optional(),
-        validators.Length(min=10, message="Password must be at least 10 characters long."),
-        validators.Regexp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&+\-])[A-Za-z\d@$!%*?&+\-]{10,}$', message='Password must contain at least one letter, one number, and one special character.')
+        validators.Optional()
     ])
     password2 = wtforms.PasswordField("Confirmer le mot de passe", description="Saisissez à nouveau le mot de passe à définir pour l'utilisateur.", validators=[
         validators.Optional(),
@@ -172,28 +174,37 @@ def usersEdit(user_guid=None):
         if not edit and form.password1.data=="":
             form.password1.errors.append("Password is required for each new user.")
         else:
+            passwordError = None
+
             # On défini le mot de passe si nécessaire
             if edit and len(form.password1.data)>0:
-                user.password = form.password1.data
+                passwordValid, passwordError = verify_password(form.password1.data)
+                if passwordValid:
+                    user.password = form.password1.data.strip()
             elif not edit:
-                user.password = form.password1.data
-
-            # On défini les autres infos
-            user.firstname = form.firstname.data
-            user.lastname = form.lastname.data
-            user.username = form.username.data
-
-            user.isAdmin = form.isAdmin.data
-            user.active = form.active.data
-
-            if edit:
-                session.merge(user)
+                passwordValid, passwordError = verify_password(form.password1.data)
+                if passwordValid:
+                    user.password = form.password1.data.strip()
+            
+            if passwordError!=None:
+                form.password1.errors.append(passwordError)
             else:
-                session.add(user)
-            
-            session.commit()
-            
-            return redirect(url_for("users.usersList"))
+                # On défini les autres infos
+                user.firstname = form.firstname.data
+                user.lastname = form.lastname.data
+                user.username = form.username.data
+
+                user.isAdmin = form.isAdmin.data
+                user.active = form.active.data
+
+                if edit:
+                    session.merge(user)
+                else:
+                    session.add(user)
+                
+                session.commit()
+                
+                return redirect(url_for("users.usersList"))
 
     
     return render_template("users/usersEdit.jinja2", existingUsers=existingUsers, user=user, form=form)

@@ -28,3 +28,19 @@ def generate_password(length=10):
 
     # Convert the list to a string
     return ''.join(password)
+
+
+def verify_password(password):
+    password = password.strip()
+
+    if len(password)<10:
+        return False, "Password must be at least 10 characters long."
+
+    has_letter = any(c.isalpha() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    has_special = any(c in string.punctuation for c in password)
+
+    if not (has_letter and has_digit and has_special):
+        return False, 'Password must contain at least one letter, one digit, and one special character.'
+
+    return True, None
