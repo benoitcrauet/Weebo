@@ -11,6 +11,5 @@ proglog
 requests
 colorama
 pyyaml
-hashlib
 psutil
 Flask-Login
