@@ -78,7 +78,7 @@ class FormUserEdit(FlaskForm):
     password1 = wtforms.PasswordField("Mot de passe", description="Saisissez un nouveau mot de passe à définir à l'utilisateur. Le nouveau mot de passe doit faire 10 caractères, contenir au minimum une lettre, un chiffre et un caractère spécial.", validators=[
         validators.Optional(),
         validators.Length(min=10, message="Password must be at least 10 characters long."),
-        validators.Regexp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&+\-]{10,}$', message='Password must contain at least one letter, one number, and one special character.')
+        validators.Regexp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&+\-])[A-Za-z\d@$!%*?&+\-]{10,}$', message='Password must contain at least one letter, one number, and one special character.')
     ])
     password2 = wtforms.PasswordField("Confirmer le mot de passe", description="Saisissez à nouveau le mot de passe à définir pour l'utilisateur.", validators=[
         validators.Optional(),
