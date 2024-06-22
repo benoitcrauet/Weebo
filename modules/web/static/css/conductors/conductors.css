@@ -154,6 +154,7 @@ a.cond-insertion-adder-link:hover {
     body:not(.edit-mode) .cond-line[data-type=section] .cond-line-display {
         position: sticky;
         top: 60px;
+        z-index: 1000;
     }
     body:not(.edit-mode) .cond-line[data-type=section] .cond-line-display td {
         background-color: rgba(var(--bs-dark-rgb), 0.7) !important;
@@ -162,7 +163,6 @@ a.cond-insertion-adder-link:hover {
         -moz-backdrop-filter: blur(10px);
         -ms-backdrop-filter: blur(10px);
         -o-backdrop-filter: blur(10px);
-        z-index: 1000;
     }
     .cond-line[data-type=section] .cond-line-done-checkbox {
             display: none;
@@ -304,6 +304,10 @@ body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkb
         overflow: hidden;
         text-overflow: ellipsis;
         font-style: italic;
+    }
+
+    .cond-medias-line td {
+        z-index: 500;
     }
 
     .cond-medias-line[data-volume-mode="mute"] .cond-media-volume-icon-mute {
