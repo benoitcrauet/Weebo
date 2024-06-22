@@ -15,11 +15,19 @@
     text-shadow: 0px 0px 3px black;
     font-family: monospace;
     font-weight: bold;
-    animation: disappear .5s 60s forwards;
+    animation: disappear .5s 10s forwards;
     background-image: url("/static/img/smpte.png");
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% 100%;
+}
+
+#identifier.infinite {
+    animation: none;
+}
+
+#identifier.hide {
+    display: none;
 }
 
     #identifier > * {
@@ -45,7 +53,7 @@
     100% { opacity: 0; }
 }
 
-#connectionAlert {
+.alert {
     z-index: 9999999999;
     position: absolute;
     top: 0px;
@@ -53,7 +61,8 @@
     right: 0px;
     bottom: 0px;
     color: white;
-    background: red;
+    background: transparent;
+    border: 20px solid red;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -61,7 +70,7 @@
     opacity: 0;
 }
 
-#connectionAlert .connectionAlert_text {
+.alert .alertText {
     display: inline;
     background: rgba(0,0,0,.6);
     padding: 10px;
@@ -69,7 +78,7 @@
     font-family: monospace;
     font-size: 80px;
     font-weight: bold;
-    animation: blinker .6s 0s infinite alternate;
+    animation: blinker .8s 0s infinite alternate;
     opacity: 1;
 }
 
