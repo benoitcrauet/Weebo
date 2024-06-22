@@ -7,13 +7,18 @@ console.log("Viewer ID \""+viewerID+"\"");
 // Élément contenant l'alerte de connexion
 const _connectionAlert = document.getElementById("connectionAlert");
 
-
 // Élément vidéo contenant les jingles
 const jingleVideo = document.getElementById("jingleVideoElement");
 
-
+// zIndex des media items
 var currentZindex = 9999;
 
+
+
+/**
+ * Génère un GUID
+ * @returns GUID généré
+ */
 function generateGUID() {
     return 'yxxxyxyyxyxyxxyxyxyxyxyxyxyxyxyxyxyxyxx'.replace(/[xy]/g, function(c) {
         var r = Math.random() * 16 | 0,
@@ -22,9 +27,7 @@ function generateGUID() {
     });
 }
 
-function getVideoByTarget(target) {
-    let obj = document.getElementById("target-"+target)
-}
+
 
 /**
  * Crée une nouvelle structure DOM contenant un nouveau média.
@@ -89,8 +92,15 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
     if(type=="video") {
         const vm = dom_media_foreground_obj;
         const vs = dom_media_background_obj;
+        let timeTrigger = 0;
+
         const syncVideos = () => {
-            vs.currentTime = vm.currentTime;
+            if(timeTigger==0)
+                vs.currentTime = vm.currentTime;
+            timeTrigger++;
+            if(timeTrigger>=20)
+                timeTrigger=0;
+
             if(vm.paused && !vs.paused)
                 vs.pause();
             else if(!vm.paused && vs.paused)
@@ -441,4 +451,58 @@ socket.on("media_command", function(data) {
     else {
         console.error("Invalid media_command websocket datas received.", data);
     }
+});
+
+
+
+
+/**
+ * Au chargement du DOM
+ */
+window.addEventListener("DOMContentLoaded", () => {
+
+    // On récupère les paramètres GET
+    const url = new URL(window.location.href);
+    const getParams = new URLSearchParams(url.search);
+
+    // On stocke l'élément de l'identifier
+    const identifier = document.getElementById("identifier");
+
+
+    // On veut afficher une image de test ?
+    if(getParams.get("sample")=="picture") {
+        console.log("Displaying picture sample.");
+        mediaArm(
+            "SAMPLE",
+            "picture",
+            "/static/sample/image.webp",
+            "test"
+        );
+        takeArmed();
+    }
+    else if(getParams.get("sample")=="video") {
+        console.log("Displaying video sample.");
+        mediaArm(
+            "SAMPLE",
+            "video",
+            "/static/sample/video.webm",
+            "test",
+            1,
+            0.5,
+            true
+        );
+        takeArmed();
+    }
+
+    // On veut supprimer l'identifier ?
+    if(getParams.get("smpte")=="off") {
+        // On cache l'identifier
+        identifier.classList.add("hide");
+    }
+    else if(getParams.get("smpte")=="infinite") {
+        // On rend le SMPTE infini (pour les calages par ex)
+        identifier.classList.add("infinite");
+    }
+
+
 });

@@ -279,8 +279,6 @@ def channelsWebDelete(show_guid, channel_guid):
 def viewerMedias(guid):
     # On vérifie si le viewer éxiste
     channel = session.query(MediaChannel).filter(MediaChannel.id == guid).first()
-    if not channel:
-        abort(404, description="Ce canal est introuvable.")
     
     return render_template("channels/viewerVideo.jinja2", channel=channel)
 

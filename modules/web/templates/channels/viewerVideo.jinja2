@@ -7,22 +7,29 @@
     </head>
     <body>
         <div id="identifier">
-            <div id="identifier_id">
-                {{ channel.id }}
-            </div>
-            <div id="identifier_name">
-                {{ channel.name }}
-            </div>
-            <div id="identifier_resolution">
-                {{ channel.width }}x{{ channel.height }}
-            </div>
-            <div id="identifier_show">
-                {{ channel.show.name }}
+            {% if channel %}
+                <div id="identifier_id">
+                    {{ channel.id }}
+                </div>
+                <div id="identifier_name">
+                    {{ channel.name }}
+                </div>
+                <div id="identifier_show">
+                    {{ channel.show.name }}
+                </div>
+                <div id="identifier_resolution">
+                    {{ channel.width }}x{{ channel.height }}
+                </div>
+            {% endif %}
+        </div>
+        <div id="connectionAlert" class="alert">
+            <div class="alertText">
+                Connexion interrompue.
             </div>
         </div>
-        <div id="connectionAlert">
-            <div class="connectionAlert_text">
-                Pas de connexion
+        <div id="notFoundAlert" class="alert">
+            <div class="alertText">
+                Canal média introuvable.
             </div>
         </div>
         <div id="main">
@@ -42,14 +49,20 @@
             </div>-->
         </div>
 
-
         <style>
             {{ channel.customCSS }}
         </style>
 
         <script>
             // ID du viewer en cours
-            const viewerID = "{{ channel.id }}";
+            const viewerID = "{{ channel.id if channel else "" }}";
+
+            {% if not channel %}
+                window.addEventListener("DOMContentLoaded", () => {
+                    document.getElementById("notFoundAlert").style.opacity = 1;
+                    document.getElementById("identifier").classList.add("hide");
+                })
+            {% endif %}
         </script>
         <script src="/static/js/socket/socket.io.min.js"></script>
         <script src="/static/js/channels/viewer.js"></script>

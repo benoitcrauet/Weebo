@@ -42,7 +42,7 @@
                         <table class="table table-striped">
                             <tbody>
                                 <tr>
-                                    <th scope="row" style="width: 35%;">
+                                    <th scope="row" style="width: 30%;">
                                         URL (à copier/coller)
                                     </th>
                                     <td>
@@ -52,22 +52,6 @@
                                                 <i class="bi bi-copy"></i>
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">
-                                        Largeur
-                                    </th>
-                                    <td>
-                                        <code>9</code>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">
-                                        Hauteur
-                                    </th>
-                                    <td>
-                                        <code>9</code>
                                     </td>
                                 </tr>
                                 <tr>
@@ -129,15 +113,27 @@
                             <table class="table table-striped">
                                 <tbody>
                                     <tr>
-                                        <th scope="row" style="width: 35%;">
+                                        <th scope="row" style="width: 30%;">
                                             URL (à copier/coller)
                                         </th>
                                         <td>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("channels.viewerWeb", guid=c.id) }}" onclick="this.select();">
+                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("channels.viewerMedias", guid=c.id) }}" onclick="this.select();" id="input-url-{{ c.id }}">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
+                                            </div>
+                                            Affichage de la mire :
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '');">Par défaut</button>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '?smpte=off');">Désactivée</button>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '?smpte=infinite');">Infinie</button>
+                                            </div><br>
+                                            Signal de test :
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '');">Désactivé</button>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '?sample=picture');">Image</button>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '?sample=video');">Vidéo</button>
                                             </div>
                                         </td>
                                     </tr>
@@ -146,7 +142,7 @@
                                             Largeur
                                         </th>
                                         <td>
-                                            <code>9</code>
+                                            <code>{{ c.width }}</code>
                                         </td>
                                     </tr>
                                     <tr>
@@ -154,7 +150,7 @@
                                             Hauteur
                                         </th>
                                         <td>
-                                            <code>9</code>
+                                            <code>{{ c.height }}</code>
                                         </td>
                                     </tr>
                                     <tr>
@@ -180,8 +176,15 @@
                     </div>
                 </div>
             {% endfor %}
-
         </div>
+        <script>
+            function mediaChannelURLAddSuffix(id, suffix="") {
+                const obj = document.getElementById("input-url-"+id);
+                if(obj.dataset.baseUrl===undefined)
+                    obj.dataset.baseUrl = obj.value;
+                obj.value = obj.dataset.baseUrl + suffix;
+            }
+        </script>
 
         <hr>
 
@@ -210,12 +213,12 @@
                             <table class="table table-striped">
                                 <tbody>
                                     <tr>
-                                        <th scope="row" style="width: 35%;">
+                                        <th scope="row" style="width: 30%;">
                                             URL (à copier/coller)
                                         </th>
                                         <td>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ web_base }}{{ url_for("channels.viewerWeb", guid=c.id) }}" onclick="this.select();">
+                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("channels.viewerWeb", guid=c.id) }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
@@ -255,7 +258,7 @@
                             <table class="table table-striped">
                                 <tbody>
                                     <tr>
-                                        <th scope="row" style="width: 35%;">
+                                        <th scope="row" style="width: 30%;">
                                             URL (à copier/coller)
                                         </th>
                                         <td>
