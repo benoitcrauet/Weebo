@@ -95,7 +95,7 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
         let timeTrigger = 0;
 
         const syncVideos = () => {
-            if(timeTigger==0)
+            if(timeTrigger==0)
                 vs.currentTime = vm.currentTime;
             timeTrigger++;
             if(timeTrigger>=20)
