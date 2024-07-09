@@ -13,6 +13,12 @@ const jingleVideo = document.getElementById("jingleVideoElement");
 // zIndex des media items
 var currentZindex = 9999;
 
+// Mode preview
+var previewMode = false;
+
+// Volume max
+var maximumVolume = 1;
+
 
 
 /**
@@ -47,7 +53,7 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
 
     let dom_media_credit = document.createElement("div");
     dom_media_credit.classList.add("media_credit");
-    dom_media_credit.innerText = source.trim()!="" ? "Source : " + source : "";
+    dom_media_credit.innerText = source.trim();
 
     let dom_media_foreground = document.createElement("div");
     dom_media_foreground.classList.add("media_foreground");
@@ -86,7 +92,7 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
     dom_media_background_obj.setAttribute("src", src);
     dom_media_foreground_obj.setAttribute("src", src);
     if(type=="video")
-        dom_media_foreground_obj.volume = linearToLogarithmic(volume);
+        dom_media_foreground_obj.volume = scaleVolume(linearToLogarithmic(volume));
 
 
     // Synchronisation des médias foreground/background
@@ -130,7 +136,7 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
                 vm.play();
                 vs.play();
 
-                e.target.volume = linearToLogarithmic(vm.dataset.volumeAfterLoop);
+                e.target.volume = scaleVolume(linearToLogarithmic(vm.dataset.volumeAfterLoop));
             }
         });
     }
@@ -287,10 +293,33 @@ function linearToLogarithmic(value) {
 }
 
 
+
+/**
+ * Réduit une valeur de volume selon la valeur de volume max
+ * @param {number} input Valeur de volue à traiter
+ * @returns {number} Valeur réduite
+ */
+function scaleVolume(input, maxVolume=null) {
+    input = Math.max(0, input)
+    input = Math.min(1, input)
+
+    if(maxVolume===null)
+        maxVolume = maximumVolume;
+    maxVolume = Math.max(0, maxVolume);
+    maxVolume = Math.min(1, maxVolume);
+
+    return input * maximumVolume
+}
+
+
+
 /**
  * Défini le volume d'un média avec une rampe et un timing
  */
 function volumeSet(id=null, exclude=false, target=0, step=0.04, interval=50, callback=null) {
+    step = scaleVolume(step);
+    target = scaleVolume(step);
+
     // On récupère le média
     let mediaItem = document.querySelectorAll(".media_item.video").forEach(element => {
         if(id==null || (!exclude && id==element.dataset.id) ||  (exclude && id!=element.dataset.id)) {
@@ -309,9 +338,9 @@ function volumeSet(id=null, exclude=false, target=0, step=0.04, interval=50, cal
 
                 // On limite
                 if(down && obj.volume<target)
-                    obj.volume = target;
+                    obj.volume = scaleVolume(target);
                 else if(!down && obj.volume>target)
-                    obj.volume = target;
+                    obj.volume = scaleVolume(target);
 
                 // On arrête si on arrive au volume cible
                 if(obj.volume == target) {
@@ -341,7 +370,7 @@ function playJingle(src, volume) {
 
     // On charge la vidéo
     jingleVideo.src = src;
-    jingleVideo.volume = linearToLogarithmic(volume);
+    jingleVideo.volume = scaleVolume(linearToLogarithmic(volume));
 }
 
 jingleVideo.addEventListener("ended", function(e) {
@@ -393,7 +422,7 @@ socket.on("media_command", function(data) {
                             args.volumeAfterLoop!==undefined &&
                             args.loop!==undefined) {
                         console.log("Arming media.");
-                        
+
                         mediaArm(args.mediaID, args.type, args.src, args.source, args.volume, args.volumeAfterLoop, args.loop);
                     }
                     else {
@@ -529,6 +558,27 @@ window.addEventListener("DOMContentLoaded", () => {
     else if(getParams.get("smpte")=="infinite") {
         // On rend le SMPTE infini (pour les calages par ex)
         identifier.classList.add("infinite");
+    }
+
+
+    // Si on a pas d'OBS de détecté, on passe en mode preview
+    if(window.obsstudio === undefined) {
+        previewMode = true;
+        document.body.classList.add("preview");
+        console.warn("PREVIEW MODE : USER NEEDS TO INTERACT FIRST");
+    }
+
+
+    // Si on demande un volume maxi
+    if(getParams.get("maxVolume")!==null) {
+        maxVolume = parseFloat(getParams.get("maxVolume"));
+        if(typeof maxVolume==="number" && maxVolume>=0 && maxVolume<=1) {
+            maximumVolume = linearToLogarithmic(maxVolume);
+            console.warn("VOLUME MODE : ALL MEDIAS WILL HAVE A MAXIMUM VOLUME OF " + Math.floor(maxVolume*100) + "%");
+        }
+        else {
+            console.error("VOLUME MODE : maxVolume MUST BE A NUMBER BETWEEN 0 AND 1");
+        }
     }
 
 

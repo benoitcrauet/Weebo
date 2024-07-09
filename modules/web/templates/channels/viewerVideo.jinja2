@@ -6,6 +6,11 @@
         <link rel="stylesheet" href="/static/css/channels/viewer.css">
     </head>
     <body>
+        <div id="interact">
+            <button type="button" onclick="this.parentElement.style.display = 'none';">
+                Cliquez ici pour initialiser le viewer
+            </button>
+        </div>
         <div id="identifier">
             {% if channel %}
                 <div id="identifier_id">
