@@ -263,7 +263,7 @@
                                         </th>
                                         <td>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ web_base }}{{ c.permalink }}" onclick="this.select();">
+                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ c.permalink }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
