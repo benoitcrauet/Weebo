@@ -42,7 +42,7 @@ class FormShowEdit(FlaskForm):
     id = wtforms.HiddenField("ID", validators=[])
     name = wtforms.StringField("Nom de l'émission", validators=[validators.DataRequired()], render_kw={"maxlength": 30})
     description = wtforms.StringField("Description", description="Une simple description, juste pour vous, pour vous y retrouver.", validators=[], render_kw={"maxlength": 150})
-    logo = wtforms.FileField("Logo", description="Permet d'associer un logo à l'émission.", validators=[FileAllowed(["jpg","jpeg","png"])])
+    logo = wtforms.FileField("Logo", description="Permet d'associer un logo à l'émission.", validators=[FileAllowed(["jpg","jpeg","png","webp"])])
     logo_delete = wtforms.BooleanField("Supprimer le logo actuel")
 
     videoWidth = wtforms.IntegerField("Largeur", description="Largeur en pixels des vidéos transcodées pour cette émission.", validators=[validators.DataRequired(), validators.NumberRange(min=300, max=3840)])
