@@ -136,7 +136,7 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
                 vm.play();
                 vs.play();
 
-                e.target.volume = scaleVolume(linearToLogarithmic(vm.dataset.volumeAfterLoop));
+                e.target.volume = linearToLogarithmic(scaleVolume(vm.dataset.volumeAfterLoop));
             }
         });
     }

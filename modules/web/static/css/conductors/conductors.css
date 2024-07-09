@@ -231,7 +231,7 @@ body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkb
 }
 
 
-#editLineFormModal, #editMediaFormModal, #vdoModal, #previewModal {
+#editLineFormModal, #editMediaFormModal, #vdoModal, #previewModal, #viewerModal {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     -moz-backdrop-filter: blur(10px);

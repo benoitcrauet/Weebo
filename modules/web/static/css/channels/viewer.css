@@ -19,9 +19,18 @@
         display: flex;
     }
 
-    #interact button {
-        font-size: 15vh;
+    #interact > div {
+        font-size: 30px;
+        font-family: "Tahoma", sans-serif;
+        color: white;
         padding: 4vh 4vw;
+        cursor: default;
+        max-width: 80vw;
+    }
+
+    #interact input[type=range] {
+        width: 100%;
+        display: block;
         cursor: pointer;
     }
 

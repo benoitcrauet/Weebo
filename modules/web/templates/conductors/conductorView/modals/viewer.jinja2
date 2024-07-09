@@ -1,0 +1,97 @@
+<!-- VDO.ninja modal -->
+<div class="modal fade" id="viewerModal" tabindex="-1" aria-labelledby="viewerModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="viewerModalTitle">Canaux médias</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <p class="lead">
+                    Vous pouvez ici voir en temps réel les médias diffusés depuis Weebo.
+                    Cliquez sur le canal que vous souhaitez visualiser, il s'ouvrira dans une nouvelle fenêtre.
+                </p>
+
+                <p>
+                    <div class="row mb-3">
+                        <label class="col-form-label col-sm-3" for="vPreviewVolume">
+                            Volume d'écoute
+                        </label>
+                        <div class="col-9">
+                            <div class="row">
+                                <div class="col-10">
+                                    <input type="range" id="vPreviewVolume" name="volume" class="form-range col-8" min="0" max="1" step="0.1" value="0.5">
+                                </div>
+                                <div class="col-auto text-center">
+                                    <span id="editPreviewVolume">50 %</span>
+                                </div>
+                            </div>
+                            <span class="form-text">
+                                Sélectionnez ici le volume maximal auquel vous souhaitez visualiser les médias diffusés sur votre appareil.
+                            </span>
+                        </div>
+                    </div>
+                    <script>
+                        function _updatePreviewVolumeDisplay(source) {
+                            document.getElementById('editPreviewVolume').innerText =  Math.round(source.value*100) + ' %';
+                            _previewCurrentVolume = source.value;
+                        }
+
+                        const _vPreviewVolume = document.getElementById("vPreviewVolume");
+                        _vPreviewVolume.addEventListener("change", function() { _updatePreviewVolumeDisplay(_vPreviewVolume); });
+                        _vPreviewVolume.addEventListener("input", function() { _updatePreviewVolumeDisplay(_vPreviewVolume); });
+                        window.setInterval(function() { _updatePreviewVolumeDisplay(_vPreviewVolume); }, 500);
+
+                        var _previewCurrentVolume = _vPreviewVolume.value;
+                    </script>
+                </p>
+
+                <table class="table table-stripped">
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 25%;">
+                                Nom
+                            </th>
+                            <th scope="col" style="width: 60%;">
+                                Description
+                            </th>
+                            <th scope="col" style="width: 15%;" class="text-end">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in mediaChannels %}
+                            <tr>
+                                <th scope="row">
+                                    {{ c.name }}
+                                </th>
+                                <td class="text-muted">
+                                    {{ c.description }}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ url_for("channels.viewerMedias", guid=c.id) }}" class="btn btn-primary" onclick="openViewerURL(this.href); return false;">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                        Ouvrir
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <script type="text/javascript">
+                    function openViewerURL(url) {
+                        let paramVolume = "&maxVolume=" + _previewCurrentVolume;
+
+                        window.open(url + "?smpte=infinite" + paramVolume, "viewerPreview", "width=1024,height=576,resizable=yes,scrollbars=no,status=no,menubar=no,toolbar=no,location=no,directories=no");
+                    }
+                </script>
+
+            </div>
+
+        </div>
+    </div>
+</div>
