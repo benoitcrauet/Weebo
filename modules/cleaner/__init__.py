@@ -45,12 +45,27 @@ def deleteOldEvents():
         print("Émission \"{}\"".format(s.name))
         
         # On supprime quand même les events trop anciens
-        recentEvents = session.query(Event.id).filter(Event.show_id == s.id).order_by(Event.date.desc()).limit(maxEvents).all()
+        recentEvents = session.query(Event).filter(Event.show_id == s.id).order_by(Event.date.desc()).all()
         recentEvents_ids = [event.id for event in recentEvents]
 
-        session.query(Event).filter(~Event.id.in_(recentEvents_ids)).delete(synchronize_session=False)
+        eventNbrByShow = {}
+        toDelete = 0
+        for e in recentEvents:
+            if not e.show_id in eventNbrByShow:
+                eventNbrByShow[e.show_id] = 0
+            
+            eventNbrByShow[e.show_id] += 1
+
+            if eventNbrByShow[e.show_id]>maxEvents:
+                session.delete(e)
+                toDelete += 1
+                pass
+        
+        # On commit toutes les suppressions
         session.commit()
+
         print("    > Nettoyage des évènements pour conserver les {} derniers.".format(maxEvents))
+        print("        > {} évènements supprimés.".format(toDelete))
 
     
     # On applique les changements
