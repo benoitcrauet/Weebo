@@ -48,7 +48,6 @@ def main():
     # Ajouter une règle de route pour servir les fichiers statiques du dossier '/medias'
     @app.route('/medias/<path:filename>')
     def medias_static(filename):
-        print("test {}".format(filename))
         root_path = os.path.dirname(os.path.abspath(__file__))
         medias_folder = os.path.abspath(os.path.join(root_path, "..", "..", config["directories"]["medias"]))
         return send_from_directory(medias_folder, filename, conditional=False)
