@@ -65,6 +65,7 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
         
         dom_media_foreground_obj = document.createElement("video");
         dom_media_foreground_obj.dataset.volumeAfterLoop = volumeAfterLoop;
+        dom_media_foreground_obj.dataset.playerId = id;
         dom_media_foreground_obj.dataset.loop = loop;
     }
     else if(type=="picture") {
@@ -95,8 +96,10 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
         let timeTrigger = 0;
 
         const syncVideos = () => {
-            if(timeTrigger==0)
-                vs.currentTime = vm.currentTime;
+            if(timeTrigger==0) {
+                //vs.currentTime = vm.currentTime;
+                //console.debug(vm.currentTime, vs.currentTime);
+            }
             timeTrigger++;
             if(timeTrigger>=20)
                 timeTrigger=0;
@@ -164,6 +167,25 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
         element: dom_media_item
     };
 
+}
+
+
+
+/**
+ * Unload d'un player selon son playerID
+ * @param {string} playerID ID du player
+ * @returns void
+ */
+function mediaUnload(playerID) {
+    // On cherche le player ID
+    let player = document.querySelector("div[data-id='"+playerID+"']");
+
+    if(player) {
+        // On unload les vidéos ou les images
+        player.querySelectorAll("video, img").forEach((element) => {
+            element.src = "";
+        });
+    }
 }
 
 
@@ -413,6 +435,11 @@ socket.on("media_command", function(data) {
                                 // On baisse le volume des autres médias
                                 volumeSet(mediaData.playerID, true, 0, 0.03, 50, (obj) => {
                                     obj.pause();
+                                    
+                                    // On unload les éléments
+                                    let playerID = obj.dataset.playerId;
+                                    mediaUnload(playerID);
+                                    console.log(`All medias unloaded on player ID ${playerID}`);
                                 });
                             })
                         }
