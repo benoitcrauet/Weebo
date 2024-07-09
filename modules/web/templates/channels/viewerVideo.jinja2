@@ -7,9 +7,24 @@
     </head>
     <body>
         <div id="interact">
-            <button type="button" onclick="this.parentElement.style.display = 'none';">
-                Cliquez ici pour initialiser le viewer
-            </button>
+            <div>
+                Glissez le curseur pour initialiser le canal :
+                <input type="range" min="0" max="100" step="1" value="0" id="unlockRange">
+
+                <script>
+                    const unlockRange = document.getElementById("unlockRange");
+                    const interactContainer = document.getElementById("interact");
+
+                    unlockRange.addEventListener("input", (e) => {
+                        if(e.target.value >= 100) {
+                            interactContainer.style.display = "none";
+                        }
+                    });
+                    unlockRange.addEventListener("mouseup", (e) => {
+                        e.target.value = 0;
+                    });
+                </script>
+            </div>
         </div>
         <div id="identifier">
             {% if channel %}
