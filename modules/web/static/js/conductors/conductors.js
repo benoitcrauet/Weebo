@@ -272,7 +272,7 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
         mediaModalCutBegin.value = "";
         mediaModalCutEnd.value = "";
         mediaModalRotate.selectedIndex = 0;
-        mediaModalLoop.checked = false;
+        mediaModalLoop.checked = true;
         mediaModalVolume.value = 0;
         mediaModalVolumeAfterLoop.value = 0;
         mediaModalUrl.value = "";
