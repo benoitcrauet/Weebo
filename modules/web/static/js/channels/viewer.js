@@ -51,6 +51,24 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
     dom_media_item.dataset.mediaId = mediaID;
     dom_media_item.classList.add("invisible"); // Par défaut l'élément est invisible
 
+    let dom_media_osd = document.createElement("div");
+    dom_media_osd.classList.add("media_osd");
+
+        let dom_media_osd_remain = document.createElement("div");
+        dom_media_osd_remain.classList.add("media_remain");
+        dom_media_osd_remain.innerText = ""; // Par défaut, le remain est vide
+
+        let dom_media_osd_progress = document.createElement("div");
+        dom_media_osd_progress.classList.add("media_progress");
+
+            let dom_media_osd_progressbar = document.createElement("div");
+            dom_media_osd_progressbar.classList.add("progressbar");
+            dom_media_osd_progressbar.style.width = "0%";
+
+            dom_media_osd_progress.append(dom_media_osd_progressbar);
+
+        dom_media_osd.append(dom_media_osd_remain, dom_media_osd_progress);
+
     let dom_media_credit = document.createElement("div");
     dom_media_credit.classList.add("media_credit");
     dom_media_credit.innerText = source.trim();
@@ -73,6 +91,7 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
         dom_media_foreground_obj.dataset.volumeAfterLoop = volumeAfterLoop;
         dom_media_foreground_obj.dataset.playerId = id;
         dom_media_foreground_obj.dataset.loop = loop;
+        dom_media_foreground_obj.dataset.playIteration = 1;
     }
     else if(type=="picture") {
         dom_media_background_obj = document.createElement("img");
@@ -99,6 +118,8 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
     if(type=="video") {
         const vm = dom_media_foreground_obj;
         const vs = dom_media_background_obj;
+        const osdRemain = dom_media_osd_remain;
+        const osdProgress = dom_media_osd_progressbar;
         let timeTrigger = 0;
 
         const syncVideos = () => {
@@ -123,20 +144,51 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
             vs.pause();
             vs.currentTime = vm.currentTime;
         });
-        vm.addEventListener("timeupdate", function() {
+        vm.addEventListener("timeupdate", function(e) {
             syncVideos();
+
+            if(previewMode) {
+                // On affiche le temps restant si < 10s et première lecture
+                let remain = "";
+                if(vm.dataset.playIteration == 1) {
+                    const delta = e.target.duration - e.target.currentTime;
+                    if(delta <= 10.9999 && delta >= 0)
+                        remain = Math.floor(delta);
+                }
+
+                // On met à jour la progressbar
+                const progress = ((e.target.currentTime / e.target.duration) * 100).toFixed(2);
+                osdProgress.style.width = progress + "%";
+
+                osdRemain.innerText = remain;
+            }
         });
         vm.addEventListener("ended", function(e) {
-            // Si on loop la vidéo, on retourne au début
-            if(vm.dataset.loop == "true") {
-                console.log("Loop mode. Replay file with volume "+(vm.volume*100)+".");
+            if(!previewMode) {
+                // Si on loop la vidéo, on retourne au début
+                if(vm.dataset.loop == "true") {
+                    console.log("Loop mode. Replay file with volume "+(vm.volume*100)+".");
 
-                vm.currentTime = 0;
-                vs.currentTime = 0;
-                vm.play();
-                vs.play();
+                    // On met en pause la lecture
+                    vm.pause();
+                    vs.pause();
 
-                e.target.volume = linearToLogarithmic(scaleVolume(vm.dataset.volumeAfterLoop));
+                    // On remet le seeking à 0
+                    vm.currentTime = 0;
+                    vs.currentTime = 0;
+
+                    // On relance la lecture
+                    vm.play();
+                    vs.play();
+
+                    // On ajoute 1 au play iteration
+                    vm.dataset.playIteration++;
+
+                    // On défini le nouveau volume
+                    e.target.volume = linearToLogarithmic(scaleVolume(vm.dataset.volumeAfterLoop));
+
+
+                }
             }
         });
     }
@@ -147,6 +199,7 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
 
     dom_media_background.appendChild(dom_media_background_obj);
     dom_media_foreground.appendChild(dom_media_foreground_obj);
+    dom_media_item.appendChild(dom_media_osd);
     dom_media_item.appendChild(dom_media_credit);
     dom_media_item.appendChild(dom_media_foreground);
     dom_media_item.appendChild(dom_media_background);
@@ -561,11 +614,16 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // Si on a pas d'OBS de détecté, on passe en mode preview
-    if(window.obsstudio === undefined) {
+    // Si on est en mode preview
+    if(getParams.get("preview")!==null) {
         previewMode = true;
         document.body.classList.add("preview");
         console.warn("PREVIEW MODE : USER NEEDS TO INTERACT FIRST");
+
+        // Si on détecte OBS, on supprime l'interact
+        if(window.obsstudio !== undefined) {
+            document.getElementById("interact").remove();
+        }
     }
 
 
