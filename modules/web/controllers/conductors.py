@@ -334,11 +334,16 @@ def conductorsView(show_guid, cond_guid=None):
             soloParams["password"] = conductor.vdoPassword
         soloLink = "https://vdo.ninja/?"+urlencode(soloParams)
 
+        # On crée le lien version screen capture
+        soloCaptureLink = "https://vdo.ninja/?"+urlencode({**soloParams, "view": soloParams["view"]+":s"})
 
 
-        # On fabrique le lien permanent
+
+        # On fabrique le lien permanent caméra
         soloPermalink = config["web"]["baseUrl"]+url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=k+1)
 
+        # ... ainsi que celui de la capture
+        soloCapturePermalink = config["web"]["baseUrl"]+url_for("conductors.vdoPermalink_screencapture", show_guid=show.id, cam_number=k+1)
 
 
         # On compile le tout et on ajoute à la liste
@@ -348,7 +353,9 @@ def conductorsView(show_guid, cond_guid=None):
             "cam_number": k,
             "link_invite": inviteLink,
             "link_solo": soloLink,
+            "link_capture_solo": soloCaptureLink,
             "permalink_solo": soloPermalink,
+            "permalink_capture_solo": soloCapturePermalink,
         }
         vdoLinks.append(obj)
     
@@ -401,7 +408,8 @@ def conductorsView(show_guid, cond_guid=None):
 
 
 # Pas de login ici : c'est les liens VDO pour OBS
-@bp.route("/cameraslink/<string:show_guid>/<int:cam_number>")
+@bp.route("/cameraslink/<string:show_guid>/<int:cam_number>", endpoint="vdoPermalink")
+@bp.route("/cameraslink/<string:show_guid>/<int:cam_number>/screencapture", endpoint="vdoPermalink_screencapture")
 def vdoPermalink(show_guid, cam_number):
     # Est-ce que le show existe ?
     show = session.query(Show).filter(Show.id == show_guid).first()
@@ -427,6 +435,11 @@ def vdoPermalink(show_guid, cam_number):
             "view": streamID, # Stream ID
             "solo": "" # Vue solo
         }
+
+        # Si on demande le screen capture, on rajoute le :s
+        if request.path.endswith("/screencapture"):
+            soloParams["view"] += ":s"
+            print("test")
 
         # On rajoute le token OBS mais uniquement sur le premier lien
         if cam_number-1 <= 0:
