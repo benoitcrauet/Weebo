@@ -7,7 +7,7 @@ from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
 from colorama import Back, Fore, Style
 
-from lib.config import config
+from lib.config import config, app as appConfig
 from lib.socketio import SocketIOInstance
 from lib.db import session
 from lib.models import User
@@ -32,6 +32,11 @@ def main():
     app.config["SECRET_KEY"] = config["web"]["secretKey"]
     socketio = SocketIOInstance(app)
     CORS(app, origins="*") # CORS from all
+
+
+    @app.context_processor
+    def inject_global_variables():
+        return dict(APP_NAME=appConfig["name"], APP_VERSION=appConfig["version"], APP_AUTHOR=appConfig["author"])
 
 
     # Configuration du login manager
