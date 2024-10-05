@@ -249,7 +249,7 @@
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionCameras-{{ c.number }}" aria-expanded="false" aria-controls="accordionCameras-{{ c.number }}">
-                            <i class="bi bi-camera-video"></i>&nbsp;Caméra {{ c.number }}
+                            <i class="bi bi-camera-video"></i>&nbsp;Caméra du participant Nº{{ c.number }}
                         </button>
                     </h2>
                     <div id="accordionCameras-{{ c.number }}" class="accordion-collapse collapse" data-bs-parent="#accordionCameras">
@@ -264,6 +264,91 @@
                                         <td>
                                             <div class="input-group">
                                                 <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ c.permalink }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Largeur
+                                        </th>
+                                        <td>
+                                            <code>1920</code>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Hauteur
+                                        </th>
+                                        <td>
+                                            <code>1080</code>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Contrôler l'audio via OBS
+                                        </th>
+                                        <td>
+                                            Oui
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Désactiver la source quand elle n'est pas visible
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Rafraîchir le navigateur lorsque la scène devient active
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        </div>
+
+        <hr>
+        
+        <h3><i class="bi bi-display-fill"></i> Captures d'écran</h3>
+
+        <p>
+            Vous pouvez également intégrer sur OBS les flux de capture vidéo des participants via les liens ci-dessous :
+        </p>
+
+        <div class="accordion" id="accordionCaptures">
+            
+            {% for c in cameras %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionCaptures-{{ c.number }}" aria-expanded="false" aria-controls="accordionCameras-{{ c.number }}">
+                            <i class="bi bi-display"></i>&nbsp;Capture du participant Nº{{ c.number }}
+                        </button>
+                    </h2>
+                    <div id="accordionCaptures-{{ c.number }}" class="accordion-collapse collapse" data-bs-parent="#accordionCaptures">
+                        <div class="accordion-body">
+                            
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" style="width: 30%;">
+                                            URL (à copier/coller)
+                                        </th>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ c.permalink_capture }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>

@@ -56,10 +56,12 @@ def linksList(show_guid):
     for i in range(10):
         # On fabrique le lien permanent
         permalink = url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=i+1)
+        permalinkCapture = url_for("conductors.vdoPermalink_screencapture", show_guid=show.id, cam_number=i+1)
 
         cameras.append({
             "number": i+1,
-            "permalink": permalink
+            "permalink": permalink,
+            "permalink_capture": permalinkCapture
         })
 
     

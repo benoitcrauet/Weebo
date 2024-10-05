@@ -19,9 +19,13 @@
                             <i class="bi bi-people-fill"></i>
                             Liens d'invitation
                         </button>
-                        <button class="nav-link" id="nav-vdo-modal-obs-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-obs" type="button" role="tab" aria-controls="nav-vdo-modal-obs" aria-selected="false">
-                            <i class="bi bi-broadcast-pin"></i>
-                            Sources OBS
+                        <button class="nav-link" id="nav-vdo-modal-obs-camera-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-obs-camera" type="button" role="tab" aria-controls="nav-vdo-modal-obs-camera" aria-selected="false">
+                            <i class="bi bi-camera-video-fill"></i>
+                            Caméras OBS
+                        </button>
+                        <button class="nav-link" id="nav-vdo-modal-obs-capture-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-obs-capture" type="button" role="tab" aria-controls="nav-vdo-modal-obs-capture" aria-selected="false">
+                            <i class="bi bi-display-fill"></i>
+                            Captures d'écrans OBS
                         </button>
                     </div>
                 </nav>
@@ -130,7 +134,12 @@
 
 
                     </div>
-                    <div class="tab-pane" id="nav-vdo-modal-obs" role="tabpanel" aria-labelledby="nav-vdo-modal-obs-tab" tabindex="0">
+
+
+                    <div class="tab-pane" id="nav-vdo-modal-obs-camera" role="tabpanel" aria-labelledby="nav-vdo-modal-obs-camera-tab" tabindex="1">
+                        <p>
+                            Vous pouvez trouver ici les liens permettant l'intégration des <strong>caméras</strong> de chaque participant.
+                        </p>
                     
                         <table class="table table-hover table-striped">
                             <thead>
@@ -144,7 +153,7 @@
                                 {% for l in vdoLinks %}
                                     <tr>
                                         <th scope="row">
-                                            <i class="bi bi-camera-video"></i>
+                                            <i class="bi bi-camera-video-fill"></i>
                                             {{ l.name }}
                                         </th>
                                         <td>
@@ -174,6 +183,66 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+
+                        <div class="alert alert-info">
+                            Il est recommandé d'utiliser les liens intelligents, marqués d'un <i class="bi bi-magic"></i>, au lieu du lien direct.<br>
+                            En effet, ces liens ciblent automatiquement les caméras du bon conducteur selon la date du jour.
+                        </div>
+
+                    </div>
+                    
+                    <div class="tab-pane" id="nav-vdo-modal-obs-capture" role="tabpanel" aria-labelledby="nav-vdo-modal-obs-capture-tab" tabindex="2">
+                        <p>
+                            Vous pouvez trouver ici les liens permettant l'intégration des <strong>captures d'écrans</strong> de chaque participant.
+                        </p>
+
+                        <table class="table table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col" width="25%">Participant</th>
+                                    <th scope="col">Source</th>
+                                    <th scope="col">Lien</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for l in vdoLinks %}
+                                    <tr>
+                                        <th scope="row">
+                                            <i class="bi bi-display-fill"></i>
+                                            {{ l.name }}
+                                        </th>
+                                        <td>
+                                            <code>SCREEN {{ l.cam_number+1 }}</code>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="bi bi-link" title="Lien permanent"></i>
+                                                </span>
+                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.link_capture_solo }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <i class="bi bi-magic" title="Lien intelligent"></i>
+                                                </span>
+                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.permalink_capture_solo }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div class="alert alert-info">
+                            Il est recommandé d'utiliser les liens intelligents, marqués d'un <i class="bi bi-magic"></i>, au lieu du lien direct.<br>
+                            En effet, ces liens ciblent automatiquement les captures d'écrans du bon conducteur selon la date du jour.
+                        </div>
 
                     </div>
                 </div>
