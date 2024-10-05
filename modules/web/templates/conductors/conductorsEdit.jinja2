@@ -125,6 +125,17 @@
                         </div>
                     </div>
 
+                    <hr>
+
+                    <div class="mb-3 row">
+                        {{ form.resetStatus.label(class="col-form-label col-sm-3") }}
+                        <div class="col-sm-9">
+                            {{ form.resetStatus(class="form-check-input") }}
+                            {{ form.resetStatus.label(class="form-check-label") }}
+                            {% if form.resetStatus.description %}<div class="form-text">{{ form.resetStatus.description }}</div>{% endif %}
+                        </div>
+                    </div>
+
                 </div>
 
             </fieldset>

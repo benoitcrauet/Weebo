@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, render_template, request, abort, jsonify
 from flask_login import login_required
 from datetime import datetime, timedelta
-from sqlalchemy import desc
+from sqlalchemy import desc, update
 import locale
 
 from lib.socketio import SocketIOInstance
@@ -61,10 +61,19 @@ def setStatus(show_guid):
             try:
                 # On ouvre le corps data
                 data = request.json
-
+                
                 if "recording" in data and isinstance(data["recording"], bool):
                     # On crée l'évènement seulement s'il y a un changement
                     if not conductor.recording == data["recording"]:
+
+                        # On désactive l'enregistrement sur tous les autres conducteurs
+                        session.execute(
+                            update(Conductor)
+                            .where(Conductor.show_id == conductor.show_id)
+                            .values(recording=False)
+                        )
+
+                        # On défini le nouvel état de recording
                         conductor.recording = data["recording"]
 
                         # On crée le nouvel évènement
@@ -81,6 +90,15 @@ def setStatus(show_guid):
                 elif "streaming" in data and isinstance(data["streaming"], bool):
                     # On crée l'évènement seulement s'il y a un changement
                     if not conductor.streaming == data["streaming"]:
+
+                        # On désactive le streaming sur tous les autres conducteurs
+                        session.execute(
+                            update(Conductor)
+                            .where(Conductor.show_id == conductor.show_id)
+                            .values(streaming=False)
+                        )
+
+                        # On défini le nouvel état de streaming
                         conductor.streaming = data["streaming"]
 
                         # On crée le nouvel évènement

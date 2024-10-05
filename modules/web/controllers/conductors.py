@@ -90,6 +90,7 @@ class FormConductorEdit(FlaskForm):
     vdoEnable = wtforms.BooleanField("Activer VDO", description="Permet d'activer la génération automatique des liens VDO.", validators=[], default=True)
     vdoPassword = wtforms.StringField("Mot de passe VDO", description="Facultatif. Vous permet de définir un mot de passe sur votre room VDO.", validators=[])
     fromTemplate = wtforms.SelectField("Template", choices=[("","- Aucun modèle -")], description="Depuis quel modèle souhaitez-vous créer votre conducteur ?")
+    resetStatus = wtforms.BooleanField("Réinitialiser l'état", description="Cochez cette case pour réinitialiser les états de streaming et d'enregistrement.", validators=[])
 
     show_id = wtforms.HiddenField("show_id")
 
@@ -160,6 +161,11 @@ def conductorsEdit(show_guid, cond_guid=None):
 
             conductor.vdoEnable = form.vdoEnable.data
             conductor.vdoPassword = form.vdoPassword.data.strip()
+
+            # Si on demande un reset, on met à false le streaming et le recording
+            if form.resetStatus.data:
+                conductor.recording = False
+                conductor.streaming = False
 
             conductor.show = show
 
