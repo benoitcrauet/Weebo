@@ -84,6 +84,28 @@
                             </div>
                         </div>
 
+                        <div id="gPlayPresetsContainer">
+                            <div class="row mb-3">
+                                <label class="col-form-label col-sm-3" for="gFile">
+                                    Paramètres de lecture
+                                </label>
+                                <div class="col-9">
+                                    <div class="list-group">
+                                        <button class="list-group-item list-group-item-action" type="button" onclick="setEditMediaPlayPreset(0, 0, true);">
+                                            Muet, en boucle
+                                        </button>
+                                        {% for p in playPresets %}
+                                            <button class="list-group-item list-group-item-action" type="button" onclick="setEditMediaPlayPreset({{ p.volume|float }}, {{ p.volumeAfterLoop|float }}, {{ 'true' if p.loop else 'false' }});">
+                                                {{ p.name }}
+                                            </button>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                                            
                         <div id="gVolumeContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gVolume">
@@ -343,7 +365,7 @@
 
                     </div>
 
-                    <div class="alert alert-info text-center">
+                    <div class="alert alert-warning text-center">
                         N'oubliez pas de prévisualiser vos médias une fois téléchargés !
                     </div>
 
@@ -454,6 +476,42 @@
         }
 
         return valid;
+    }
+
+
+    // Permet de définir un volume de lecture
+    function setEditMediaVolume(value, afterLoop=false) {
+        const volumeField = document.getElementById("gVolume");
+        const volumeFieldValue = document.getElementById("editMediaVolumeValue");
+        const volumeAfterLoopField = document.getElementById("gVolumeAfterLoop");
+        const volumeAfterLoopFieldValue = document.getElementById("editMediaVolumeAfterLoopValue");
+
+        if(afterLoop == true) {
+            volumeAfterLoopField.value = value;
+            volumeAfterLoopFieldValue.innerText = value*100 + " %";
+        }
+        else {
+            volumeField.value = value;
+            volumeFieldValue.innerText = value*100 + " %";
+        }
+    }
+
+
+    // Permet de définir un volume de lecture
+    function setEditMediaLoop(loop) {
+        const loopField = document.getElementById("gLoop");
+
+        if(loop == true)
+            loopField.checked = true;
+        else
+            loopField.checked = false;
+    }
+
+    // Permet de définir un preset de lecture
+    function setEditMediaPlayPreset(volume, volumeAfterLoop, loop) {
+        setEditMediaVolume(volume);
+        setEditMediaVolume(volumeAfterLoop, true);
+        setEditMediaLoop(loop);
     }
 
 

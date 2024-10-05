@@ -178,8 +178,9 @@ const mediaModalTypeContainer = document.getElementById("gTypeContainer");
 const mediaModalNameContainer = document.getElementById("gNameContainer");
 const mediaModalSourceContainer = document.getElementById("gSourceContainer");
 const mediaModalFileContainer = document.getElementById("gFileContainer");
-const mediaDiskUsageContainer = document.getElementById("gDiskUsageContainer");
+const mediaModalDiskUsageContainer = document.getElementById("gDiskUsageContainer");
 const mediaModalRotateContainer = document.getElementById("gRotateContainer");
+const mediaModalPlayPresetsContainer = document.getElementById("gPlayPresetsContainer");
 const mediaModalLoopContainer = document.getElementById("gLoopContainer");
 const mediaModalVolumeContainer = document.getElementById("gVolumeContainer");
 const mediaModalVolumeAfterLoopContainer = document.getElementById("gVolumeAfterLoopContainer");
@@ -189,6 +190,7 @@ const mediaModalWebChannelContainer = document.getElementById("gWebChannelContai
 
 const mediaModalTranscodeSettingsContainer = document.getElementById("gTranscodeSettingsContainer");
 const mediaModalTranscodeSettingsAccordion = document.getElementById("accordionTranscodeSettings");
+
 const mediaModalCutBeginContainer = document.getElementById("gCutBeginContainer");
 const mediaModalCutEndContainer = document.getElementById("gCutEndContainer");
 
@@ -1297,8 +1299,9 @@ function mediaEditUpdateDisplay(type) {
         case "media":
             mediaModalSourceContainer.style.display = "block";
             mediaModalFileContainer.style.display = "block";
-            mediaDiskUsageContainer.style.display = "block";
+            mediaModalDiskUsageContainer.style.display = "block";
             mediaModalUrlContainer.style.display = "none";
+            mediaModalPlayPresetsContainer.style.display = "block";
             mediaModalLoopContainer.style.display = "block";
             mediaModalVolumeContainer.style.display = "block";
             mediaModalVolumeAfterLoopContainer.style.display = "block";
@@ -1316,8 +1319,9 @@ function mediaEditUpdateDisplay(type) {
         case "web":
             mediaModalSourceContainer.style.display = "none";
             mediaModalFileContainer.style.display = "none";
-            mediaDiskUsageContainer.style.display = "none";
+            mediaModalDiskUsageContainer.style.display = "none";
             mediaModalUrlContainer.style.display = "block";
+            mediaModalPlayPresetsContainer.style.display = "none";
             mediaModalLoopContainer.style.display = "none";
             mediaModalVolumeContainer.style.display = "none";
             mediaModalVolumeAfterLoopContainer.style.display = "none";
@@ -1335,8 +1339,9 @@ function mediaEditUpdateDisplay(type) {
         default:
             mediaModalSourceContainer.style.display = "none";
             mediaModalFileContainer.style.display = "none";
-            mediaDiskUsageContainer.style.display = "none";
+            mediaModalDiskUsageContainer.style.display = "none";
             mediaModalUrlContainer.style.display = "none";
+            mediaModalPlayPresetsContainer.style.display = "none";
             mediaModalLoopContainer.style.display = "none";
             mediaModalVolumeContainer.style.display = "none";
             mediaModalVolumeAfterLoopContainer.style.display = "none";
