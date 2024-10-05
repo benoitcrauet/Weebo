@@ -14,7 +14,7 @@
                         <div id="gTypeContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gType">
-                                    Type
+                                    <b>Type<span class="text-danger">*</span></b>
                                 </label>
                                 <div class="col-9">
                                     <select id="gType" name="type" class="form-select">
@@ -31,7 +31,7 @@
                         <div id="gNameContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gName">
-                                    Nom
+                                    <b>Nom<span class="text-danger">*</span></b>
                                 </label>
                                 <div class="col-9">
                                     <input type="text" id="gName" name="name" class="form-control">
@@ -79,7 +79,7 @@
                         <div id="gFileContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gFile">
-                                    Fichier
+                                    <b>Fichier<span class="text-danger">*</span></b>
                                 </label>
                                 <div class="col-9">
                                     <input type="file" id="gFile" name="file" class="form-control">
@@ -115,7 +115,7 @@
                         <div id="gVolumeContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gVolume">
-                                    Volume
+                                    <b>Volume<span class="text-danger">*</span></b>
                                 </label>
                                 <div class="col-9">
                                     <div class="row">
@@ -162,7 +162,7 @@
                         <div id="gVolumeAfterLoopContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gVolumeAfterLoop">
-                                    Volume <u>après</u> la boucle
+                                    <b>Volume <u>après</u> la boucle<span class="text-danger">*</span></b>
                                 </label>
                                 <div class="col-9">
                                     <div class="row">
@@ -193,7 +193,7 @@
                         <div id="gUrlContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gUrl">
-                                    URL
+                                    <b>URL<span class="text-danger">*</span></b>
                                 </label>
                                 <div class="col-9">
                                     <input type="text" id="gUrl" name="url" class="form-control" data-refused="false">
@@ -210,7 +210,7 @@
                         <div id="gMediaChannelContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gMediaChannel">
-                                    Canaux
+                                    <b>Canaux<span class="text-danger">*</span></b>
                                 </label>
                                 <div class="col-9">
                                     <select id="gMediaChannel" name="mediaChannel" multiple class="form-select">
@@ -228,7 +228,7 @@
                         <div id="gWebChannelContainer">
                             <div class="row mb-3">
                                 <label class="col-form-label col-sm-3" for="gWebChannel">
-                                    Canaux
+                                    <b>Canaux<span class="text-danger">*</span></b>
                                 </label>
                                 <div class="col-9">
                                     <select id="gWebChannel" name="webChannel" multiple class="form-select">
@@ -374,6 +374,10 @@
                     <div class="alert alert-warning text-center">
                         N'oubliez pas de prévisualiser vos médias une fois téléchargés !
                     </div>
+
+                    <p>
+                        <b><span class="text-danger">*</span> : champ requis.</b>
+                    </p>
 
                 </div>
 
