@@ -401,8 +401,11 @@ def conductorsView(show_guid, cond_guid=None):
 
     # On récupère les contraintes de lien
     linksConstraints = config["linksConstraints"]
+
+    # On récupère les presets de lecture
+    playPresets = config["playPresets"]
     
-    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web"]["baseUrl"], medias_dir=config["directories"]["medias"], linksConstraints=linksConstraints, disk=get_disk_usage("GB"))
+    return render_template("conductors/conductorsView.jinja2", show=show, conductor=conductor, jingles=jingles, generator=generate_guid, vdoLinks=vdoLinks, vdoRoomID=vdoRoomID, directorLink=directorLink, guestsLink=guestsLink, defaultMediaChannels=defaultMediaChannels, defaultWebChannels=defaultWebChannels, mediaChannels=mediaChannels, webChannels=webChannels, web_base=config["web"]["baseUrl"], medias_dir=config["directories"]["medias"], linksConstraints=linksConstraints, playPresets=playPresets, disk=get_disk_usage("GB"))
 
 
 

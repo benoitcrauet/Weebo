@@ -43,6 +43,27 @@ cleaner:
   maxEvents: 400
 
 
+# Presets de lecture
+playPresets:
+  # pour chaque preset :
+  # - name: Nom du preset
+  #   loop: true/false. Définit si la vidéo doit être lue en boucle ou pas.
+  #   volume: 0.0 <> 1.0. Définit le volume de lecture de base du média.
+  #   volumeAfterLoop: 0.0 <> 1.0. Définit le volume de lecture du média après sa première lecture.
+  
+  # >>> Un preset muet sera systématiquement présent
+  
+  - name: Fond sonore, en boucle
+    loop: true
+    volume: 0.3
+    volumeAfterLoop: 0.3
+  
+  - name: Vidéo à écouter, puis boucle en fond sonore
+    loop: true
+    volume: 1
+    volumeAfterLoop: 0.3
+
+
 # Contraintes de liens
 linksConstraints:
   # pour chaque contrainte :
