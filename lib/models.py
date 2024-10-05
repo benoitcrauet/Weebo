@@ -171,6 +171,7 @@ class Line(Base):
     text = Column(String)
     order = Column(Integer)
     done = Column(Boolean, default=True)
+    highlight = Column(Boolean, default=False)
     type = Column(String, default="classic")
     jingle = Column(String)
 

@@ -409,6 +409,7 @@ function lineSetDatas(element, line) {
     let done = line.done;
     let order = line.order;
     let jingle = (line.jingle==undefined || line.jingle=="") ? false : line.jingle;
+    let highlight = line.highlight;
 
     // On édite le tbody principal
     element.setAttribute("id", "cond-line-"+id);
@@ -416,6 +417,7 @@ function lineSetDatas(element, line) {
     element.dataset.type = type;
     element.dataset.order = order;
     element.dataset.jingle = jingle;
+    element.dataset.highlight = highlight;
 
     // On édite le nom de la ligne
     element.querySelector(".cond-line-title").innerText = name;

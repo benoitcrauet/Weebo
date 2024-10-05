@@ -69,6 +69,7 @@ const formEditLine = document.getElementById("formEditLine");
 const lineModalTitle = document.querySelector(modalLineTitleQuery);
 const lineModalType = document.getElementById("fType");
 const lineModalName = document.getElementById("fName");
+const lineModalHighlight = document.getElementById("fHighlight");
 const lineModalText = document.getElementById("fText");
 const lineModalJingle = document.getElementById("fJingle");
 const lineModalId = document.getElementById("fId");
@@ -77,6 +78,7 @@ const lineModalSubmit = document.getElementById("fSubmit");
 
 const lineModalTypeContainer = document.getElementById("fTypeContainer");
 const lineModalNameContainer = document.getElementById("fNameContainer");
+const lineModalHighlightContainer = document.getElementById("fHighlightContainer");
 const lineModalTextContainer = document.getElementById("fTextContainer");
 const lineModalJingleContainer = document.getElementById("fJingleContainer");
 
@@ -109,6 +111,7 @@ async function openLineEditor(id=null, insertAfter=null, type=null, name=null, t
             // On set les éléments
             lineModalType.value = data.type;
             lineModalName.value = data.name;
+            lineModalHighlight.checked = data.highlight;
             lineModalText.value = data.text;
             lineModalJingle.value = data.jingle;
             lineModalId.value = data.id;
@@ -131,6 +134,7 @@ async function openLineEditor(id=null, insertAfter=null, type=null, name=null, t
         // On reset les éléments
         lineModalType.selectedIndex = 0;
         lineModalName.value = "";
+        lineModalHighlight.checked = false;
         lineModalText.value = "";
         lineModalJingle.value = "";
         lineModalId.value = id ?? "";
@@ -794,7 +798,7 @@ function checkContinuousDone(lineTarget, done) {
         if(lineID == lineTarget)
             lineFound = true;
 
-        if(lineType == "classic") {
+        if(lineType=="classic" || lineType=="section") {
 
             if(done && !lineFound) {
                 console.log(lineID, checked);
@@ -1258,22 +1262,26 @@ function lineEditUpdateDisplay(type) {
     switch(type) {
         case "classic":
             lineModalNameContainer.style.display = "block";
+            lineModalHighlightContainer.style.display = "none";
             lineModalTextContainer.style.display = "block";
             lineModalJingleContainer.style.display = "block";
             break;
         case "section":
             lineModalNameContainer.style.display = "block";
+            lineModalHighlightContainer.style.display = "block";
             lineModalTextContainer.style.display = "block";
             lineModalJingleContainer.style.display = "block";
             break;
         case "comment":
             lineModalNameContainer.style.display = "none";
+            lineModalHighlightContainer.style.display = "none";
             lineModalTextContainer.style.display = "block";
             lineModalJingleContainer.style.display = "block";
             lineModalName.value = "";
             break;
         case "important":
             lineModalNameContainer.style.display = "none";
+            lineModalHighlightContainer.style.display = "none";
             lineModalTextContainer.style.display = "block";
             lineModalJingleContainer.style.display = "block";
             lineModalName.value = "";
@@ -1497,6 +1505,7 @@ formEditLine.addEventListener("submit", function(e) {
     let data = {
         type: lineModalType.value,
         name: lineModalName.value,
+        highlight: lineModalHighlight.checked,
         text: lineModalText.value,
         jingle: lineModalJingle.value,
         insertAfter: lineModalInsertAfter.value

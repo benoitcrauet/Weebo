@@ -406,6 +406,50 @@
         </div>
 
 
+        <hr>
+
+
+        <h3><i class="bi bi-robot"></i> API conducteur</h3>
+
+        <p>
+            Une API JSON est également disponible, en lecture seule,
+            afin de vous permettre de faire des intégrations du
+            sommaire de l'émission ainsi que de son avancement pour,
+            par exemple, un habillage dynamique.
+        </p>
+
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <th scope="row" style="width: 30%;">
+                        Sommaire uniquement
+                    </th>
+                    <td>
+                        <div class="input-group">
+                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("conductors.showSummary", show_guid=show.id) }}" onclick="this.select();">
+                            <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                <i class="bi bi-copy"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row" style="width: 30%;">
+                        Tout le conducteur
+                    </th>
+                    <td>
+                        <div class="input-group">
+                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("conductors.showSummaryAll", show_guid=show.id) }}" onclick="this.select();">
+                            <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                <i class="bi bi-copy"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+
 
         
     </div>

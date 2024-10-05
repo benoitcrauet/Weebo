@@ -156,19 +156,16 @@ a.cond-insertion-adder-link:hover {
         top: 60px;
         z-index: 1000;
     }
-    body:not(.edit-mode) .cond-line[data-type=section] .cond-line-display td {
+    /*body:not(.edit-mode) .cond-line[data-type=section] .cond-line-display td {
         background-color: rgba(var(--bs-dark-rgb), 0.7) !important;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         -moz-backdrop-filter: blur(10px);
         -ms-backdrop-filter: blur(10px);
         -o-backdrop-filter: blur(10px);
-    }
-    .cond-line[data-type=section] .cond-line-done-checkbox {
-            display: none;
-    }
+    }*/
     .cond-line[data-type=section] .cond-line-title {
-        font-size: 26pt;
+        font-size: 30pt;
         font-weight: bolder;
         margin: 0px;
         font-variant: small-caps;
@@ -178,8 +175,8 @@ a.cond-insertion-adder-link:hover {
         display: none;
     }
     .cond-line[data-type=section] .cond-line-desc {
+        font-size: 10pt;
         text-align: center;
-        font-size: 8pt;
     }
     .cond-line[data-type=section] .cond-line-medias {
         display: none;
@@ -224,9 +221,25 @@ a.cond-insertion-adder-link:hover {
     display: none;
 }
 
+
+.cond-line[data-highlight=true] td {
+    background: white;
+    color: black;
+}
+
+    .cond-line[data-highlight=true][data-type=section] .cond-line-title {
+        text-decoration: underline;
+    }
+
 body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkbox]:checked) td {
     background-color: rgb(30,30,30) !important;
     color: rgb(100,100,100) !important;
+    text-decoration: line-through;
+}
+
+body:not(.edit-mode) .cond-line[data-highlight=true] .cond-line-display:has(.cond-line-done-checkbox[type=checkbox]:checked) td {
+    background-color: rgb(165, 165, 165) !important;
+    color: rgb(43, 43, 43) !important;
     text-decoration: line-through;
 }
 
