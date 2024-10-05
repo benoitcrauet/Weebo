@@ -143,7 +143,7 @@
 
             {% if media.path and not media.path=="" %}
                 <p class="text-center">
-                    <video src="/{{ config['medias_dir'] }}/{{ media.path }}" controls style="width: 100%; max-width: 640px; height: 360px; background: url('/static/img/transparent.png') repeat;"></video>
+                    <video src="/{{ config['directories']['medias'] }}/{{ media.path }}" controls style="width: 100%; max-width: 640px; height: 360px; background: url('/static/img/transparent.png') repeat;"></video>
                 </p>
             {% endif %}
         </form>
