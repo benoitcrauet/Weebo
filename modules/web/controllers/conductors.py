@@ -577,7 +577,7 @@ def api_conductorsLinesListInsert(cond_guid):
 
 
             # Maintenant on ajoute la nouvelle ligne
-            newLine = Line(type=data["type"], name=data["name"], text=data["text"], jingle=data["jingle"], order=newOrder, conductor=conductor, done=False)
+            newLine = Line(type=data["type"], name=data["name"], highlight=data["highlight"], text=data["text"], jingle=data["jingle"], order=newOrder, conductor=conductor, done=False)
             session.add(newLine)
 
             # On stocke les objets modifiés pour le websocket
@@ -628,6 +628,8 @@ def api_conductorsLineEdit(line_guid):
             line.type = data["type"];
         if "name" in data:
             line.name = data["name"];
+        if "highlight" in data:
+            line.highlight = data["highlight"];
         if "text" in data:
             line.text = data["text"];
         if "jingle" in data:
@@ -1212,3 +1214,61 @@ def mediaStop(cond_guid, media_guid):
     session.commit()
     
     return model_to_dict(media)
+
+
+@bp.route("/api/summary/<string:show_guid>", endpoint="showSummary")
+@bp.route("/api/summary/<string:show_guid>/all", endpoint="showSummaryAll")
+def showSummary(show_guid):
+    # On vérifie si l'émission éxiste
+    show = session.query(Show).filter(Show.id == show_guid).first()
+    if not show:
+        abort(404, description="Cette émission est introuvable.")
+    
+    # On récupère le conducteur en cours
+    conductor = getActiveConductor(show.id)
+
+    if conductor:
+        # On liste le sommaire
+        query = session.query(Line).filter(Line.conductor_id == conductor.id)
+        if not request.path.endswith("/all"):
+            query = query.filter(Line.highlight == True)
+        lines = query.order_by(Line.order).all()
+
+        summary = []
+        nextHighlight = None # Stockage de la prochaine ligne HIGHLIGHT non cochée
+        lastHighlight = None # Stockage de la dernière ligne HIGHLIGHT cochée
+
+        virtualOrder = 1
+        for l in lines:
+            currentLine = {
+                "id": l.id,
+                "title": l.name,
+                "text": l.text,
+                "highlight": l.highlight,
+                "done": l.done,
+                "order": virtualOrder
+            }
+            summary.append(currentLine)
+
+            if nextHighlight is None and l.done==False and l.highlight==True:
+                nextHighlight = currentLine
+
+            if l.done==True and l.highlight==True:
+                lastHighlight = currentLine
+
+            virtualOrder += 1
+
+        output = {
+            "show": model_to_dict(show),
+            "activeConductor": model_to_dict(conductor),
+            "summary": summary,
+            "nextHighlight": nextHighlight,
+            "lastHighlight": lastHighlight
+        }
+        
+        return jsonify(output)
+    else:
+        abort(204, description="Cette émission n'a aucun conducteur actif.")
+
+    
+    return ""
