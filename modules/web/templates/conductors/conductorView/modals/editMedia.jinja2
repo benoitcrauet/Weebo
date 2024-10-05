@@ -54,6 +54,12 @@
                                     </span>
                                 </div>
                             </div>
+
+                            {% if sourcesRules|trim != "" %}
+                                <div class="alert alert-info">
+                                    {{ sourcesRules }}
+                                </div>
+                            {% endif %}
                         </div>
 
                         <div id="gDiskUsageContainer">
