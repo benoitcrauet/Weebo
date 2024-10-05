@@ -43,6 +43,10 @@ cleaner:
   maxEvents: 400
 
 
+# Règles à afficher pour les sources médias (laissez vide pour désactiver l'affichage de la règle)
+sourcesRules: ""
+
+
 # Presets de lecture
 playPresets:
   # pour chaque preset :
