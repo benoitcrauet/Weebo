@@ -84,6 +84,7 @@ function autoSelectLastBroadcast() {
             
             // On marque le flag
             streamingStart = true;
+            streamingEnd = false;
 
             console.debug("Found streaming.start: ", element.dataset);
         }
