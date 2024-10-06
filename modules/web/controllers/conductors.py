@@ -1071,7 +1071,7 @@ def api_conductorsMediaDelete(cond_guid, media_guid):
 
 
 
-@bp.route("/api/conductors/<string:cond_guid>/medias/<string:media_guid>/armtake")
+@bp.route("/api/conductors/<string:cond_guid>/medias/<string:media_guid>/armtake", methods=["POST"])
 @login_required
 def mediaBroadcast(cond_guid, media_guid):
     # On vérifie si le conducteur éxiste
@@ -1084,78 +1084,98 @@ def mediaBroadcast(cond_guid, media_guid):
     if not media:
         abort(404, description="Ce canal est introuvable.")
     
-    # On met à jour le champ média
-    conductor.currentMedia = media.id
-    
-    # Building viewers list
-    viewers_list = media.channel.split(",")
+    if request.is_json:
+        data = request.json
 
-    # Building args list
-    args = {}
-    if media.type=="media":
-        ext = media.path.split(".")[-1]
-        # IMAGE
-        if ext=="webp":
-            args = {
-                "type": "picture",
-                "src": "/"+config["directories"]["medias"]+"/"+media.path,
-                "source": media.source,
-                "volume": None,
-                "volumeAfterLoop": None,
-                "loop": None
-            }
-        # VIDEO
-        else:
-            args = {
-                "type": "video",
-                "src": "/"+config["directories"]["medias"]+"/"+media.path,
-                "source": media.source,
-                "volume": media.volume,
-                "volumeAfterLoop": media.volumeAfterLoop,
-                "loop": media.loop
-            }
-    else:
-        args = {
-            "type": "web",
-            "src": media.path
+        # On prépare les paramètres de surcharge
+        surcharge = {
         }
 
-        # On met à jour le media web
-        conductor.currentMediaWeb = media.id
-    
-    # On ajoute le mediaID à la trame
-    args["mediaID"] = media.id
+        if "surcharge" in data:
+            dataSurcharge = data["surcharge"]
+            if "volume" in dataSurcharge and isinstance(dataSurcharge["volume"], (int, float)):
+                surcharge["volume"] = dataSurcharge["volume"]
+            if "startFrom" in dataSurcharge and isinstance(dataSurcharge["startFrom"], (int, float)):
+                surcharge["startFrom"] = dataSurcharge["startFrom"]
 
-    # Building websocket object
-    object_to_send = {
-        "command": "armtake",
-        "viewer": viewers_list,
-        "args": args
-    }
+        # On met à jour le champ média
+        conductor.currentMedia = media.id
+        
+        # Building viewers list
+        viewers_list = media.channel.split(",")
 
-    # On met à jour le conducteur
-    session.merge(conductor)
+        # Building args list
+        args = {}
+        if media.type=="media":
+            ext = media.path.split(".")[-1]
+            # IMAGE
+            if ext=="webp":
+                args = {
+                    "type": "picture",
+                    "src": "/"+config["directories"]["medias"]+"/"+media.path,
+                    "source": media.source,
+                    "volume": None,
+                    "volumeAfterLoop": None,
+                    "loop": None,
+                    "surcharge": surcharge
+                }
+            # VIDEO
+            else:
+                args = {
+                    "type": "video",
+                    "src": "/"+config["directories"]["medias"]+"/"+media.path,
+                    "source": media.source,
+                    "volume": media.volume,
+                    "volumeAfterLoop": media.volumeAfterLoop,
+                    "loop": media.loop,
+                    "surcharge": surcharge
+                }
+        else:
+            args = {
+                "type": "web",
+                "src": media.path,
+                "surcharge": surcharge
+            }
 
-    # Sending object
-    socketio.emit("media_command", object_to_send)
+            # On met à jour le media web
+            conductor.currentMediaWeb = media.id
+        
+        # On ajoute le mediaID à la trame
+        args["mediaID"] = media.id
 
-    # Sending information to media command
-    socketio.emit("conductor_command", conductorWebSocketBase(action="currentMedia", conductor=conductor.id, data_line=None, data_media=model_to_dict(media)))
+        # Building websocket object
+        object_to_send = {
+            "command": "armtake",
+            "viewer": viewers_list,
+            "args": args
+        }
+
+        # On met à jour le conducteur
+        session.merge(conductor)
+
+        # Sending object
+        socketio.emit("media_command", object_to_send)
+
+        # Sending information to media command
+        socketio.emit("conductor_command", conductorWebSocketBase(action="currentMedia", conductor=conductor.id, data_line=None, data_media=model_to_dict(media)))
 
 
-    # On crée un nouvel évènement
-    if media.type=="media":
-        newEvent = createNewEvent(conductor.show_id, "media.start", "Starting media \"{}\"".format(media.name))
-    elif media.type=="web":
-        newEvent = createNewEvent(conductor.show_id, "web.start", "Displaying web page \"{}\"".format(media.name))
-    
-    session.add(newEvent)
+        # On crée un nouvel évènement
+        if media.type=="media":
+            newEvent = createNewEvent(conductor.show_id, "media.start", "Starting media \"{}\"".format(media.name))
+        elif media.type=="web":
+            newEvent = createNewEvent(conductor.show_id, "web.start", "Displaying web page \"{}\"".format(media.name))
+        
+        session.add(newEvent)
 
-    # On met à jour la DB
-    session.commit()
+        # On met à jour la DB
+        session.commit()
 
 
-    return model_to_dict(media)
+        return model_to_dict(media)
+
+    else:
+        abort(400, description="La requête doit être une requête JSON.")
 
 
 
