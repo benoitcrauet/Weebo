@@ -509,7 +509,8 @@ socket.on("media_command", function(data) {
                             args.source!==undefined &&
                             args.volume!==undefined &&
                             args.volumeAfterLoop!==undefined &&
-                            args.loop!==undefined) {
+                            args.loop!==undefined &&
+                            args.surcharge!==undefined) {
                         console.log("Arm and take media.");
                         
                         let startFrom = 0;

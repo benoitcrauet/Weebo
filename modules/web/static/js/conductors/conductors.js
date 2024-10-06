@@ -758,12 +758,13 @@ function mediaElementsRegisterEventListeners(elements) {
  * @param {number} [startFrom=0] Jouer la vidéo à partir de cet instant
  */
 function mediaBroadcast(id, volume=null, startFrom=null) {
-    obj = {
+    let obj = {
         "surcharge": {
-            "volume": Number(volume),
             "startFrom": Number(startFrom),
         }
     };
+    if(volume!==null)
+        obj.surcharge.volume = Number(volume);
 
     fetch("/api/conductors/"+currentConductorID+"/medias/"+id+"/armtake", {
         method: "POST",

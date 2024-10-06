@@ -1093,10 +1093,11 @@ def mediaBroadcast(cond_guid, media_guid):
 
         if "surcharge" in data:
             dataSurcharge = data["surcharge"]
-            if "volume" in dataSurcharge and isinstance(dataSurcharge["volume"], (int, float)):
-                surcharge["volume"] = dataSurcharge["volume"]
-            if "startFrom" in dataSurcharge and isinstance(dataSurcharge["startFrom"], (int, float)):
-                surcharge["startFrom"] = dataSurcharge["startFrom"]
+            if isinstance(dataSurcharge, dict):
+                if "volume" in dataSurcharge and isinstance(dataSurcharge["volume"], (int, float)):
+                    surcharge["volume"] = dataSurcharge["volume"]
+                if "startFrom" in dataSurcharge and isinstance(dataSurcharge["startFrom"], (int, float)):
+                    surcharge["startFrom"] = dataSurcharge["startFrom"]
 
         # On met à jour le champ média
         conductor.currentMedia = media.id
