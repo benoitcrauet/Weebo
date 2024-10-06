@@ -27,6 +27,12 @@
                                     <i class="bi bi-play-fill play-button"></i>
                                     <i class="bi bi-pause-fill pause-button"></i>
                                 </button>
+                                <button type="button" class="btn btn-sm btn-outline-info" id="videoPreviewRewindButton" title="Reculer de quelques secondes">
+                                    <i class="bi bi-arrow-left"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-info" id="videoPreviewFastForwardButton" title="Avancer de quelques secondes">
+                                    <i class="bi bi-arrow-right"></i>
+                                </button>
                                 <span class="input-group-text" id="videoPreviewSeekBarElapsed">0:00</span>
                                 <span class="input-group-text flex-fill"><input type="range" id="videoPreviewSeekBar" class="form-range" min="0" max="100" step="0.1"></span>
                                 <span class="input-group-text" id="videoPreviewSeekBarRemaining">-0:00</span>
@@ -34,34 +40,36 @@
                         </div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-sm-8">
-                        </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm">
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="bi bi-volume-up-fill"></i></span>
+                                <span class="input-group-text"><i class="bi bi-volume-up-fill"></i> Volume :</span>
                                 <span class="input-group-text flex-fill"><input type="range" id="videoPreviewVolume" class="form-range" min="0" max="1" step="0.1"></span>
                                 <span class="input-group-text" id="videoPreviewVolumeValue">0 %</span>
                             </div>
                         </div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-sm text-center">
-                            Cue :
-                            <button type="button" class="btn btn-sm btn-danger" id="videoPreviewCuePointSet" title="Définir le point de cue">
-                                <i class="bi bi-arrow-down"></i> Définir
-                            </button>
-                            <button type="button" class="btn btn-sm btn-light" id="videoPreviewCuePointGet" title="Rappeler le point de cue">
-                                <i class="bi bi-chevron-bar-right"></i> Rappeler
-                            </button>
+                        <div class="col-sm">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    Cue :
+                                </span>
+                                <button type="button" class="btn btn-sm btn-danger" id="videoPreviewCuePointSet" title="Enregistrer le cue point">
+                                    <i class="bi bi-arrow-down"></i> Définir
+                                </button>
+                                <button type="button" class="btn btn-sm btn-light" id="videoPreviewCuePointGet" title="Rappeler le cue point">
+                                    <i class="bi bi-chevron-bar-right"></i> Rappeler
+                                </button>
+                                <button type="button" class="btn btn-success fw-bold" id="videoPreviewBroadcast" title="Diffuser le média dans OBS à partir du cue point enregistré">
+                                    <i class="bi bi-caret-right-fill"></i> Diffuser à l'antenne
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <div class="row mb-2">
-                        <div class="col-sm text-center">
-                            <button type="button" id="videoPreviewBroadcast" class="btn btn-success">
-                                <i class="bi bi-caret-right-fill"></i>
-                                Diffuser à partir du point enregistré
-                            </button>
-                        </div>
+
+
+                    <div class="alert alert-warning">
+                        La diffusion du média se fera à partir du cue point que vous avez défini, ainsi qu'avec le niveau de volume que vous avez réglé dans cette fenêtre.
                     </div>
                 </div>
 
@@ -77,6 +85,8 @@
 <script>
     const videoPreviewPlayer = document.getElementById("videoPreviewPlayer");
     const videoPreviewPlayButton = document.getElementById("videoPreviewPlayButton");
+    const videoPreviewRewindButton = document.getElementById("videoPreviewRewindButton");
+    const videoPreviewFastForwardButton = document.getElementById("videoPreviewFastForwardButton");
     const videoPreviewSeekBar = document.getElementById("videoPreviewSeekBar");
     const videoPreviewSeekBarElapsed = document.getElementById("videoPreviewSeekBarElapsed");
     const videoPreviewSeekBarRemaining = document.getElementById("videoPreviewSeekBarRemaining");
@@ -86,6 +96,8 @@
     const videoPreviewCuePointSet = document.getElementById("videoPreviewCuePointSet");
     const videoPreviewCuePointGet = document.getElementById("videoPreviewCuePointGet");
     const videoPreviewBroadcast = document.getElementById("videoPreviewBroadcast");
+
+    const videoPreviewJumpSeconds = 3; // Nombre de secondes quand on clique sur avancer/reculer
 
     let videoPreviewCuePoint = 0;
 
@@ -128,6 +140,23 @@
                 videoPreviewPlayer.play();
             else
                 videoPreviewPlayer.pause();
+        });
+
+        // Lorsque l'on clique sur le bouton de recul
+        videoPreviewRewindButton.addEventListener("click", (e) => {
+            const position = videoPreviewPlayer.currentTime;
+
+            const newPosition = Math.max(0, position - videoPreviewJumpSeconds);
+            videoPreviewPlayer.currentTime = newPosition;
+        });
+
+        // Lorsque l'on clique sur le bouton d'avance
+        videoPreviewFastForwardButton.addEventListener("click", (e) => {
+            const position = videoPreviewPlayer.currentTime;
+            const duration = videoPreviewPlayer.duration;
+
+            const newPosition = Math.min(position + videoPreviewJumpSeconds, duration);
+            videoPreviewPlayer.currentTime = newPosition;
         });
 
         // Lorsque l'on clique sur le bouton d'enregistrement du point cue
@@ -197,7 +226,7 @@
             const startFrom = videoPreviewCuePoint;
 
             // On lance la diffusion du média
-            if(confirm("Êtes-vous sûr de vouloir diffuser la vidéo à partir du point cue enregistré ?"))
+            if(confirm("Êtes-vous sûr de vouloir diffuser la vidéo à partir du point cue enregistré ?\n\n⚠️ Le niveau de volume que vous avez défini sera également utilisé à l'antenne."))
                 mediaBroadcast(mediaID, volume, startFrom);
         });
     });
