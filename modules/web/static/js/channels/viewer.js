@@ -169,34 +169,31 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
             }
         });
         vm.addEventListener("ended", function(e) {
-            if(!previewMode) {
-                // Si on loop la vidéo, on retourne au début
-                if(vm.dataset.loop == "true") {
+            // Si on loop la vidéo, on retourne au début
+            if(vm.dataset.loop == "true") {
 
-                    // On met en pause la lecture
-                    vm.pause();
-                    vs.pause();
+                // On met en pause la lecture
+                vm.pause();
+                vs.pause();
 
-                    // On remet le seeking à 0
-                    vm.currentTime = 0;
-                    vs.currentTime = 0;
+                // On remet le seeking à 0
+                vm.currentTime = 0;
+                vs.currentTime = 0;
 
-                    // On relance la lecture
-                    vm.play();
-                    vs.play();
+                // On relance la lecture
+                vm.play();
+                vs.play();
 
-                    // On ajoute 1 au play iteration
-                    vm.dataset.playIteration++;
+                // On ajoute 1 au play iteration
+                vm.dataset.playIteration++;
 
-                    // On défini le nouveau volume si la fonction est active sur ce média
-                    if(vm.dataset.volumeAfterLoopEnabled == 1)
-                        e.target.volume = linearToLogarithmic(scaleVolume(vm.dataset.volumeAfterLoop));
-
-
-                    console.log("Loop mode. Replay file with volume "+(vm.volume*100)+".");
+                // On défini le nouveau volume si la fonction est active sur ce média
+                if(vm.dataset.volumeAfterLoopEnabled == 1)
+                    e.target.volume = linearToLogarithmic(scaleVolume(vm.dataset.volumeAfterLoop));
 
 
-                }
+                console.log("Loop mode. Replay file with volume "+(vm.volume*100)+".");
+
             }
         });
         vm.addEventListener("loadedmetadata", () => {
