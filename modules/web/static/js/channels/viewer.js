@@ -38,7 +38,7 @@ function generateGUID() {
 /**
  * Crée une nouvelle structure DOM contenant un nouveau média.
  **/
-function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=false) {
+function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=false, startFrom=0) {
     let id = generateGUID();
 
     // Création du nouvel élément
@@ -198,6 +198,12 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
 
                 }
             }
+        });
+        vm.addEventListener("loadedmetadata", () => {
+            vm.currentTime = startFrom;
+        });
+        vs.addEventListener("loadedmetadata", () => {
+            vs.currentTime = startFrom;
         });
     }
 
@@ -506,7 +512,19 @@ socket.on("media_command", function(data) {
                             args.loop!==undefined) {
                         console.log("Arm and take media.");
                         
-                        let mediaData = mediaArm(args.mediaID, args.type, args.src, args.source, args.volume, args.volumeAfterLoop, args.loop);
+                        let startFrom = 0;
+
+                        let volume = args.volume;
+                        let volumeAfterLoop = args.volumeAfterLoop;
+
+                        // Si on a des surcharges de paramètre, on les traite
+                        if(args.surcharge.volume !== undefined) // Volume
+                            volume = args.surcharge.volume;
+
+                        if(args.surcharge.startFrom !== undefined) // Point de démarrage
+                            startFrom = args.surcharge.startFrom;
+
+                        let mediaData = mediaArm(args.mediaID, args.type, args.src, args.source, volume, volumeAfterLoop, args.loop, startFrom);
                         let mediaElement = mediaData.element;
                         let mediaPlayerID = mediaData.playerID;
 

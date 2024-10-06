@@ -708,12 +708,13 @@ function mediaElementsRegisterEventListeners(elements) {
         let mediaPath = mediaElement.getAttribute("data-path");
         let mediaLoop = mediaElement.getAttribute("data-loop") == "true";
         let mediaVolume = mediaElement.getAttribute("data-volume");
+        let mediaModalVolumeAfterLoop = mediaElement.getAttribute("data-volume-after-loop");
 
         let path = "/"+mediasDir+"/"+mediaPath;
         if(mediaType == "web")
             path = mediaPath;
         
-        showPreview(mediaType, mediaName, path, mediaLoop, mediaVolume);
+        showPreview(mediaID, mediaType, mediaName, path, mediaLoop, mediaVolume, mediaModalVolumeAfterLoop);
     });
 
     // Évènement quand on clique sur le bouton d'édition
@@ -752,10 +753,25 @@ function mediaElementsRegisterEventListeners(elements) {
 
 /**
  * Lance un média
- * @param {string} id ID du média à diffuser
+ * @param {string} id ID du média à jouer
+ * @param {number} [volume=null] Forçage du volume (null pour laisser le volume par défaut du média)
+ * @param {number} [startFrom=0] Jouer la vidéo à partir de cet instant
  */
-function mediaBroadcast(id) {
-    fetch("/api/conductors/"+currentConductorID+"/medias/"+id+"/armtake");
+function mediaBroadcast(id, volume=null, startFrom=null) {
+    obj = {
+        "surcharge": {
+            "volume": Number(volume),
+            "startFrom": Number(startFrom),
+        }
+    };
+
+    fetch("/api/conductors/"+currentConductorID+"/medias/"+id+"/armtake", {
+        method: "POST",
+        body: JSON.stringify(obj),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
 }
 
 

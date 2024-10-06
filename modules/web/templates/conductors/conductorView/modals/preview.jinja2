@@ -1,6 +1,6 @@
 <!-- preview modal -->
 <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
 
             <div class="modal-header">
@@ -10,11 +10,59 @@
             <div class="modal-body">
 
                 <div class="preview-modal-container-picture">
-                    <img src="" alt="">
+                    <div class="preview-modal-subcontainer">
+                        <img src="" alt="">
+                    </div>
                 </div>
 
                 <div class="preview-modal-container-video">
-                    <video src="" controls></video>
+                    <div class="preview-modal-subcontainer mb-2">
+                        <video src="" id="videoPreviewPlayer"></video>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-sm">
+                            <div class="input-group input-group-sm">
+                                <button type="button" class="btn btn-sm btn-primary" id="videoPreviewPlayButton" title="Lecture / Pause">
+                                    <i class="bi bi-play-fill play-button"></i>
+                                    <i class="bi bi-pause-fill pause-button"></i>
+                                </button>
+                                <span class="input-group-text" id="videoPreviewSeekBarElapsed">0:00</span>
+                                <span class="input-group-text flex-fill"><input type="range" id="videoPreviewSeekBar" class="form-range" min="0" max="100" step="0.1"></span>
+                                <span class="input-group-text" id="videoPreviewSeekBarRemaining">-0:00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-8">
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-volume-up-fill"></i></span>
+                                <span class="input-group-text flex-fill"><input type="range" id="videoPreviewVolume" class="form-range" min="0" max="1" step="0.1"></span>
+                                <span class="input-group-text" id="videoPreviewVolumeValue">0 %</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm text-center">
+                            Cue :
+                            <button type="button" class="btn btn-sm btn-danger" id="videoPreviewCuePointSet" title="Définir le point de cue">
+                                <i class="bi bi-arrow-down"></i> Définir
+                            </button>
+                            <button type="button" class="btn btn-sm btn-light" id="videoPreviewCuePointGet" title="Rappeler le point de cue">
+                                <i class="bi bi-chevron-bar-right"></i> Rappeler
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm text-center">
+                            <button type="button" id="videoPreviewBroadcast" class="btn btn-success">
+                                <i class="bi bi-caret-right-fill"></i>
+                                Diffuser à partir du point enregistré
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -27,6 +75,134 @@
 </div>
 
 <script>
+    const videoPreviewPlayer = document.getElementById("videoPreviewPlayer");
+    const videoPreviewPlayButton = document.getElementById("videoPreviewPlayButton");
+    const videoPreviewSeekBar = document.getElementById("videoPreviewSeekBar");
+    const videoPreviewSeekBarElapsed = document.getElementById("videoPreviewSeekBarElapsed");
+    const videoPreviewSeekBarRemaining = document.getElementById("videoPreviewSeekBarRemaining");
+    const videoPreviewVolume = document.getElementById("videoPreviewVolume");
+    const videoPreviewVolumeValue = document.getElementById("videoPreviewVolumeValue");
+
+    const videoPreviewCuePointSet = document.getElementById("videoPreviewCuePointSet");
+    const videoPreviewCuePointGet = document.getElementById("videoPreviewCuePointGet");
+    const videoPreviewBroadcast = document.getElementById("videoPreviewBroadcast");
+
+    let videoPreviewCuePoint = 0;
+
+    // Lancement des event listeners
+    $(function() {
+        var videoPreviewSeekBarIsDragging = false;
+        var videoPreviewSeekBarDraggingPlay = false;
+
+        // Lorsque la vidéo se lance
+        videoPreviewPlayer.addEventListener("play", (e) => {
+            videoPreviewPlayButton.querySelector(".play-button").style.display = "none";
+            videoPreviewPlayButton.querySelector(".pause-button").style.display = "inline";
+        });
+
+        // Lorsque la vidéo s'arrête
+        videoPreviewPlayer.addEventListener("pause", (e) => {
+            videoPreviewPlayButton.querySelector(".play-button").style.display = "inline";
+            videoPreviewPlayButton.querySelector(".pause-button").style.display = "none";
+        });
+
+        // Lorsque la position de la vidéo change
+        videoPreviewPlayer.addEventListener("timeupdate", (e) => {
+            if(!videoPreviewSeekBarIsDragging) {
+                const duration = e.target.duration;
+                const position = e.target.currentTime;
+                const remaining = duration - position;
+                const percent = (position / duration) * 100;
+
+                videoPreviewSeekBar.value = percent;
+
+                // On affiche le current time et le remaining
+                videoPreviewSeekBarElapsed.innerText = formatTime(position);
+                videoPreviewSeekBarRemaining.innerText = "-"+formatTime(remaining);
+            }
+        });
+
+        // Lorsque l'on clique sur le bouton play/pause
+        videoPreviewPlayButton.addEventListener("click", (e) => {
+            if(videoPreviewPlayer.paused)
+                videoPreviewPlayer.play();
+            else
+                videoPreviewPlayer.pause();
+        });
+
+        // Lorsque l'on clique sur le bouton d'enregistrement du point cue
+        videoPreviewCuePointSet.addEventListener("click", (e) => {
+            // On enregistre le dernier point de cue et on enable le bouton
+            videoPreviewCuePoint = videoPreviewPlayer.currentTime;
+            videoPreviewCuePointGet.disabled = false;
+            videoPreviewBroadcast.disabled = false;
+        });
+
+        // Lorsque l'on clique sur le bouton de rappel du point cue
+        videoPreviewCuePointGet.addEventListener("click", (e) => {
+            const playing = !videoPreviewPlayer.paused;
+
+            videoPreviewPlayer.pause();
+            videoPreviewPlayer.currentTime = videoPreviewCuePoint;
+
+            if(playing)
+                videoPreviewPlayer.play();
+        });
+
+        // Lorsque l'on change la position de la seekbar
+        videoPreviewSeekBar.addEventListener("input", (e) => {
+            const duration = videoPreviewPlayer.duration;
+            const newPosition = duration * (e.target.value / 100);
+            const newRemaining = duration - newPosition;
+
+            videoPreviewPlayer.currentTime = newPosition;
+
+            // On affiche le current time et le remaining
+            videoPreviewSeekBarElapsed.innerText = formatTime(newPosition);
+            videoPreviewSeekBarRemaining.innerText = "-"+formatTime(newRemaining);
+        });
+
+        // Lorsqu'on maintient la seekbar
+        videoPreviewSeekBar.addEventListener("mousedown", () => {
+            const playing = !videoPreviewPlayer.paused;
+            videoPreviewSeekBarIsDragging = true;
+            videoPreviewSeekBarDraggingPlay = playing;
+
+            videoPreviewPlayer.pause();
+        });
+
+        // Lorsqu'on relâche la seekbar
+        videoPreviewSeekBar.addEventListener("mouseup", () => {
+            videoPreviewSeekBarIsDragging = false;
+
+            if(videoPreviewSeekBarDraggingPlay)
+                videoPreviewPlayer.play();
+        });
+
+        // Lorsqu'on change la valeur du range volume
+        videoPreviewVolume.addEventListener("input", (e) => {
+            const linVolume = e.target.value;
+            const logVolume = linearToLogarithmic(linVolume);
+
+            videoPreviewPlayer.volume = logVolume;
+
+            // On affiche la valeur de volume
+            videoPreviewVolumeValue.innerText = Math.floor(linVolume * 100) + " %";
+        });
+
+        // Lorsqu'on clique sur le bouton de diffusion du média
+        videoPreviewBroadcast.addEventListener("click", () => {
+            const mediaID = videoPreviewPlayer.dataset.mediaId;
+            const volume = videoPreviewVolume.value;
+            const startFrom = videoPreviewCuePoint;
+
+            // On lance la diffusion du média
+            if(confirm("Êtes-vous sûr de vouloir diffuser la vidéo à partir du point cue enregistré ?"))
+                mediaBroadcast(mediaID, volume, startFrom);
+        });
+    });
+
+
     let previewModalInstance = null;
     $(function() {
         previewModalInstance = new bootstrap.Modal("#previewModal");
@@ -54,7 +230,7 @@
     /**
      * Ouvre une modale de prévisualisation
      */
-    function showPreview(type, name, path, loop, volume) {
+    function showPreview(mediaID, type, name, path, loop, volume, volumeAfterLoop) {
         // On supprime les 3 classes du conteneur
         previewModal.querySelector(".modal-body").classList.remove("video", "picture");
 
@@ -86,12 +262,25 @@
                 // Objet vidéo
                 videoElement = previewModal.querySelector("video");
 
+                // On set les données
+                videoElement.dataset.mediaId = mediaID;
+
                 // On set le src
                 videoElement.src = path;
 
-                // On set le loop et le volume
+                // On set le volume
                 videoElement.loop = loop;
-                videoElement.volume = volume;
+                videoElement.volume = linearToLogarithmic(volume);
+
+                // On affiche la valeur de volume sur l'UX
+                videoPreviewVolume.value = volume;
+                videoPreviewVolumeValue.innerText = Math.floor(volume * 100) + " %";
+
+                // On remet à 0 la mémoire du point de cue
+                videoPreviewCuePoint = 0;
+                // On désactive les boutons de get cue et broadcast
+                videoPreviewCuePointGet.disabled = true;
+                videoPreviewBroadcast.disabled = true;
 
                 // On lance la lecture
                 videoElement.play();
@@ -106,12 +295,41 @@
     function getFileExtension(filename) {
         return filename.split('.').pop();
     }
+
+    /**
+    * Transforme un volume linéaire en volume logarithmique
+    * @param {number} value Valeur linéaire du volume
+    * @returns Valeur logarithmique du volume
+    */
+    function linearToLogarithmic(value) {
+        value = Math.min(1, value);
+        value = Math.max(0, value);
+        return Math.pow(value, 2);
+    }
+
+    /**
+    * Transforme un volume logarithmique en volume linéaire
+    * @param {number} value Valeur logarithmique du volume
+    * @returns {number} Valeur linéaire du volume
+    */
+    function logarithmicToLinear(value) {
+        value = Math.min(1, value); // Limite la valeur à 1
+        value = Math.max(0, value); // Limite la valeur à 0
+        return Math.sqrt(value); // Retourne la racine carrée de la valeur
+    }
+
+
+    // Fonction pour formater le temps
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs < 10 ? '0' : ''}${secs}`; // Ajoute un zéro devant les secondes si nécessaire
+    }
+
 </script>
 
 <style>
-    #previewModal .preview-modal-container-picture,
-    #previewModal .preview-modal-container-video {
-        display: none;
+    #previewModal .preview-modal-subcontainer {
         position: relative;
         width: inherit;
         height: 0;
@@ -127,6 +345,11 @@
         width: 100%;
         height: 100%;
         object-fit: contain;
+    }
+
+    #previewModal .preview-modal-container-picture,
+    #previewModal .preview-modal-container-video {
+        display: none;
     }
 
     #previewModal .picture .preview-modal-container-picture {
