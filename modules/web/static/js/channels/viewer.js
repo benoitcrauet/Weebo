@@ -89,9 +89,14 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
         
         dom_media_foreground_obj = document.createElement("video");
         dom_media_foreground_obj.dataset.volumeAfterLoop = volumeAfterLoop;
+        dom_media_foreground_obj.dataset.volumeAfterLoopEnabled = 1;
         dom_media_foreground_obj.dataset.playerId = id;
         dom_media_foreground_obj.dataset.loop = loop;
         dom_media_foreground_obj.dataset.playIteration = 1;
+
+        // On désactive l'auto play : c'est JS qui s'en charge
+        dom_media_foreground_obj.autoplay = false;
+        dom_media_background_obj.autoplay = false;
     }
     else if(type=="picture") {
         dom_media_background_obj = document.createElement("img");
@@ -167,7 +172,6 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
             if(!previewMode) {
                 // Si on loop la vidéo, on retourne au début
                 if(vm.dataset.loop == "true") {
-                    console.log("Loop mode. Replay file with volume "+(vm.volume*100)+".");
 
                     // On met en pause la lecture
                     vm.pause();
@@ -184,8 +188,12 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
                     // On ajoute 1 au play iteration
                     vm.dataset.playIteration++;
 
-                    // On défini le nouveau volume
-                    e.target.volume = linearToLogarithmic(scaleVolume(vm.dataset.volumeAfterLoop));
+                    // On défini le nouveau volume si la fonction est active sur ce média
+                    if(vm.dataset.volumeAfterLoopEnabled == 1)
+                        e.target.volume = linearToLogarithmic(scaleVolume(vm.dataset.volumeAfterLoop));
+
+
+                    console.log("Loop mode. Replay file with volume "+(vm.volume*100)+".");
 
 
                 }
@@ -251,7 +259,7 @@ function mediaUnload(playerID) {
 /**
  * Transite un élément armé vers un élément joué
  **/
-function takeArmed() {
+function takeArmed(autoPlay = true) {
     // Seulement s'il y a un élément armé
     if(armedMedia !== null) {
         let newMedia = document.getElementById("media-item-" + armedMedia);
@@ -282,7 +290,8 @@ function takeArmed() {
             armedMedia = null;
 
             // On lance la lecture du nouveau média si besoin
-            mediaPlay(takedMedia);
+            if(autoPlay)
+                mediaPlay(takedMedia);
         }
     }
 }
@@ -371,7 +380,7 @@ function scaleVolume(input, maxVolume=null) {
  */
 function volumeSet(id=null, exclude=false, target=0, step=0.04, interval=50, callback=null) {
     step = scaleVolume(step);
-    target = scaleVolume(step);
+    target = scaleVolume(target);
 
     // On récupère le média
     let mediaItem = document.querySelectorAll(".media_item.video").forEach(element => {
@@ -381,18 +390,21 @@ function volumeSet(id=null, exclude=false, target=0, step=0.04, interval=50, cal
             // On défini si on est en mode down
             let down = obj.volume > target;
 
+            // On désactive le volumeAfterLoop
+            obj.dataset.volumeAfterLoopEnabled = 0;
+
             const intervalInstance = setInterval(() => {
 
                 // On calcule le nouveau volume
                 let newVol = down ? obj.volume-step : obj.volume+step;
 
-                // On baisse le volume
+                // On change le volume
                 obj.volume = Math.min(1, Math.max(0, newVol));
 
                 // On limite
-                if(down && obj.volume<target)
+                if(down && obj.volume<=target)
                     obj.volume = scaleVolume(target);
-                else if(!down && obj.volume>target)
+                else if(!down && obj.volume>=target)
                     obj.volume = scaleVolume(target);
 
                 // On arrête si on arrive au volume cible
@@ -500,22 +512,27 @@ socket.on("media_command", function(data) {
 
                         let foregroundElement = mediaElement.querySelector(".media-item-obj-foreground");
 
+                        // On défini le volumeAfterLoop à 0 sur l'ancien média
+                        const foregroundVideo = foregroundElement.querySelector(".media-item-obj-foreground")
+                        if(foregroundVideo) foregroundVideo.setAttribute("data-volume-after-loop", 0);
+
                         // On take quand le média est chargé
                         if(args.type=="picture") {
                             foregroundElement.addEventListener("load", function() {
-                                takeArmed();
+
+                                takeArmed(false);
                                 // On baisse le volume des autres médias
-                                volumeSet(mediaData.playerID, true, 0, 0.03, 50);
+                                volumeSet(mediaData.playerID, true, 0, 0.02, 25);
                             })
                         }
                         else if(args.type=="video") {
                             foregroundElement.addEventListener("canplay", function() {
-                                takeArmed();
+                                takeArmed(false);
                                 
                                 // On lance la lecture du média
                                 mediaPlay(mediaData.playerID);
                                 // On baisse le volume des autres médias
-                                volumeSet(mediaData.playerID, true, 0, 0.03, 50, (obj) => {
+                                volumeSet(mediaData.playerID, true, 0, 0.02, 25, (obj) => {
                                     obj.pause();
                                     
                                     // On unload les éléments

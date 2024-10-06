@@ -133,7 +133,7 @@ body {
 }
 
 .media_item {
-    transition: .5s opacity;
+    transition: .35s opacity;
     transition-delay: 0s;
     opacity: 1;
     width: 100vw;
@@ -143,7 +143,7 @@ body {
 
 .media_item.invisible {
     opacity: 0;
-    transition-delay: 1s;
+    transition-delay: .2s;
     z-index: -999;
 }
 
