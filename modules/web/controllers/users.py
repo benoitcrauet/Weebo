@@ -7,6 +7,7 @@ from flask_login import login_required, logout_user, login_user, current_user
 import wtforms
 import wtforms.validators as validators
 import json
+from urllib.parse import urlparse
 
 from lib.socketio import SocketIOInstance
 from lib.db import session
@@ -33,20 +34,29 @@ def init(flaskapp):
 
 
 @bp.route("/login", methods=["GET", "POST"])
-@guest_required
 def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        user = session.query(User).filter(User.username==username).first()
-        if user and user.verify_password(password):
-            login_user(user)
-            flash("Vous êtes maintenant connecté ! Have fun!", "success")
-            return redirect(url_for('home.home'))
-        else:
-            flash("Connexion impossible. Merci de vérifier vos identifiants ou adressez-vous à un administrateur.", "danger")
-    return render_template("login.jinja2")
+    next_url = request.args.get("next")
+    if next_url:
+        parsed_url = urlparse(next_url)
+        is_relative = not parsed_url.scheme and not parsed_url.netloc
+    else:
+        is_relative = False
+    
+    if current_user.is_authenticated and next_url and is_relative:
+        return redirect(next_url)
+    else:
+        if request.method == 'POST':
+            username = request.form.get('username')
+            password = request.form.get('password')
+            
+            user = session.query(User).filter(User.username==username).first()
+            if user and user.verify_password(password):
+                login_user(user)
+                flash("Vous êtes maintenant connecté ! Have fun!", "success")
+                return redirect(url_for('home.home'))
+            else:
+                flash("Connexion impossible. Merci de vérifier vos identifiants ou adressez-vous à un administrateur.", "danger")
+        return render_template("login.jinja2")
 
 
 
