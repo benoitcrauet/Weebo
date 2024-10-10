@@ -1278,10 +1278,14 @@ def showSummary(show_guid):
                 lastHighlight = currentLine
 
             virtualOrder += 1
+        
+        cleanedConductor = model_to_dict(conductor)
+        del cleanedConductor["vdoEnable"]
+        del cleanedConductor["vdoPassword"]
 
         output = {
             "show": model_to_dict(show),
-            "activeConductor": model_to_dict(conductor),
+            "activeConductor": cleanedConductor,
             "summary": summary,
             "nextHighlight": nextHighlight,
             "lastHighlight": lastHighlight
