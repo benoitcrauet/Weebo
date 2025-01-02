@@ -33,10 +33,29 @@
                             </span>
                         </div>
                     </div>
+                    <div class="row mb-3">
+                        <label class="col-form-label col-sm-3" for="vPreviewJingleOverride">
+                            Voir tous les jingles
+                        </label>
+                        <div class="col-9">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <input type="checkbox" id="vPreviewJingleOverride" name="jingleOverride" class="form-check-input" checked>
+                                </div>
+                            </div>
+                            <span class="form-text">
+                                Activez cette case si vous souhaitez que les jingles de <b>tous</b> les canaux médias soient prévisualisés dans votre fenêtre.
+                            </span>
+                        </div>
+                    </div>
                     <script>
                         function _updatePreviewVolumeDisplay(source) {
                             document.getElementById('editPreviewVolume').innerText =  Math.round(source.value*100) + ' %';
                             _previewCurrentVolume = source.value;
+                        }
+
+                        function _updatePreviewJingleOverride(source) {
+                            _previewJingleOverride = source.checked;
                         }
 
                         const _vPreviewVolume = document.getElementById("vPreviewVolume");
@@ -44,7 +63,11 @@
                         _vPreviewVolume.addEventListener("input", function() { _updatePreviewVolumeDisplay(_vPreviewVolume); });
                         window.setInterval(function() { _updatePreviewVolumeDisplay(_vPreviewVolume); }, 500);
 
+                        const _vJingleOverride = document.getElementById("vPreviewJingleOverride");
+                        _vJingleOverride.addEventListener("input", function() { _updatePreviewJingleOverride(_vJingleOverride); });
+
                         var _previewCurrentVolume = _vPreviewVolume.value;
+                        var _previewJingleOverride = _vJingleOverride.checked;
                     </script>
                 </p>
 
@@ -84,9 +107,13 @@
 
                 <script type="text/javascript">
                     function openViewerURL(url) {
-                        let paramVolume = "&maxVolume=" + _previewCurrentVolume;
+                        let param = "";
+                        param += "&maxVolume=" + _previewCurrentVolume;
 
-                        window.open(url + "?preview&smpte=infinite" + paramVolume, "viewerPreview", "width=1024,height=576,resizable=yes,scrollbars=no,status=no,menubar=no,toolbar=no,location=no,directories=no");
+                        if(_previewJingleOverride===true)
+                            param += "&jingleOverride=1";
+
+                        window.open(url + "?preview&smpte=infinite" + param, "viewerPreview", "width=1024,height=576,resizable=yes,scrollbars=no,status=no,menubar=no,toolbar=no,location=no,directories=no");
                     }
                 </script>
 

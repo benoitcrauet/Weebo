@@ -19,6 +19,9 @@ var previewMode = false;
 // Volume max
 var maximumVolume = 1;
 
+// Mode jingle override
+var jingleOverride = false;
+
 
 
 /**
@@ -477,7 +480,7 @@ socket.on("media_command", function(data) {
         console.log("Websocket received for viewer ID \"" + viewer + "\"");
         console.debug(data);
 
-        if(viewer.includes(viewerID)) {
+        if(viewer.includes(viewerID)  ||  (jingleOverride===true && command=="jingle")) {
             console.log("   It's me! Processing the command...");
 
             switch(command) {
@@ -670,6 +673,12 @@ window.addEventListener("DOMContentLoaded", () => {
         else {
             console.error("VOLUME MODE : maxVolume MUST BE A NUMBER BETWEEN 0 AND 1");
         }
+    }
+
+
+    // On est en mode "jingle override" ?
+    if(getParams.get("jingleOverride")!==null) {
+        jingleOverride = getParams.get("jingleOverride")=="1";
     }
 
 
