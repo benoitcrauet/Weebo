@@ -13,3 +13,5 @@ colorama
 pyyaml
 psutil
 Flask-Login
+gevent
+gevent-websocket
