@@ -124,15 +124,6 @@ def main():
                                 print("    > Pass {}/{}...".format(media.passes, config["transcoding"]["maxRetry"]))
                                 print("")
 
-                                # Fonction anonyme permettant d'envoyer une update
-                                def updateMediaWeb():
-                                    # On envoie un évènement de mise à jour au web
-                                    try:
-                                        if media.line_id:
-                                            requests.get("{}/api/conductor/media/update/{}".format(config["web"]["baseUrl"], media.id), timeout=0.5)
-                                    except Exception as e:
-                                        print("ERROR while sending event to web: {}".format(e))
-
                                 # Fonction anonyme permettant le suivi de progression
                                 def progressCallback(percent, lastUpdate):
                                     modified = False
@@ -153,8 +144,6 @@ def main():
                                         session.merge(media)
                                         session.commit()
                                         lastUpdate[0] = currentTime
-
-                                        updateMediaWeb()
                                 
 
                                 # Si on demande une vidéo brute, on bypass la conversion
@@ -197,8 +186,6 @@ def main():
                                         session.commit()
 
                                         time.sleep(0.2)
-                                        # On envoie l'update au web
-                                        updateMediaWeb()
                                     else:
                                         print("        > ⚠️ Thumbnail extraction error for media ID {}".format(media.id))
 
@@ -206,8 +193,6 @@ def main():
                                         media.error = "Thumbnail Extraction\n\n"+str(thumbnailExtraction)
                                         session.merge(media)
                                         session.commit()
-
-                                        updateMediaWeb()
                                     
 
                                     # Suppression du fichier d'origine
@@ -222,8 +207,6 @@ def main():
                                     media.error = str(videoConversion)
                                     session.merge(media)
                                     session.commit()
-
-                                    updateMediaWeb()
 
                                 session.commit()
 

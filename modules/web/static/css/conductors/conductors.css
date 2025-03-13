@@ -366,11 +366,11 @@ body:not(.edit-mode) .cond-line[data-highlight=true] .cond-line-display:has(.con
 
         .cond-medias-line-name .progress {
             height: 4px;
-            transition: s height cubic-bezier(1, 0, 1, 1);
+            transition: 1s height cubic-bezier(1, 0, 1, 1);
         }
 
             .cond-media-progressbar {
-                transition: 2s width linear;
+                transition: 5s width linear;
             }
 
             .cond-medias-line[data-inprogress=false] .progress {

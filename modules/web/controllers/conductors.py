@@ -1237,6 +1237,34 @@ def mediaStop(cond_guid, media_guid):
     return model_to_dict(media)
 
 
+
+
+@bp.route("/api/conductors/<string:cond_guid>/medias")
+@login_required
+def mediasStatus(cond_guid):
+
+    # On vérifie si le conducteur éxiste
+    conductor = session.query(Conductor).filter(Conductor.id == cond_guid).first()
+    if not conductor:
+        abort(404, description="Ce conducteur est introuvable.")
+    
+    status = {}
+
+    # On récupère les médias
+    medias = (
+        session.query(Media)
+        .join(Line, Media.line_id == Line.id)
+        .join(Conductor, Line.conductor_id == Conductor.id)
+        .filter(Conductor.id == conductor.id)
+        .all()
+    )
+
+    for m in medias:
+        status[m.id] = model_to_dict(m)
+    
+    return status
+
+
 @bp.route("/api/summary/<string:show_guid>", endpoint="showSummary")
 @bp.route("/api/summary/<string:show_guid>/all", endpoint="showSummaryAll")
 def showSummary(show_guid):

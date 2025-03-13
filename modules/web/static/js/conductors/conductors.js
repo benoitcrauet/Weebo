@@ -1810,4 +1810,29 @@ $(function() {
                 updateDiskUsage(diskTotal, diskUsed, diskFree);
             })
     }, 60000);
+
+
+
+
+    // Update régulière de tous les médias du conducteur
+    window.setInterval(() => {
+        fetch(`/api/conductors/${currentConductorID}/medias`)
+            .then(response => {
+                if(!response.ok) {
+                    console.error("Error occured while getting medias status.");
+                }
+                return response.json();
+            })
+            .then(data => {
+
+                Object.keys(data).forEach(k => {
+                    media = data[k];
+                    
+                    // updating media in DOM
+                    insertMediaInConductor(media);
+                });
+
+
+            });
+    }, 5000);
 });
