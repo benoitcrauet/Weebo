@@ -45,6 +45,11 @@ tmp_medias/*
 *.bak
 *.swp
 
+# Fichiers temporaires ffmpeg
+/*.ogg
+/*.mp3
+/*.m4v
+
 # Fichiers de sortie (ex: .coverage, coverage/)
 .coverage
 coverage*/
