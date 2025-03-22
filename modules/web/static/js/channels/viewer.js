@@ -76,134 +76,84 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
     dom_media_credit.classList.add("media_credit");
     dom_media_credit.innerText = source.trim();
 
-    let dom_media_foreground = document.createElement("div");
-    dom_media_foreground.classList.add("media_foreground");
+    let dom_media = document.createElement("div");
+    dom_media.classList.add("media_object");
 
-    let dom_media_background = document.createElement("div");
-    dom_media_background.classList.add("media_background");
-
-    let dom_media_foreground_obj = null;
-    let dom_media_background_obj = null;
+    let dom_media_obj = null;
 
     // On crée les objets média selon le type
     if(type=="video") {
-        dom_media_background_obj = document.createElement("video");
-        dom_media_background_obj.volume = 0;
-        
-        dom_media_foreground_obj = document.createElement("video");
-        dom_media_foreground_obj.dataset.volumeAfterLoop = volumeAfterLoop;
-        dom_media_foreground_obj.dataset.volumeAfterLoopEnabled = 1;
-        dom_media_foreground_obj.dataset.playerId = id;
-        dom_media_foreground_obj.dataset.loop = loop;
-        dom_media_foreground_obj.dataset.playIteration = 1;
+        dom_media_obj = document.createElement("video");
+        dom_media_obj.dataset.volumeAfterLoop = volumeAfterLoop;
+        dom_media_obj.dataset.volumeAfterLoopEnabled = 1;
+        dom_media_obj.dataset.playerId = id;
+        dom_media_obj.dataset.loop = loop;
+        dom_media_obj.dataset.playIteration = 1;
 
         // On désactive l'auto play : c'est JS qui s'en charge
-        dom_media_foreground_obj.autoplay = false;
-        dom_media_background_obj.autoplay = false;
+        dom_media_obj.autoplay = false;
     }
     else if(type=="picture") {
-        dom_media_background_obj = document.createElement("img");
-        dom_media_background_obj.setAttribute("alt", "");
-
-        dom_media_foreground_obj = document.createElement("img");
-        dom_media_foreground_obj.setAttribute("alt", "");
+        dom_media_obj = document.createElement("img");
+        dom_media_obj.setAttribute("alt", "");
     }
 
     // Définition des ID dom
-    dom_media_background_obj.setAttribute("id", "media-item-obj-background-" + id);
-    dom_media_background_obj.classList.add("media-item-obj-background");
-    dom_media_foreground_obj.setAttribute("id", "media-item-obj-foreground-" + id);
-    dom_media_foreground_obj.classList.add("media-item-obj-foreground");
+    dom_media_obj.setAttribute("id", "media-item-obj-" + id);
+    dom_media_obj.classList.add("media-item-obj");
 
     // Définition des URLs des médias
-    dom_media_background_obj.setAttribute("src", src);
-    dom_media_foreground_obj.setAttribute("src", src);
+    dom_media_obj.setAttribute("src", src);
     if(type=="video")
-        dom_media_foreground_obj.volume = scaleVolume(linearToLogarithmic(volume));
+        dom_media_obj.volume = scaleVolume(linearToLogarithmic(volume));
 
 
-    // Synchronisation des médias foreground/background
+    // Event handlers des vidéos
     if(type=="video") {
-        const vm = dom_media_foreground_obj;
-        const vs = dom_media_background_obj;
+        const videoObj = dom_media_obj;
         const osdRemain = dom_media_osd_remain;
         const osdProgress = dom_media_osd_progressbar;
-        let timeTrigger = 0;
+        
+        if(previewMode) {
+            videoObj.addEventListener("timeupdate", function(e) {
+                    // On affiche le temps restant si < 10s et première lecture
+                    let remain = "";
+                    if(videoObj.dataset.playIteration == 1) {
+                        const delta = e.target.duration - e.target.currentTime;
+                        if(delta <= 10.9999 && delta >= 0)
+                            remain = Math.floor(delta);
+                    }
 
-        const syncVideos = () => {
-            if(timeTrigger==0) {
-                //vs.currentTime = vm.currentTime;
-                //console.debug(vm.currentTime, vs.currentTime);
-            }
-            timeTrigger++;
-            if(timeTrigger>=20)
-                timeTrigger=0;
+                    // On met à jour la progressbar
+                    const progress = ((e.target.currentTime / e.target.duration) * 100).toFixed(2);
+                    osdProgress.style.width = progress + "%";
 
-            if(vm.paused && !vs.paused)
-                vs.pause();
-            else if(!vm.paused && vs.paused)
-                vs.play();
-        };
-        vm.addEventListener("play", function() {
-            vs.play();
-            vs.currentTime = vm.currentTime;
-        });
-        vm.addEventListener("pause", function() {
-            vs.pause();
-            vs.currentTime = vm.currentTime;
-        });
-        vm.addEventListener("timeupdate", function(e) {
-            syncVideos();
-
-            if(previewMode) {
-                // On affiche le temps restant si < 10s et première lecture
-                let remain = "";
-                if(vm.dataset.playIteration == 1) {
-                    const delta = e.target.duration - e.target.currentTime;
-                    if(delta <= 10.9999 && delta >= 0)
-                        remain = Math.floor(delta);
-                }
-
-                // On met à jour la progressbar
-                const progress = ((e.target.currentTime / e.target.duration) * 100).toFixed(2);
-                osdProgress.style.width = progress + "%";
-
-                osdRemain.innerText = remain;
-            }
-        });
-        vm.addEventListener("ended", function(e) {
+                    osdRemain.innerText = remain;
+            });
+        }
+        videoObj.addEventListener("ended", function(e) {
             // Si on loop la vidéo, on retourne au début
-            if(vm.dataset.loop == "true") {
+            if(videoObj.dataset.loop == "true") {
 
-                // On met en pause la lecture
-                vm.pause();
-                vs.pause();
-
-                // On remet le seeking à 0
-                vm.currentTime = 0;
-                vs.currentTime = 0;
-
-                // On relance la lecture
-                vm.play();
-                vs.play();
+                // On met en pause la lecture et on relance
+                videoObj.pause();
+                videoObj.currentTime = 0;
+                videoObj.play();
 
                 // On ajoute 1 au play iteration
-                vm.dataset.playIteration++;
+                videoObj.dataset.playIteration++;
 
                 // On défini le nouveau volume si la fonction est active sur ce média
-                if(vm.dataset.volumeAfterLoopEnabled == 1)
-                    e.target.volume = linearToLogarithmic(scaleVolume(vm.dataset.volumeAfterLoop));
+                if(videoObj.dataset.volumeAfterLoopEnabled == 1)
+                    e.target.volume = linearToLogarithmic(scaleVolume(videoObj.dataset.volumeAfterLoop));
 
 
-                console.log("Loop mode. Replay file with volume "+(vm.volume*100)+".");
+                console.log("Loop mode. Replay file with volume "+(videoObj.volume*100)+".");
 
             }
         });
-        vm.addEventListener("loadedmetadata", () => {
-            vm.currentTime = startFrom;
-        });
-        vs.addEventListener("loadedmetadata", () => {
-            vs.currentTime = startFrom;
+        videoObj.addEventListener("loadedmetadata", () => {
+            videoObj.currentTime = startFrom;
         });
     }
 
@@ -211,12 +161,10 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
     // On récupère l'élément parent
     let parentElement = document.getElementById("main");
 
-    dom_media_background.appendChild(dom_media_background_obj);
-    dom_media_foreground.appendChild(dom_media_foreground_obj);
+    dom_media.appendChild(dom_media_obj);
     dom_media_item.appendChild(dom_media_osd);
     dom_media_item.appendChild(dom_media_credit);
-    dom_media_item.appendChild(dom_media_foreground);
-    dom_media_item.appendChild(dom_media_background);
+    dom_media_item.appendChild(dom_media);
 
     if(parentElement.firstChild === null)
         parentElement.appendChild(dom_media_item);
@@ -313,14 +261,10 @@ function mediaPlay(id) {
         // On vérifie si le type de media est compatible avec cette commande
         if(mediaItem.classList.contains("video")) {
             // On récupère les 2 objets et on lance la lecture
-            let foregroundObj = document.getElementById("media-item-obj-foreground-" + id);
-            let backgroundObj = document.getElementById("media-item-obj-foreground-" + id);
+            let videoObj = document.getElementById("media-item-obj-" + id);
 
-            if(foregroundObj !== null)
-                foregroundObj.play();
-            
-            if(backgroundObj !== null)
-                backgroundObj.play();
+            if(videoObj !== null)
+                videoObj.play();
         }
     }
 }
@@ -392,7 +336,7 @@ function volumeSet(id=null, exclude=false, target=0, step=0.04, interval=50, cal
     let mediaItem = document.querySelectorAll(".media_item.video").forEach(element => {
         if(id==null || (!exclude && id==element.dataset.id) ||  (exclude && id!=element.dataset.id)) {
 
-            let obj = element.querySelector(".media-item-obj-foreground");
+            let obj = element.querySelector(".media-item-obj");
             // On défini si on est en mode down
             let down = obj.volume > target;
 
@@ -529,15 +473,15 @@ socket.on("media_command", function(data) {
                         let mediaElement = mediaData.element;
                         let mediaPlayerID = mediaData.playerID;
 
-                        let foregroundElement = mediaElement.querySelector(".media-item-obj-foreground");
+                        let videoElement = mediaElement.querySelector(".media-item-obj");
 
                         // On défini le volumeAfterLoop à 0 sur l'ancien média
-                        const foregroundVideo = foregroundElement.querySelector(".media-item-obj-foreground")
-                        if(foregroundVideo) foregroundVideo.setAttribute("data-volume-after-loop", 0);
+                        const videoObj = videoElement.querySelector(".media-item-obj")
+                        if(videoObj) videoObj.setAttribute("data-volume-after-loop", 0);
 
                         // On take quand le média est chargé
                         if(args.type=="picture") {
-                            foregroundElement.addEventListener("load", function() {
+                            videoElement.addEventListener("load", function() {
 
                                 takeArmed(false);
                                 // On baisse le volume des autres médias
@@ -545,7 +489,7 @@ socket.on("media_command", function(data) {
                             })
                         }
                         else if(args.type=="video") {
-                            foregroundElement.addEventListener("canplay", function() {
+                            videoElement.addEventListener("canplay", function() {
                                 takeArmed(false);
                                 
                                 // On lance la lecture du média
@@ -645,8 +589,13 @@ window.addEventListener("DOMContentLoaded", () => {
         identifier.classList.add("hide");
     }
     else if(getParams.get("smpte")=="infinite") {
-        // On rend le SMPTE infini (pour les calages par ex)
-        identifier.classList.add("infinite");
+        // On ne fait pas disparaitre l'identifier
+    }
+    else {
+        // On fait disparaitre l'identifier au bout de 10 secondes
+        setTimeout(() => {
+            identifier.classList.add("hide");
+        }, 10000);
     }
 
 
