@@ -77,10 +77,10 @@
                             <th scope="col" style="width: 25%;">
                                 Nom
                             </th>
-                            <th scope="col" style="width: 60%;">
+                            <th scope="col" style="width: 55%;">
                                 Description
                             </th>
-                            <th scope="col" style="width: 15%;" class="text-end">
+                            <th scope="col" style="width: 20%;" class="text-end">
                                 Actions
                             </th>
                         </tr>
@@ -95,10 +95,15 @@
                                     {{ c.description }}
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ url_for("channels.viewerMedias", guid=c.id) }}" class="btn btn-primary" onclick="openViewerURL(this.href); return false;">
-                                        <i class="bi bi-box-arrow-up-right"></i>
-                                        Ouvrir
-                                    </a>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for("channels.viewerMedias", guid=c.id) }}" class="btn btn-secondary" onclick="copyViewerURL(this.href); return false;" title="Copier le lien du canal">
+                                            <i class="bi bi-link"></i>
+                                        </a>
+                                        <a href="{{ url_for("channels.viewerMedias", guid=c.id) }}" class="btn btn-primary" onclick="openViewerURL(this.href); return false;" title="Ouvrir le canal">
+                                            <i class="bi bi-box-arrow-up-right"></i>
+                                            Ouvrir
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -113,7 +118,26 @@
                         if(_previewJingleOverride===true)
                             param += "&jingleOverride=1";
 
-                        window.open(url + "?preview&smpte=infinite" + param, "viewerPreview", "width=1024,height=576,resizable=yes,scrollbars=no,status=no,menubar=no,toolbar=no,location=no,directories=no");
+                        let address = url + "?preview&smpte=infinite" + param;
+
+                        window.open(address, "viewerPreview", "width=1024,height=576,resizable=yes,scrollbars=no,status=no,menubar=no,toolbar=no,location=no,directories=no");
+                    }
+
+                    async function copyViewerURL(url) {
+                        let param = "";
+                        param += "&maxVolume=" + _previewCurrentVolume;
+
+                        if(_previewJingleOverride===true)
+                            param += "&jingleOverride=1";
+
+                        let address = url + "?preview&smpte=infinite" + param;
+
+                        try {
+                            await navigator.clipboard.writeText(address);
+                        }
+                        catch(err) {
+                            alert("Erreur lors de la copie dans le presse-papier.");
+                        }
                     }
                 </script>
 
