@@ -213,6 +213,7 @@ class Media(Base):
             self.passes = 0
 
 def delete_media_files(mapper, connection, target):
+    
     if target.type == "media":
         filename = target.path
 
@@ -241,7 +242,7 @@ def delete_media_files(mapper, connection, target):
                     os.remove(pathMeta2)
             except Exception as e:
                 print("ERROR WHILE DELETING MEDIA FILES FOR ID {}:\n{}".format(target.id, e))
-        
+
 event.listen(Media, "before_delete", delete_media_files)
 
 
