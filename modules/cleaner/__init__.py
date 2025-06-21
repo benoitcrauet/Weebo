@@ -86,16 +86,16 @@ def deleteMediaFiles():
         if os.path.isfile(os.path.join(medias_dir, file)):
             # On extrait le nom du fichier et la première partie (jusqu'au premier .)
             basename = os.path.basename(file)
-            media_id = basename.split(".")[0]
+            file_id = basename.split(".")[0]
 
-            if media_id!="":
-                # On vérifie si cet ID existe toujours
-                media = session.query(Media).get(media_id)
+            if file_id!="":
+                # On vérifie si ce fichier est toujours référencé dans la base médias
+                media = session.query(Media).filter(Media.path.startswith(file_id)).all()
 
-                # Media introuvable : on supprime le fichier
-                if media is None:
-                    if media_id not in to_delete:
-                        to_delete.append(media_id)
+                # Fichier non référencé : on le supprime
+                if not media:
+                    if file_id not in to_delete:
+                        to_delete.append(file_id)
     
     print("Medias files to delete:")
     if len(to_delete)==0:
@@ -109,10 +109,10 @@ def deleteMediaFiles():
             if os.path.isfile(os.path.join(medias_dir, file)):
                 # On extrait le media_id
                 basename = os.path.basename(file)
-                media_id = basename.split(".")[0]
+                file_id = basename.split(".")[0]
                 path = os.path.join(medias_dir, file)
 
-                if media_id in to_delete:
+                if file_id in to_delete:
                     try:
                         os.remove(path)
                         print("   > 🗑️ The file '" + path + "' has been deleted.")
