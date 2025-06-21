@@ -114,27 +114,81 @@
                                 <tbody>
                                     <tr>
                                         <th scope="row" style="width: 30%;">
-                                            URL (à copier/coller)
+                                            URL du canal (à copier/coller)
                                         </th>
                                         <td>
-                                            <div class="input-group">
-                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("channels.viewerMedias", guid=c.id) }}" onclick="this.select();" id="input-url-{{ c.id }}">
-                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
-                                                    <i class="bi bi-copy"></i>
-                                                </button>
-                                            </div>
-                                            Affichage de la mire :
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '');">Par défaut</button>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '?smpte=off');">Désactivée</button>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '?smpte=infinite');">Infinie</button>
-                                            </div><br>
-                                            Signal de test :
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '');">Désactivé</button>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '?sample=picture');">Image</button>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="mediaChannelURLAddSuffix('{{ c.id }}', '?sample=video');">Vidéo</button>
-                                            </div>
+                                            <form action="#" class="mediaChannel-settings-form">
+                                                <div class="input-group">
+                                                    <input type="text" name="url" class="form-control" style="font-family: monospace;" readonly onclick="this.select();">
+                                                    <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                        <i class="bi bi-copy"></i>
+                                                    </button>
+                                                </div>
+                                            
+                                                <input type="hidden" name="channelID" value="{{ c.id }}">
+                                                <input type="hidden" name="baseUrl" value="{{ config["web"]["baseUrl"] }}{{ url_for("channels.viewerMedias", guid=c.id) }}">
+
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                Paramétrage du player vidéo
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th scope="row">
+                                                                Afficher la mire :
+                                                            </th>
+                                                            <td>
+                                                                <span class="btn-group">
+                                                                    <input type="radio" class="btn-check mediaChannel-setting" name="mire" id="mireDisabled-{{ c.id }}" autocomplete="off" value="disabled">
+                                                                    <label class="btn btn-sm btn-outline-secondary" for="mireDisabled-{{ c.id }}">Non</label>
+
+                                                                    <input type="radio" class="btn-check mediaChannel-setting" name="mire" id="mireDefault-{{ c.id }}" autocomplete="off" value="default" checked>
+                                                                    <label class="btn btn-sm btn-outline-light" for="mireDefault-{{ c.id }}">Auto.</label>
+
+                                                                    <input type="radio" class="btn-check mediaChannel-setting" name="mire" id="mireInfinite-{{ c.id }}" autocomplete="off" value="infinite">
+                                                                    <label class="btn btn-sm btn-outline-light" for="mireInfinite-{{ c.id }}">Infinie</label>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">
+                                                                Intégrer la source :
+                                                            </th>
+                                                            <td>
+                                                                <span class="btn-group">
+                                                                    <input type="radio" class="btn-check mediaChannel-setting" name="source" id="sourceDisabled-{{ c.id }}" autocomplete="off" value="disabled">
+                                                                    <label class="btn btn-sm btn-outline-secondary" for="sourceDisabled-{{ c.id }}">Non</label>
+
+                                                                    <input type="radio" class="btn-check mediaChannel-setting" name="source" id="sourceEnabled-{{ c.id }}" autocomplete="off" value="enabled" checked>
+                                                                    <label class="btn btn-sm btn-outline-light" for="sourceEnabled-{{ c.id }}">Oui</label>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th scope="row">
+                                                                Média de test :
+                                                            </th>
+                                                            <td>
+                                                                <span class="btn-group">
+                                                                    <input type="radio" class="btn-check mediaChannel-setting" name="test" id="testDisabled-{{ c.id }}" autocomplete="off" value="disabled" checked>
+                                                                    <label class="btn btn-sm btn-outline-secondary" for="testDisabled-{{ c.id }}">Non</label>
+
+                                                                    <input type="radio" class="btn-check mediaChannel-setting" name="test" id="testPicture-{{ c.id }}" autocomplete="off" value="picture">
+                                                                    <label class="btn btn-sm btn-outline-warning" for="testPicture-{{ c.id }}">Image</label>
+
+                                                                    <input type="radio" class="btn-check mediaChannel-setting" name="test" id="testVideo-{{ c.id }}" autocomplete="off" value="video">
+                                                                    <label class="btn btn-sm btn-outline-warning" for="testVideo-{{ c.id }}">Vidéo</label>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <button class="btn btn-sm btn-secondary" type="reset">Paramètres par défaut</button>
+                                            </form>
                                         </td>
                                     </tr>
                                     <tr>
@@ -171,6 +225,63 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            <hr>
+                            <table class="table table-stripped">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row" style="width: 30%;">
+                                            Source seule (à copier/coller)
+                                        </th>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="text" name="url" class="form-control" style="font-family: monospace;" readonly onclick="this.select();" value="{{ config["web"]["baseUrl"] }}{{ url_for("channels.viewerMediasSource", guid=c.id) }}">
+                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                            <div class="form-text">
+                                                Cet URL vous permet d'afficher sur OBS la source sur un autre calque que celui du canal d'origine.<br>
+                                                Attention : cette source ne fonctionne que si elle est lancée sur le même OBS que celui qui affiche votre canal médias.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Largeur conseillée
+                                        </th>
+                                        <td>
+                                            <code>{{ c.width }}</code>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Hauteur conseillée
+                                        </th>
+                                        <td>
+                                            <code>200</code> au minimum
+                                            <div class="form-text">
+                                                Adaptez cette valeur selon la configuration CSS personnalisée du canal.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Désactiver la source quand elle n'est pas visible
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            Rafraîchir le navigateur lorsque la scène devient active
+                                        </th>
+                                        <td>
+                                            Non
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
                         </div>
                     </div>
@@ -178,11 +289,73 @@
             {% endfor %}
         </div>
         <script>
-            function mediaChannelURLAddSuffix(id, suffix="") {
-                const obj = document.getElementById("input-url-"+id);
-                if(obj.dataset.baseUrl===undefined)
-                    obj.dataset.baseUrl = obj.value;
-                obj.value = obj.dataset.baseUrl + suffix;
+            document.addEventListener("DOMContentLoaded", (e) => {
+                // On liste tous les éléments de paramètrage des liens des canaux vidéos
+                let inputElements = document.getElementsByClassName("mediaChannel-setting");
+                for(let i=0; i<inputElements.length; i++) {
+                    let input = inputElements[i];
+                    let form = input.form;
+                    
+                    // Quand on clique sur le radio...
+                    input.addEventListener("change", (e) => {
+                        mediaChannelURLUpdate(form);
+                    });
+                }
+
+
+                // On récupère tous les formulaires de settings
+                let formElements = document.getElementsByClassName("mediaChannel-settings-form");
+                for(let i=0; i<formElements.length; i++) {
+                    let form = formElements[i];
+                    
+                    mediaChannelURLUpdate(form);
+
+                    form.addEventListener("reset", (e) => {
+                        setTimeout(() => {
+                            mediaChannelURLUpdate(e.target);
+                        }, 100);
+                    });
+                }
+            });
+            function mediaChannelURLUpdate(form) {
+                // On récupère l'ID du channel
+                const channelID = form.elements["channelID"].value;
+
+                // On récupère le base URL
+                const baseUrl = form.elements["baseUrl"].value;
+
+                // On récupère le champ URL à set
+                const urlField = form.elements["url"];
+                
+                // On récupère les valeurs des champs
+                const mire = form.elements["mire"].value;
+                const source = form.elements["source"].value;
+                const test = form.elements["test"].value;
+
+                // On stocke les paramètres GET dans l'array
+                let params = [];
+
+                // Mire
+                if(mire=="disabled")
+                    params.push("smpte=disabled");
+                else if(mire=="infinite")
+                    params.push("smpte=infinite");
+
+                // Test
+                if(test=="picture")
+                    params.push("sample=picture");
+                else if(test=="video")
+                    params.push("sample=video");
+
+                // Source
+                if(source=="disabled")
+                    params.push("noSource");
+                
+                let get = "";
+                if(params.length>=1)
+                    get = "?" + params.join("&");
+                
+                urlField.value = baseUrl + get;
             }
         </script>
 

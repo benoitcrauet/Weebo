@@ -48,13 +48,13 @@ def channelsMedias(show_guid):
 # Classe de validation
 class FormMediaChannelEdit(FlaskForm):
     id = wtforms.HiddenField("ID", validators=[])
-    name = wtforms.StringField("Nom du canal", validators=[validators.DataRequired()], render_kw={"maxlength": 30})
+    name = wtforms.StringField("Nom du canal", validators=[validators.DataRequired()], render_kw={"maxlength": 30}, default="lala")
     description = wtforms.StringField("Description", description="Une simple description, juste pour vous, pour vous y retrouver.", validators=[], render_kw={"maxlength": 150})
     width = wtforms.IntegerField("Résolution", description="Indiquez ici la résolution qui sera utilisée pour ce canal média. Dans la plupart des cas, 1920x1080 convient.", validators=[validators.NumberRange(200, 6000)])
     height = wtforms.IntegerField("Hauteur", validators=[validators.NumberRange(200, 6000)])
     defaultEnable = wtforms.BooleanField("Par défaut", description="Permet de définir si le canal est coché par défaut pour cette émission.")
-    customCSS = wtforms.TextAreaField("CSS personnalisé", description="Vous permet de personnaliser le rendu. Moldus, passez votre chemin.")
-
+    customCSS = wtforms.TextAreaField("CSS personnalisé", description="Vous permet de personnaliser le rendu de l'affichage du canal sur OBS. Moldus, passez votre chemin.")
+    
     submit = wtforms.SubmitField("Valider")
 
 
@@ -76,6 +76,8 @@ def channelsMediasEdit(show_guid, channel_guid=None):
         channel = session.query(MediaChannel).filter(MediaChannel.id == channel_guid).first()
     else:
         channel = MediaChannel()
+        # On défini les valeurs par défaut
+        channel.customCSS = config["channels"]["defaultCustomCSS"]
     
     # Chargement du formulaire
     form = FormMediaChannelEdit(obj=channel)
@@ -281,6 +283,14 @@ def viewerMedias(guid):
     channel = session.query(MediaChannel).filter(MediaChannel.id == guid).first()
     
     return render_template("channels/viewerVideo.jinja2", channel=channel)
+
+
+@bp.route("/viewer/medias/<string:guid>/source")
+def viewerMediasSource(guid):
+    # On vérifie si le viewer éxiste
+    channel = session.query(MediaChannel).filter(MediaChannel.id == guid).first()
+    
+    return render_template("channels/viewerVideoSource.jinja2", channel=channel)
 
 
 @bp.route("/viewer/web/<string:guid>")

@@ -47,6 +47,69 @@ cleaner:
 sourcesRules: ""
 
 
+# Paramètres des canaux
+channels:
+  # Code CSS appliqué par défaut à la création d'un canal vidéo
+  defaultCustomCSS: |
+    /*
+      AIDE CONCERNANT LES ÉLÉMENTS CSS :
+      .media_item {} pour le conteneur général du média
+        - .media_credit {} pour l'objet contenant la source
+          - .viewer.video .media_credit {} pour les sources intégrées
+          - .viewer.source .media_credit {} pour les sources détachées
+        - .media_object {} pour l'objet contenant le média
+          - .media_object video {} pour les objets vidéo
+          - .media_object img {} pour les objets image
+    */
+
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+    /* Préfixe auto des sources */
+    .media_credit:not(:empty)::before {
+      content: "Source : ";
+    }
+
+    /* Style commun des sources */
+    .media_credit {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Style des sources intégrées */
+    .viewer.video .media_credit {
+      font-family: 'Roboto', sans-serif;
+      font-weight: bolder;
+      font-size: 4vh;
+      text-shadow: none;
+      bottom: 10px;
+      right: 0px;
+      padding-top: 6px;
+      padding-right: 20px;
+      padding-bottom: 6px;
+      padding-left: 10px;
+      color: white;
+      background-color: rgba(0,0,0, .4);
+      backdrop-filter: blur(30px);
+      -o-backdrop-filter: blur(30px);
+      -ms-backdrop-filter: blur(30px);
+      -moz-backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+    }
+
+    /* Style des sources détachées */
+    .viewer.source .media_credit {
+      font-family: 'Roboto', sans-serif;
+      font-weight: bolder;
+      font-style: italic;
+      font-size: 32px;
+      text-shadow: 0px 0px 10px black;
+      padding: 10px;
+      text-align: right;
+      color: white;
+    }
+
+
 # Presets de lecture
 playPresets:
   # pour chaque preset :

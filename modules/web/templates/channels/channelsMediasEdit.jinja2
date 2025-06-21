@@ -74,7 +74,7 @@
                 <div class="mb-3 row">
                     {{ form.customCSS.label(class="col-form-label col-sm-3") }}
                     <div class="col-sm-9">
-                        {{ form.customCSS(class="form-control", rows=10, style="font-family: monospace;") }}
+                        {{ form.customCSS(class="form-control", rows=24, style="font-family: monospace; font-size: 75%; white-space: nowrap; overflow-x: auto;") }}
                         {% if form.customCSS.description %}<div class="form-text">{{ form.customCSS.description }}</div>{% endif %}
                     </div>
                 </div>
@@ -101,59 +101,59 @@
 
 
         <script>
-        // Récupérer l'élément textarea
-        var textarea = document.getElementById("customCSS");
+            // Récupérer l'élément textarea
+            var textarea = document.getElementById("customCSS");
 
-        // Ajouter un écouteur d'événement pour intercepter la pression de touche
-        textarea.addEventListener("keydown", function(event) {
-            // Vérifier si la touche pressée est la touche Tab
-            if (event.key === "Tab") {
-                // Empêcher le comportement par défaut de la touche Tab
-                event.preventDefault();
-                
-                // Insérer quatre espaces dans le texte du textarea à la position actuelle du curseur
-                var start = this.selectionStart;
-                var end = this.selectionEnd;
-                var text = this.value;
-                var newText = text.substring(0, start) + "    " + text.substring(end);
-                
-                // Mettre à jour le texte du textarea avec les espaces insérées
-                this.value = newText;
-                
-                // Déplacer le curseur après les espaces insérées
-                this.selectionStart = this.selectionEnd = start + 4;
-            } else if (event.key === "Enter") {
-                // Empêcher le comportement par défaut de la touche Entrée
-                event.preventDefault();
-                
-                // Récupérer la position du curseur
-                var start = this.selectionStart;
-                
-                // Récupérer le texte avant et après la position du curseur
-                var textBeforeCursor = this.value.substring(0, start);
-                var textAfterCursor = this.value.substring(start);
-                
-                // Trouver le niveau de tabulation du texte avant le curseur
-                var tabLevel = 0;
-                var lines = textBeforeCursor.split("\n");
-                var lastLine = lines[lines.length - 1];
-                for (var i = 0; i < lastLine.length; i++) {
-                    if (lastLine[i] === " ") {
-                        tabLevel++;
-                    } else {
-                        break;
+            // Ajouter un écouteur d'événement pour intercepter la pression de touche
+            textarea.addEventListener("keydown", function(event) {
+                // Vérifier si la touche pressée est la touche Tab
+                if (event.key === "Tab") {
+                    // Empêcher le comportement par défaut de la touche Tab
+                    event.preventDefault();
+                    
+                    // Insérer quatre espaces dans le texte du textarea à la position actuelle du curseur
+                    var start = this.selectionStart;
+                    var end = this.selectionEnd;
+                    var text = this.value;
+                    var newText = text.substring(0, start) + "    " + text.substring(end);
+                    
+                    // Mettre à jour le texte du textarea avec les espaces insérées
+                    this.value = newText;
+                    
+                    // Déplacer le curseur après les espaces insérées
+                    this.selectionStart = this.selectionEnd = start + 2;
+                } else if (event.key === "Enter") {
+                    // Empêcher le comportement par défaut de la touche Entrée
+                    event.preventDefault();
+                    
+                    // Récupérer la position du curseur
+                    var start = this.selectionStart;
+                    
+                    // Récupérer le texte avant et après la position du curseur
+                    var textBeforeCursor = this.value.substring(0, start);
+                    var textAfterCursor = this.value.substring(start);
+                    
+                    // Trouver le niveau de tabulation du texte avant le curseur
+                    var tabLevel = 0;
+                    var lines = textBeforeCursor.split("\n");
+                    var lastLine = lines[lines.length - 1];
+                    for (var i = 0; i < lastLine.length; i++) {
+                        if (lastLine[i] === " ") {
+                            tabLevel++;
+                        } else {
+                            break;
+                        }
                     }
+                    
+                    // Insérer une nouvelle ligne avec le même niveau de tabulation
+                    var newLine = "\n" + " ".repeat(tabLevel);
+                    
+                    // Mettre à jour le texte du textarea avec la nouvelle ligne et déplacer le curseur
+                    this.value = textBeforeCursor + newLine + textAfterCursor;
+                    this.selectionStart = this.selectionEnd = start + newLine.length;
                 }
-                
-                // Insérer une nouvelle ligne avec le même niveau de tabulation
-                var newLine = "\n" + " ".repeat(tabLevel);
-                
-                // Mettre à jour le texte du textarea avec la nouvelle ligne et déplacer le curseur
-                this.value = textBeforeCursor + newLine + textAfterCursor;
-                this.selectionStart = this.selectionEnd = start + newLine.length;
-            }
-        });
-</script>
+            });
+        </script>
 
         
     </div>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Viewer</title>
+    </head>
+    <body class="viewer source">
+        <div id="main">
+            <div id="sourceText" class="media_credit"></div>
+        </div>
+
+        <style>
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+
+            {{ channel.customCSS | replace('<style>', '&lt;style&gt;') | replace('</style>', '&lt;/style&gt;') }}
+        </style>
+
+        <script>
+            // ID du viewer en cours
+            const viewerID = "{{ channel.id if channel else "" }}";
+
+            window.addEventListener("DOMContentLoaded", () => {
+                {% if not channel %}
+                    document.write("Canal média introuvable.");
+                {% endif %}
+            })
+        </script>
+        <script src="/static/js/socket/socket.io.min.js"></script>
+        <script src="/static/js/channels/viewerSource.js"></script>
+    </body>
+</html>

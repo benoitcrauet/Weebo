@@ -73,21 +73,8 @@ def deleteOldEvents():
     session.commit()
 
 
-# Routine de nettoyage des conducteurs et des évènements
-def cleanConductorsAndEvents():
-    print("##### Suppression conducteurs vieux de {} jours... #####".format(config["cleaner"]["conductorRetention"]))
-    deleteOldConductors()
-    time.sleep(1)
-
-    print("##### Nettoyage des évènements... #####")
-    deleteOldEvents()
-    time.sleep(1)
-
-    print("Terminé.")
-
-
 # Routine de nettoyage des fichiers médias
-def cleanMediaFiles():
+def deleteMediaFiles():
     medias_dir = "medias/"
 
     to_delete = []
@@ -136,12 +123,27 @@ def cleanMediaFiles():
 
 
 
+# Routine de nettoyage de tous les éléments
+def cleanAll():
+    print("##### Suppression conducteurs vieux de {} jours... #####".format(config["cleaner"]["conductorRetention"]))
+    deleteOldConductors()
+    time.sleep(1)
+
+    print("##### Nettoyage des évènements... #####")
+    deleteOldEvents()
+    time.sleep(1)
+
+    print("##### Nettoyage des fichiers médias... #####")
+    deleteMediaFiles()
+    time.sleep(1)
+
+    print("Terminé.")
+
 
 # Thread du module
 def main():
-    cleanMediaFiles()
     print("Starting cleaner thread...")
-    cleanConductorsAndEvents()
+    cleanAll()
     print("Cleaner will start cleaning process everyday at {}h (24h format).".format(config["cleaner"]["schedule"]))
 
     while True:
@@ -149,7 +151,7 @@ def main():
 
         # Si il est l'heure configurée, on clean
         if currentTime.hour == config["cleaner"]["schedule"] and currentTime.minute == 0:
-            cleanConductorsAndEvents()
+            cleanAll()
 
         # On attend le début de la minute suivante
         currentTime = datetime.now()

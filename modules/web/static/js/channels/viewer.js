@@ -22,6 +22,8 @@ var maximumVolume = 1;
 // Mode jingle override
 var jingleOverride = false;
 
+// Initialisation du broadcast channel pour la source média
+const bChannel_Source = new BroadcastChannel("viewer_source");
 
 
 /**
@@ -52,6 +54,7 @@ function mediaArm(mediaID, type, src, source, volume=1, volumeAfterLoop=1, loop=
     dom_media_item.style.zIndex = currentZindex--;
     dom_media_item.dataset.id = id;
     dom_media_item.dataset.mediaId = mediaID;
+    dom_media_item.dataset.source = source;
     dom_media_item.classList.add("invisible"); // Par défaut l'élément est invisible
 
     let dom_media_osd = document.createElement("div");
@@ -236,6 +239,15 @@ function takeArmed(autoPlay = true) {
 
             // On enlève la classe invisible du nouveau média
             newMedia.classList.remove("invisible");
+
+            // On récupère la source
+            const source = newMedia.dataset.source ?? "";
+
+            // On envoie une commande au viewer source détaché
+            bChannel_Source.postMessage({
+                viewerID: viewerID,
+                source: source
+            });
 
             // On transforme le média armé en media joué
             takedMedia = armedMedia;
@@ -527,6 +539,12 @@ socket.on("media_command", function(data) {
                         console.log("Stopping medias ID "+args.mediaID);
                         stopAllMediasID(args.mediaID);
                         destroyAllMediasID(args.mediaID);
+
+                        // On envoie une commande au viewer source détaché
+                        bChannel_Source.postMessage({
+                            viewerID: viewerID,
+                            source: ""
+                        });
                     }
 
                     break;
@@ -609,6 +627,18 @@ window.addEventListener("DOMContentLoaded", () => {
         if(window.obsstudio !== undefined) {
             document.getElementById("interact").remove();
         }
+
+        // On fait disparaitre l'identifier au bout de 10 secondes
+        setTimeout(() => {
+            identifier.classList.add("hide");
+        }, 10000);
+    }
+
+    
+
+    // Si on est en mode "no source"
+    if(getParams.get("noSource")!==null) {
+        document.body.classList.add("noSource");
     }
 
 
