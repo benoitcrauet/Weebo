@@ -49,7 +49,7 @@
                             {{ c.date.strftime("%d %B %Y") }}
                         </td>
                         <td>
-                            {{ c.guests.split("\n") | length if c.guests.strip()!="" else "Aucun" }}
+                            {{ c.guestsCount if c.guestsCount > 0 else "Aucun" }}
                         </td>
                         <td>
                             {{ "Oui" if c.vdoEnable else "Non" }}

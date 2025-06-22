@@ -8,11 +8,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>
-                    Formidable ! Weebo a déjà configuré pour vous VDO !<br>
-                    Vous trouverez ci-dessous l'ensemble de vos liens.
-                </p>
-
                 <nav>
                     <div class="nav nav-tabs" id="nav-vdo-modal-tabs" role="tablist">
                         <button class="nav-link active" id="nav-vdo-modal-users-tab" data-bs-toggle="tab" data-bs-target="#nav-vdo-modal-users" type="button" role="tab" aria-controls="nav-vdo-modal-users" aria-selected="true">
@@ -42,13 +37,15 @@
                             <tbody>
                                 {% for l in vdoLinks %}
                                     <tr>
-                                        <th scope="row">
-                                            <i class="bi bi-person"></i>
-                                            {{ l.name }}
-                                        </th>
+                                        <td>
+                                            <span class="fw-bold">
+                                                <i class="bi bi-display-fill"></i>
+                                                {{ l.name }}</span><br>
+                                            <span class="text-body-secondary">{{ l.role }}</span>
+                                        </td>
                                         <td>
                                             <div class="input-group">
-                                                <a href="{{ l.link_invite }}" class="btn btn-primary" onclick="window.open(this.href); return false;">
+                                                <a href="{{ l.link_invite }}" class="btn btn-primary" data-confirm-message="ATTENTION : Accès réservé à {{ l.name }}. Est-ce bien vous ?" onclick="if(confirm(this.dataset.confirmMessage)) window.open(this.href); return false;">
                                                     <i class="bi bi-box-arrow-up-right"></i>
                                                     Accéder
                                                 </a>
@@ -74,13 +71,17 @@
                             </label>
                             <div class="col-9">
                                 <div class="input-group">
+                                    <a href="{{ guestsLink }}" class="btn btn-secondary" onclick="window.open(this.href); return false;">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                        Accéder
+                                    </a>
                                     <input type="text" id="vdoInviteLinkOtherGuests" class="form-control font-monospace" readonly value="{{ guestsLink }}" onclick="this.select();">
                                     <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                         <i class="bi bi-copy"></i>
                                     </button>
                                 </div>
                                 <span class="form-text">
-                                    Lien d'invitation hors intervenants de l'émission.
+                                    Lien d'invitation hors intervenants de l'émission non destinés à passer à l'antenne.
                                 </span>
                             </div>
                         </div>
@@ -144,36 +145,34 @@
                         <table class="table table-hover table-striped">
                             <thead>
                                 <tr>
-                                    <th scope="col" width="25%">Participant</th>
-                                    <th scope="col">Source</th>
+                                    <th scope="col" width="30%">Participant</th>
                                     <th scope="col">Lien</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for l in vdoLinks %}
                                     <tr>
-                                        <th scope="row">
-                                            <i class="bi bi-camera-video-fill"></i>
-                                            {{ l.name }}
-                                        </th>
                                         <td>
-                                            <code>CAM {{ l.cam_number+1 }}</code>
+                                            <span class="fw-bold">
+                                                <i class="bi bi-display-fill"></i>
+                                                {{ l.name }}</span><br>
+                                            <span class="text-body-secondary">{{ l.role }}</span>
                                         </td>
                                         <td>
                                             <div class="input-group">
                                                 <span class="input-group-text">
-                                                    <i class="bi bi-link" title="Lien permanent"></i>
+                                                    <i class="bi bi-magic" title="Lien magique"></i>
                                                 </span>
-                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.link_solo }}" onclick="this.select();">
-                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.permalink_solo }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-primary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
                                             </div>
                                             <div class="input-group">
                                                 <span class="input-group-text">
-                                                    <i class="bi bi-magic" title="Lien intelligent"></i>
+                                                    <i class="bi bi-link" title="Lien permanent"></i>
                                                 </span>
-                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.permalink_solo }}" onclick="this.select();">
+                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.link_solo }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
@@ -185,7 +184,7 @@
                         </table>
 
                         <div class="alert alert-info">
-                            Il est recommandé d'utiliser les liens intelligents, marqués d'un <i class="bi bi-magic"></i>, au lieu du lien direct.<br>
+                            Il est recommandé d'utiliser les liens magiques, marqués d'un <i class="bi bi-magic"></i>, au lieu du lien direct.<br>
                             En effet, ces liens ciblent automatiquement les caméras du bon conducteur selon la date du jour.
                         </div>
 
@@ -199,36 +198,34 @@
                         <table class="table table-hover table-striped">
                             <thead>
                                 <tr>
-                                    <th scope="col" width="25%">Participant</th>
-                                    <th scope="col">Source</th>
+                                    <th scope="col" width="30%">Participant</th>
                                     <th scope="col">Lien</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for l in vdoLinks %}
                                     <tr>
-                                        <th scope="row">
-                                            <i class="bi bi-display-fill"></i>
-                                            {{ l.name }}
-                                        </th>
                                         <td>
-                                            <code>SCREEN {{ l.cam_number+1 }}</code>
-                                        </td>
+                                            <span class="fw-bold">
+                                                <i class="bi bi-display-fill"></i>
+                                                {{ l.name }}</span><br>
+                                            <span class="text-body-secondary">{{ l.role }}</span>
+                                        </th>
                                         <td>
                                             <div class="input-group">
                                                 <span class="input-group-text">
-                                                    <i class="bi bi-link" title="Lien permanent"></i>
+                                                    <i class="bi bi-magic" title="Lien magique"></i>
                                                 </span>
-                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.link_capture_solo }}" onclick="this.select();">
-                                                <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.permalink_capture_solo }}" onclick="this.select();">
+                                                <button type="button" class="btn btn-primary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
                                             </div>
                                             <div class="input-group">
                                                 <span class="input-group-text">
-                                                    <i class="bi bi-magic" title="Lien intelligent"></i>
+                                                    <i class="bi bi-link" title="Lien permanent"></i>
                                                 </span>
-                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.permalink_capture_solo }}" onclick="this.select();">
+                                                <input type="text" class="form-control font-monospace" readonly value="{{ l.link_capture_solo }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
@@ -240,7 +237,7 @@
                         </table>
 
                         <div class="alert alert-info">
-                            Il est recommandé d'utiliser les liens intelligents, marqués d'un <i class="bi bi-magic"></i>, au lieu du lien direct.<br>
+                            Il est recommandé d'utiliser les liens magiques, marqués d'un <i class="bi bi-magic"></i>, au lieu du lien direct.<br>
                             En effet, ces liens ciblent automatiquement les captures d'écrans du bon conducteur selon la date du jour.
                         </div>
 

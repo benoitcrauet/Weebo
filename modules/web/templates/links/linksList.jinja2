@@ -418,14 +418,14 @@
 
         <div class="accordion" id="accordionCameras">
             
-            {% for c in cameras %}
+            {% for r in roles %}
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionCameras-{{ c.number }}" aria-expanded="false" aria-controls="accordionCameras-{{ c.number }}">
-                            <i class="bi bi-camera-video"></i>&nbsp;Caméra du participant Nº{{ c.number }}
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionCameras-{{ r.index }}" aria-expanded="false" aria-controls="accordionCameras-{{ r.index }}">
+                            <i class="bi bi-camera-video"></i>&nbsp;{{ r.name }}
                         </button>
                     </h2>
-                    <div id="accordionCameras-{{ c.number }}" class="accordion-collapse collapse" data-bs-parent="#accordionCameras">
+                    <div id="accordionCameras-{{ r.index }}" class="accordion-collapse collapse" data-bs-parent="#accordionCameras">
                         <div class="accordion-body">
                             
                             <table class="table table-striped">
@@ -436,7 +436,7 @@
                                         </th>
                                         <td>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ c.permalink }}" onclick="this.select();">
+                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ r.permalink }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
@@ -503,14 +503,14 @@
 
         <div class="accordion" id="accordionCaptures">
             
-            {% for c in cameras %}
+            {% for r in roles %}
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionCaptures-{{ c.number }}" aria-expanded="false" aria-controls="accordionCameras-{{ c.number }}">
-                            <i class="bi bi-display"></i>&nbsp;Capture du participant Nº{{ c.number }}
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionCaptures-{{ r.index }}" aria-expanded="false" aria-controls="accordionCameras-{{ r.index }}">
+                            <i class="bi bi-display"></i>&nbsp;{{ r.name }}
                         </button>
                     </h2>
-                    <div id="accordionCaptures-{{ c.number }}" class="accordion-collapse collapse" data-bs-parent="#accordionCaptures">
+                    <div id="accordionCaptures-{{ r.index }}" class="accordion-collapse collapse" data-bs-parent="#accordionCaptures">
                         <div class="accordion-body">
                             
                             <table class="table table-striped">
@@ -521,7 +521,7 @@
                                         </th>
                                         <td>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ c.permalink_capture }}" onclick="this.select();">
+                                                <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ r.permalink_capture }}" onclick="this.select();">
                                                 <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                                     <i class="bi bi-copy"></i>
                                                 </button>
@@ -582,20 +582,19 @@
         <hr>
 
 
-        <h3><i class="bi bi-robot"></i> API conducteur</h3>
+        <h3><i class="bi bi-robot"></i> API Weebo</h3>
 
         <p>
             Une API JSON est également disponible, en lecture seule,
-            afin de vous permettre de faire des intégrations du
-            sommaire de l'émission ainsi que de son avancement pour,
-            par exemple, un habillage dynamique.
+            afin de vous permettre de récupérer diverses données en relation
+            avec le contenu de l'émission.
         </p>
 
         <table class="table table-striped">
             <tbody>
                 <tr>
                     <th scope="row" style="width: 30%;">
-                        Sommaire uniquement
+                        Sommaire de l'émission en cours
                     </th>
                     <td>
                         <div class="input-group">
@@ -608,11 +607,24 @@
                 </tr>
                 <tr>
                     <th scope="row" style="width: 30%;">
-                        Tout le conducteur
+                        Tout le conducteur de l'émission en cours
                     </th>
                     <td>
                         <div class="input-group">
                             <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("conductors.showSummaryAll", show_guid=show.id) }}" onclick="this.select();">
+                            <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
+                                <i class="bi bi-copy"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row" style="width: 30%;">
+                        Noms des intervenants de l'émission en cours
+                    </th>
+                    <td>
+                        <div class="input-group">
+                            <input type="text" class="form-control" style="font-family: monospace;" readonly value="{{ config["web"]["baseUrl"] }}{{ url_for("conductors.showGuests", show_guid=show.id) }}" onclick="this.select();">
                             <button type="button" class="btn btn-secondary" onclick="this.previousElementSibling.select(); document.execCommand('copy');">
                                 <i class="bi bi-copy"></i>
                             </button>

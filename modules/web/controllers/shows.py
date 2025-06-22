@@ -44,6 +44,7 @@ class FormShowEdit(FlaskForm):
     description = wtforms.StringField("Description", description="Une simple description, juste pour vous, pour vous y retrouver.", validators=[], render_kw={"maxlength": 150})
     logo = wtforms.FileField("Logo", description="Permet d'associer un logo à l'émission.", validators=[FileAllowed(["jpg","jpeg","png","webp"])])
     logo_delete = wtforms.BooleanField("Supprimer le logo actuel")
+    roles = wtforms.TextAreaField("Rôles", description="Définissez les différents rôles pour votre émission. Chaque rôle correspond à une caméra. N'inscrivez qu'un seul rôle par ligne.", validators=[])
 
     videoWidth = wtforms.IntegerField("Largeur", description="Largeur en pixels des vidéos transcodées pour cette émission.", validators=[validators.DataRequired(), validators.NumberRange(min=300, max=3840)])
     videoHeight = wtforms.IntegerField("Hauteur", description="Hauteur en pixels des vidéos transcodées pour cette émission.", validators=[validators.DataRequired(), validators.NumberRange(min=300, max=2160)])
@@ -84,8 +85,14 @@ def showEdit(guid=None):
         else:
             show = Show()
         
+        # On nettoie les lignes vides dans les rôles
+        roles = form.roles.data.replace("\r", "").split("\n")
+        roles = [line.strip() for line in roles if line.strip()]
+        roles = "\n".join(roles)
+        
         show.name = form.name.data
         show.description = form.description.data
+        show.roles = roles
         show.videoWidth = form.videoWidth.data
         show.videoHeight = form.videoHeight.data
         show.videoQuality = max(0, min(1, form.videoQuality.data))

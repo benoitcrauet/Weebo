@@ -55,6 +55,7 @@ class Show(Base):
     id = Column(String, primary_key=True, default=lambda: str(generate_guid()))
     name = Column(String)
     description = Column(String)
+    roles = Column(String)
     logo = Column(String)
 
     videoWidth = Column(Integer, default=1920)
@@ -66,6 +67,20 @@ class Show(Base):
     conductors = relationship("Conductor", back_populates="show", cascade="all, delete")
     medias = relationship("Media", back_populates="show", cascade="all, delete")
     events = relationship("Event", back_populates="show", cascade="all, delete")
+
+    @property
+    def rolesList(self):
+        roles = self.roles.split("\n")
+        list = {}
+        i = 0
+        for role in roles:
+            list[i] = {
+                "index": i,
+                "name": roles[i]
+            }
+            i += 1
+
+        return list
 
 
     def __init__(self, *args, **kwargs):
@@ -154,6 +169,33 @@ class Conductor(Base):
 
     show_id = Column(String, ForeignKey('Shows.id'))
     show = relationship("Show", back_populates="conductors")
+
+    @property
+    def guestsList(self):
+        rawRoles = self.show.roles.split("\n")
+        roles = []
+        for role in rawRoles:
+            roles.append(role)
+
+        lines = self.guests.split("\n")
+        list = {}
+        i = 0
+        for line in lines:
+            list[i] = {
+                "index": i,
+                "role": roles[i],
+                "name": line.strip(),
+                "defined": line.strip()!=""
+            }
+            i += 1
+
+        return list
+
+    @property
+    def guestsCount(self):
+        lines = self.guests.split("\n")
+        nonEmpty = [l for l in lines if l.strip()]
+        return len(nonEmpty)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

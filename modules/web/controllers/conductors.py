@@ -74,6 +74,7 @@ def conductorsList(show_guid):
     # On liste les templates
     templates = session.query(Conductor).filter(Conductor.type == "template").filter(Conductor.show_id == show.id).order_by(Conductor.name).all()
 
+
     return render_template("conductors/conductorsList.jinja2", show=show, conductors=conductors, templates=templates)
 
 
@@ -86,7 +87,7 @@ class FormConductorEdit(FlaskForm):
     day = wtforms.IntegerField("Diffusion", description="Entrez ici la date de diffusion de l'émission.", validators=[validators.NumberRange(min=1, max=31)])
     month = wtforms.IntegerField("mois", validators=[validators.NumberRange(min=1, max=12)])
     year = wtforms.IntegerField("année", validators=[validators.NumberRange(min=datetime.now().year-1, max=datetime.now().year+2)])
-    guests = wtforms.TextAreaField("Participants", description="Saisissez un nom par ligne.", validators=[])
+    guests = wtforms.HiddenField("Participants", description="Saisissez les noms des différents intervenants présents. Vous n'êtes pas obligé de définir absolument un nom par rôle. Attention : ces noms peuvent être susceptibles d'être affichés publiquement.", validators=[])
     vdoEnable = wtforms.BooleanField("Activer VDO", description="Permet d'activer la génération automatique des liens VDO.", validators=[], default=True)
     vdoPassword = wtforms.StringField("Mot de passe VDO", description="Facultatif. Vous permet de définir un mot de passe sur votre room VDO.", validators=[])
     fromTemplate = wtforms.SelectField("Template", choices=[("","- Aucun modèle -")], description="Depuis quel modèle souhaitez-vous créer votre conducteur ?")
@@ -157,7 +158,7 @@ def conductorsEdit(show_guid, cond_guid=None):
             conductor.day = form.day.data
             conductor.month = form.month.data
             conductor.year = form.year.data
-            conductor.guests = form.guests.data
+            conductor.guests = form.guests.data.replace("\r", "")
 
             conductor.vdoEnable = form.vdoEnable.data
             conductor.vdoPassword = form.vdoPassword.data.strip()
@@ -168,9 +169,6 @@ def conductorsEdit(show_guid, cond_guid=None):
                 conductor.streaming = False
 
             conductor.show = show
-
-            guests_cleaner = [l.strip() for l in conductor.guests.splitlines() if l.strip()]
-            conductor.guests = '\n'.join(guests_cleaner)
 
 
 
@@ -276,88 +274,94 @@ def conductorsView(show_guid, cond_guid=None):
     # Code co-director
     coDirectorHash = generateVdoCoDirectorHash(conductor.id)
 
-    for k,guestName in enumerate(conductor.guests.split("\n")):
-        # On fabrique le hash de l'utilisateur
-        streamID = generateVdoGuestHash(conductor.id, k)
-
-
-
-        # On fabrique le lien d'invitation
-        inviteParams = {
-            "room": vdoRoomID, # Room ID
-            "push": streamID, # Stream ID
-            "label": guestName, # Nom du guest
-            "webcam": "", # Pas de choix entre screenshare ou webcam (webcam direct)
-            "welcomeb64": "Bienvenue, {} !".format(guestName), # Message de bienvenue
-            "order": 10-k, # Priorité de mix (plus le guest est en premier dans la liste, plus il est prioritaire)
-            "showlabels": "teams", # Affichage des noms des guests (style Teams)
-            "clock24": "2", # Affichage de l'heure en haut
-            "timer": "5", # Affichage du timer au centre
-            "consent": "", # Permission de contrôler les caméras et micros
-            "obs": "", # Activer le controle d'OBS (que pour les guests)
-            "remote": obsRemote, # Token de controle d'OBS
-            "hands": "", # Autorise les guests à lever la main
-            "screensharebutton": "", # Autorise les guests à partager leur écran
-            "nohangupbutton": "", # On cache le bouton raccrocher pour éviter les erreurs
-            "fullscreenbutton": "", # On permet l'affichage en plein écran
-            "grid": "", # Ajout de la grille des tiers
-            "channelcount": "1", # Micro en mono
-            "agc": "1", # Auto-gain control ON
-            "gain": "70", # Volume de l'invité en %
-            "limiter": "", # Activation du limiteur audio
-            "gate": "1", # Activation du noise gate
-        }
-        # On rajoute l'image de bienvenue s'il y en a une
-        if show.logo:
-            inviteParams["welcomeimage"] = config["web"]["baseUrl"]+"/"+config["directories"]["images"]+"/"+show.logo
-        # On rajoute le mot de passe s'il y en a un
-        if conductor.vdoPassword!="":
-            inviteParams["hash"] = generateVdoHash(conductor.vdoPassword)
+    for i in conductor.guestsList:
+        guest = conductor.guestsList[i]
         
-        inviteLink = "https://vdo.ninja/?"+urlencode(inviteParams)
+        # On n'affiche la webcam que si le rôle est présent dans cette émission
+        if guest["defined"]:
+
+            # On fabrique le hash de l'utilisateur
+            streamID = generateVdoGuestHash(conductor.id, guest["index"])
 
 
 
-        # On fabrique le lien solo
-        soloParams = {
-            "room": vdoRoomID, # Room ID
-            "view": streamID, # Stream ID
-            "solo": "", # Vue solo
-        }
+            # On fabrique le lien d'invitation
+            inviteParams = {
+                "room": vdoRoomID, # Room ID
+                "push": streamID, # Stream ID
+                "label": guest["name"], # Nom du guest
+                "webcam": "", # Pas de choix entre screenshare ou webcam (webcam direct)
+                "welcomeb64": "Bienvenue, {} !".format(guest["name"]), # Message de bienvenue
+                "order": 10-guest["index"], # Priorité de mix (plus le guest est en premier dans la liste, plus il est prioritaire)
+                "showlabels": "teams", # Affichage des noms des guests (style Teams)
+                "clock24": "2", # Affichage de l'heure en haut
+                "timer": "5", # Affichage du timer au centre
+                "consent": "", # Permission de contrôler les caméras et micros
+                "obs": "", # Activer le controle d'OBS (que pour les guests)
+                "remote": obsRemote, # Token de controle d'OBS
+                "hands": "", # Autorise les guests à lever la main
+                "screensharebutton": "", # Autorise les guests à partager leur écran
+                "nohangupbutton": "", # On cache le bouton raccrocher pour éviter les erreurs
+                "fullscreenbutton": "", # On permet l'affichage en plein écran
+                "grid": "", # Ajout de la grille des tiers
+                "channelcount": "1", # Micro en mono
+                "agc": "1", # Auto-gain control ON
+                "gain": "70", # Volume de l'invité en %
+                "limiter": "", # Activation du limiteur audio
+                "gate": "1", # Activation du noise gate
+            }
+            # On rajoute l'image de bienvenue s'il y en a une
+            if show.logo:
+                inviteParams["welcomeimage"] = config["web"]["baseUrl"]+"/"+config["directories"]["images"]+"/"+show.logo
+            # On rajoute le mot de passe s'il y en a un
+            if conductor.vdoPassword!="":
+                inviteParams["hash"] = generateVdoHash(conductor.vdoPassword)
+            
+            inviteLink = "https://vdo.ninja/?"+urlencode(inviteParams)
 
-        # On rajoute le token OBS mais uniquement sur le premier lien
-        if k==0:
-            soloParams["remote"] = obsRemote # Token de pilotage OBS
-        
-        # On rajoute le mot de passe s'il y en a un
-        if conductor.vdoPassword!="":
-            soloParams["password"] = conductor.vdoPassword
-        soloLink = "https://vdo.ninja/?"+urlencode(soloParams)
-
-        # On crée le lien version screen capture
-        soloCaptureLink = "https://vdo.ninja/?"+urlencode({**soloParams, "view": soloParams["view"]+":s"})
 
 
+            # On fabrique le lien solo
+            soloParams = {
+                "room": vdoRoomID, # Room ID
+                "view": streamID, # Stream ID
+                "solo": "", # Vue solo
+            }
 
-        # On fabrique le lien permanent caméra
-        soloPermalink = config["web"]["baseUrl"]+url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=k+1)
+            # On rajoute le token OBS mais uniquement sur le premier lien
+            if guest["index"]==0:
+                soloParams["remote"] = obsRemote # Token de pilotage OBS
+            
+            # On rajoute le mot de passe s'il y en a un
+            if conductor.vdoPassword!="":
+                soloParams["password"] = conductor.vdoPassword
+            soloLink = "https://vdo.ninja/?"+urlencode(soloParams)
 
-        # ... ainsi que celui de la capture
-        soloCapturePermalink = config["web"]["baseUrl"]+url_for("conductors.vdoPermalink_screencapture", show_guid=show.id, cam_number=k+1)
+            # On crée le lien version screen capture
+            soloCaptureLink = "https://vdo.ninja/?"+urlencode({**soloParams, "view": soloParams["view"]+":s"})
 
 
-        # On compile le tout et on ajoute à la liste
-        obj = {
-            "name": guestName,
-            "push": streamID,
-            "cam_number": k,
-            "link_invite": inviteLink,
-            "link_solo": soloLink,
-            "link_capture_solo": soloCaptureLink,
-            "permalink_solo": soloPermalink,
-            "permalink_capture_solo": soloCapturePermalink,
-        }
-        vdoLinks.append(obj)
+
+            # On fabrique le lien permanent caméra
+            soloPermalink = config["web"]["baseUrl"]+url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=guest["index"]+1)
+
+            # ... ainsi que celui de la capture
+            soloCapturePermalink = config["web"]["baseUrl"]+url_for("conductors.vdoPermalink_screencapture", show_guid=show.id, cam_number=guest["index"]+1)
+
+
+            # On compile le tout et on ajoute à la liste
+            obj = {
+                "name": guest["name"],
+                "role": guest["role"],
+                "push": streamID,
+                "cam_number": guest["index"],
+                "link_invite": inviteLink,
+                "link_solo": soloLink,
+                "link_capture_solo": soloCaptureLink,
+                "permalink_solo": soloPermalink,
+                "permalink_capture_solo": soloCapturePermalink,
+            }
+            vdoLinks.append(obj)
     
 
 
@@ -1317,6 +1321,33 @@ def showSummary(show_guid):
             "summary": summary,
             "nextHighlight": nextHighlight,
             "lastHighlight": lastHighlight
+        }
+        
+        return jsonify(output)
+    else:
+        abort(204, description="Cette émission n'a aucun conducteur actif.")
+
+    
+    return ""
+
+
+
+@bp.route("/api/guests/<string:show_guid>", endpoint="showGuests")
+def showGuests(show_guid):
+    # On vérifie si l'émission éxiste
+    show = session.query(Show).filter(Show.id == show_guid).first()
+    if not show:
+        abort(404, description="Cette émission est introuvable.")
+    
+    # On récupère le conducteur en cours
+    conductor = getActiveConductor(show.id)
+
+    if conductor:
+        # On récupère la liste des guests
+        output = {
+            "name": conductor.name,
+            "date": conductor.date.isoformat(),
+            "guests": conductor.guestsList
         }
         
         return jsonify(output)

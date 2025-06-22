@@ -103,10 +103,60 @@
                     <div class="mb-3 row">
                         {{ form.guests.label(class="col-form-label col-sm-3") }}
                         <div class="col-sm-9">
-                            {{ form.guests(class="form-control", rows="6", style="resize: none;") }}
+                            {{ form.guests() }}
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">
+                                            Rôle
+                                        </th>
+                                        <th scope="col">
+                                            Nom
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for role in show.roles.split("\n") %}
+                                        <tr>
+                                            <th scope="row">
+                                                <label for="guest-number-{{ loop.index }}" class="col-form-label d-block">
+                                                    {{ role }}
+                                                </label>
+                                            </th>
+                                            <td>
+                                                <input type="text" class="form-control guest-role-field" id="guest-number-{{ loop.index }}">
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                             {% if form.guests.description %}<div class="form-text">{{ form.guests.description }}</div>{% endif %}
                         </div>
                     </div>
+                    <script type="text/javascript">
+                        document.addEventListener("DOMContentLoaded", () => {
+                            const guestValue = document.getElementById("guests");
+                            const guestVirtualFields = document.getElementsByClassName("guest-role-field");
+
+                            // On liste tous les guests
+                            let guests = guestValue.value.split("\n");
+                            
+                            // On liste tous les champs virtuels
+                            for(let i=0; i<guestVirtualFields.length; i++) {
+                                const field = guestVirtualFields[i];
+
+                                // On défini la valeur par défaut de ce champ virtuel
+                                field.value = guests[i] ?? "";
+
+                                // On déclare l'event pour mettre à jour la valeur réelle
+                                field.addEventListener("keyup", (e) => {
+                                    guests[i] = e.target.value;
+
+                                    guestValue.value = guests.join("\n");
+                                });
+                            }
+                        });
+                    </script>
 
                     <div class="mb-3 row">
                         {{ form.vdoEnable.label(class="col-form-label col-sm-3") }}

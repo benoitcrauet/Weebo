@@ -50,20 +50,22 @@ def linksList(show_guid):
     
     # On récupère les canaux web
     webChannels = session.query(WebChannel).filter(WebChannel.show_id == show.id).order_by(WebChannel.name).all()
-
-    # Caméras
-    cameras = []
-    for i in range(10):
+    
+    # Rôles
+    roles = []
+    for i in show.rolesList:
+        role = show.rolesList[i]
         # On fabrique le lien permanent
         permalink = url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=i+1)
         permalinkCapture = url_for("conductors.vdoPermalink_screencapture", show_guid=show.id, cam_number=i+1)
 
-        cameras.append({
-            "number": i+1,
+        roles.append({
+            "index": role["index"],
+            "name": role["name"],
             "permalink": permalink,
             "permalink_capture": permalinkCapture
         })
 
     
-    return render_template("links/linksList.jinja2", show=show, mediaChannels=mediaChannels, webChannels=webChannels, cameras=cameras, config=config)
+    return render_template("links/linksList.jinja2", show=show, mediaChannels=mediaChannels, webChannels=webChannels, roles=roles, config=config)
 
