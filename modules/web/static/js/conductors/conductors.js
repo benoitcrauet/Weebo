@@ -352,7 +352,7 @@ function getStringFromSeconds(input) {
 /**
  * Met à jour ou ajout des lignes dans le DOM en fonction des données d'entrée
  */
-function updateLines(data) {
+function updateLines(data, keep=false) {
     let idToKeep = [];
 
     // On explore les données
@@ -375,14 +375,15 @@ function updateLines(data) {
         }
     }
 
-    // On cherche aussi des éléments à supprimer
-    condMainTable.querySelectorAll(".cond-line").forEach(element => {
-        let id = element.dataset.id;
+    if(!keep)
+        // On cherche aussi des éléments à supprimer
+        condMainTable.querySelectorAll(".cond-line").forEach(element => {
+            let id = element.dataset.id;
 
-        if(!idToKeep.includes(id))
-            // ID introuvable > on supprime l'élément
-            element.remove();
-    });
+            if(!idToKeep.includes(id))
+                // ID introuvable > on supprime l'élément
+                element.remove();
+        });
 }
 
 
@@ -841,7 +842,7 @@ function insertMediaInConductor(medias, autoDelete=false) {
 
             if(line !== null) {
                 let mediasTable = line.querySelector(".cond-line-medias-table");
-
+                
                 if(mediasTable !== undefined) {
 
                     // Génération de la structure et on y place les données
@@ -1210,15 +1211,20 @@ function textToLinks(input) {
  * @returns Sortie HTML une fois le markdown parsé
  */
 function parseMarkdown(markdown) {
-    // Remplace le gras et l'italique
-    markdown = markdown.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>'); // gras et italique
-    markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // gras
-    markdown = markdown.replace(/\*(.*?)\*/g, '<em>$1</em>'); // italique
-    // Remplace le souligné
-    markdown = markdown.replace(/__(.*?)__/g, '<u>$1</u>');
+    if(typeof(markdown)=="string") {
+        // Remplace le gras et l'italique
+        markdown = markdown.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>'); // gras et italique
+        markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // gras
+        markdown = markdown.replace(/\*(.*?)\*/g, '<em>$1</em>'); // italique
+        // Remplace le souligné
+        markdown = markdown.replace(/__(.*?)__/g, '<u>$1</u>');
 
-    // Ajout des liens
-    markdown = textToLinks(markdown);
+        // Ajout des liens
+        markdown = textToLinks(markdown);
+    }
+    else {
+        console.error("Can't parse markdown in following object:", markdown);
+    }
 
     return markdown;
 }
@@ -1230,8 +1236,13 @@ function parseMarkdown(markdown) {
  * Remplace les sauts de ligne par des balises <br>
  */
 function nl2br(input) {
-    // Remplace les sauts de ligne par <br>
-    input = input.replace(/\n/g, '<br>');
+    if(typeof(input)=="string") {
+        // Remplace les sauts de ligne par <br>
+        input = input.replace(/\n/g, '<br>');
+    }
+    else {
+        console.error("Can't process nl2br in object:", input);
+    }
     return input
 }
 
@@ -1243,11 +1254,17 @@ function nl2br(input) {
  * @returns Texte protégé contre les injections HTML
  */
 function htmlspecialchars(text) {
-    return text.replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+    if(typeof(text)=="string") {
+        return text.replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+    }
+    else {
+        console.error("Can't process htmlspecialchars in following object:", text);
+        return text;
+    }
 }
 
 

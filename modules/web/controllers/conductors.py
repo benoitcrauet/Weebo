@@ -579,8 +579,20 @@ def api_conductorsLinesListInsert(cond_guid):
 
 
             # Maintenant on ajoute la nouvelle ligne
-            newLine = Line(type=data["type"], name=data["name"], highlight=data["highlight"], text=data["text"], jingle=data["jingle"], order=newOrder, conductor=conductor, done=False)
+            newLine = Line()
+            newLine.type = data["type"]
+            newLine.name = data["name"]
+            newLine.highlight = data["highlight"]
+            newLine.text = data["text"]
+            newLine.jingle = data["jingle"]
+            newLine.order = newOrder
+            newLine.conductor = conductor
+            newLine.done = False
             session.add(newLine)
+
+            session.flush()
+            newLine.done = False
+
 
             # On stocke les objets modifiés pour le websocket
             modified_objects = [model_to_dict(obj) for obj in session.dirty]
@@ -924,6 +936,9 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
 
     # On ajoute le média à la base
     session.add(media)
+
+    session.flush()
+    media.name = media.name
 
     # On stocke les objets modifiés pour le websocket
     modified_objects = [model_to_dict(obj) for obj in session.dirty]

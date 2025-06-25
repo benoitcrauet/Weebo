@@ -32,7 +32,7 @@ socket.on('conductor_command', function(data) {
                 switch(action) {
                     case "insert":
                         // Insertion : on update et on réordonne
-                        updateLines(data_line);
+                        updateLines(data_line, true);
                         reorderLines();
                         break;
                     case "edit":
@@ -56,6 +56,7 @@ socket.on('conductor_command', function(data) {
             
             // Seulement si on a de la data dans data_media
             if(data_media != null) {
+                console.debug(data_media);
                 // On détermine si on doit supprimer des lignes ou en modifier
                 switch(action) {
                     case "insert":
