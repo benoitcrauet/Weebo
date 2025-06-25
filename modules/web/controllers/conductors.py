@@ -274,9 +274,7 @@ def conductorsView(show_guid, cond_guid=None):
     # Code co-director
     coDirectorHash = generateVdoCoDirectorHash(conductor.id)
 
-    for i in conductor.guestsList:
-        guest = conductor.guestsList[i]
-        
+    for guest in conductor.guestsList:
         # On n'affiche la webcam que si le rôle est présent dans cette émission
         if guest["defined"]:
 

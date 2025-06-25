@@ -71,13 +71,15 @@ class Show(Base):
     @property
     def rolesList(self):
         roles = self.roles.split("\n")
-        list = {}
+        list = []
         i = 0
         for role in roles:
-            list[i] = {
-                "index": i,
-                "name": roles[i]
-            }
+            list.append(
+                {
+                    "index": i,
+                    "name": roles[i]
+                }
+            )
             i += 1
 
         return list

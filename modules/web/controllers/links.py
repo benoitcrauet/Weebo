@@ -53,11 +53,10 @@ def linksList(show_guid):
     
     # Rôles
     roles = []
-    for i in show.rolesList:
-        role = show.rolesList[i]
+    for role in show.rolesList:
         # On fabrique le lien permanent
-        permalink = url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=i+1)
-        permalinkCapture = url_for("conductors.vdoPermalink_screencapture", show_guid=show.id, cam_number=i+1)
+        permalink = url_for("conductors.vdoPermalink", show_guid=show.id, cam_number=role["index"])
+        permalinkCapture = url_for("conductors.vdoPermalink_screencapture", show_guid=show.id, cam_number=role["index"])
 
         roles.append({
             "index": role["index"],
