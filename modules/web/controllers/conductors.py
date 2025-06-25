@@ -627,19 +627,27 @@ def api_conductorsLineEdit(line_guid):
         oldDone = line.done
 
         if "type" in data:
-            line.type = data["type"];
+            line.type = data["type"]
         if "name" in data:
-            line.name = data["name"];
+            line.name = data["name"]
         if "highlight" in data:
-            line.highlight = data["highlight"];
+            line.highlight = data["highlight"]
         if "text" in data:
-            line.text = data["text"];
+            line.text = data["text"]
         if "jingle" in data:
-            line.jingle = data["jingle"];
+            line.jingle = data["jingle"]
         if "order" in data:
-            line.order = data["order"];
+            line.order = data["order"]
         if "done" in data:
-            line.done = data["done"];
+            line.done = data["done"]
+        if "tag1" in data:
+            line.tag1 = data["tag1"]
+        if "tag2" in data:
+            line.tag2 = data["tag2"]
+        if "tag3" in data:
+            line.tag3 = data["tag3"]
+        if "tag4" in data:
+            line.tag4 = data["tag4"]
         
 
         # On crée l'évènement si l'état "done" est différent
@@ -1297,7 +1305,8 @@ def showSummary(show_guid):
                 "text": l.text,
                 "highlight": l.highlight,
                 "done": l.done,
-                "order": virtualOrder
+                "order": virtualOrder,
+                "tags": l.tagsList
             }
             summary.append(currentLine)
 
@@ -1316,6 +1325,11 @@ def showSummary(show_guid):
 
         cleanedShow = model_to_dict(show)
         cleanedShow["roles"] = show.rolesList
+        del cleanedShow["tagsNotes"]
+        del cleanedShow["tagName1"]
+        del cleanedShow["tagName2"]
+        del cleanedShow["tagName3"]
+        del cleanedShow["tagName4"]
 
         output = {
             "show": cleanedShow,

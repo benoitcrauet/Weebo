@@ -29,7 +29,13 @@ function lineStructure(integrateMedias=true) {
             checkbox_done.classList.add("cond-line-done-checkbox");
             checkbox_done.setAttribute("type", "checkbox");
 
-            td_done.append(checkbox_done);
+            i_tags = document.createElement("i");
+            i_tags.classList.add("bi");
+            i_tags.classList.add("bi-database-fill-gear");
+            i_tags.classList.add("cond-line-tags-icon");
+            i_tags.setAttribute("title", "Cette ligne intègre des tags.");
+
+            td_done.append(checkbox_done, i_tags);
         
         td_content = document.createElement("td");
         td_content.classList.add("cond-line-content");
@@ -410,6 +416,10 @@ function lineSetDatas(element, line) {
     let order = line.order;
     let jingle = (line.jingle==undefined || line.jingle=="") ? false : line.jingle;
     let highlight = line.highlight;
+    let tag1 = line.tag1;
+    let tag2 = line.tag2;
+    let tag3 = line.tag3;
+    let tag4 = line.tag4;
 
     // On édite le tbody principal
     element.setAttribute("id", "cond-line-"+id);
@@ -418,6 +428,12 @@ function lineSetDatas(element, line) {
     element.dataset.order = order;
     element.dataset.jingle = jingle;
     element.dataset.highlight = highlight;
+    element.dataset.tag1 = tag1;
+    element.dataset.tag2 = tag2;
+    element.dataset.tag3 = tag3;
+    element.dataset.tag4 = tag4;
+
+    element.dataset.hasTag = tag1!="" || tag2!="" || tag3!="" || tag4!="";
 
     // On édite le nom de la ligne
     element.querySelector(".cond-line-title").innerText = name;

@@ -58,6 +58,12 @@ class Show(Base):
     roles = Column(String)
     logo = Column(String)
 
+    tagsNotes = Column(String)
+    tagName1 = Column(String)
+    tagName2 = Column(String)
+    tagName3 = Column(String)
+    tagName4 = Column(String)
+
     videoWidth = Column(Integer, default=1920)
     videoHeight = Column(Integer, default=1080)
     videoQuality = Column(Float, default=0.5)
@@ -220,6 +226,20 @@ class Line(Base):
     highlight = Column(Boolean, default=False)
     type = Column(String, default="classic")
     jingle = Column(String)
+
+    tag1 = Column(String)
+    tag2 = Column(String)
+    tag3 = Column(String)
+    tag4 = Column(String)
+
+    @property
+    def tagsList(self):
+        return [
+            self.tag1,
+            self.tag2,
+            self.tag3,
+            self.tag4
+        ]
 
     medias = relationship("Media", back_populates="line", cascade="all, delete")
 

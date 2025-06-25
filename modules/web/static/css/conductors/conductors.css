@@ -41,6 +41,12 @@
         font-style: italic;
     }
 
+    #toolsbar h1, #toolsbar h2, #toolsbar h3 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     #toolsbar a.btn, #toolsbar button {
         display: table-cell;
         height: 50px;
@@ -229,6 +235,15 @@ a.cond-insertion-adder-link:hover {
 
     .cond-line[data-highlight=true][data-type=section] .cond-line-title {
         text-decoration: underline;
+    }
+
+
+.cond-line-tags-icon {
+    display: none;
+}
+
+    .cond-line[data-has-tag=true] .cond-line-tags-icon {
+        display: inline-block;
     }
 
 body:not(.edit-mode) .cond-line-display:has(.cond-line-done-checkbox[type=checkbox]:checked) td {

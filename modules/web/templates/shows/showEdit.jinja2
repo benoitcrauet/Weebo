@@ -123,6 +123,48 @@
 
             </fieldset>
 
+            <fieldset>
+                <legend>Avancé</legend>
+
+                <div class="mb-3 row">
+                    {{ form.tagsNotes.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.tagsNotes(class="form-control", rows=6) }}
+                        {% if form.tagsNotes.description %}<div class="form-text">{{ form.tagsNotes.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
+                    {{ form.tagName1.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.tagName1(class="form-control") }}
+                        {% if form.tagName1.description %}<div class="form-text">{{ form.tagName1.description }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    {{ form.tagName2.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.tagName2(class="form-control") }}
+                        {% if form.tagName2.description %}<div class="form-text">{{ form.tagName2.description }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    {{ form.tagName3.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.tagName3(class="form-control") }}
+                        {% if form.tagName3.description %}<div class="form-text">{{ form.tagName3.description }}</div>{% endif %}
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    {{ form.tagName4.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.tagName4(class="form-control") }}
+                        {% if form.tagName4.description %}<div class="form-text">{{ form.tagName4.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+            </fieldset>
+
             <div class="col-12">
                 {{ form.hidden_tag() }}
                 {{ form.id }}

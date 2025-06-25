@@ -93,6 +93,74 @@
                             </div>
                         </div>
 
+                        <div id="fTagsContainer">
+                            <div class="accordion mb-3" id="accordionLineTags">
+                                <div class="accordion-item">
+                                    <div class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordionLineTagsPan" aria-expanded="false" aria-controls="collapseOne">
+                                            <i class="bi bi-database-fill-gear"></i>&nbsp;
+                                            Tags
+                                        </button>
+                                    </div>
+                                    <div id="accordionLineTagsPan" class="accordion-collapse collapse" data-bs-parent="#accordionLineTags">
+                                        <div class="accordion-body">
+
+                                            {% if show.tagsNotes.strip()!="" %}
+                                                <div class="alert alert-info">
+                                                    <div>{{ show.tagsNotes | replace('\n', '<br>') | safe }}</div>
+                                                </div>
+                                            {% else %}
+                                                <p>
+                                                    Les tags permettent de transmettre des données personnalisées via l'API de Weebo.<br>
+                                                    L'administrateur n'a pas donné de consigne particulière concernant les tags de cette émission.
+                                                </p>
+                                                <p>
+                                                    Il est possible que les tags n'aient pas d'usage propre pour cette émission.
+                                                </p>
+                                            {% endif %}
+                                        
+                                            <div class="row mb-3">
+                                                <label class="col-form-label col-sm-3" for="fTag1">
+                                                    {{ show.tagName1 if show.tagName1.strip()!="" else "Tag #1" }}
+                                                </label>
+                                                <div class="col-9">
+                                                    <input type="text" id="fTag1" name="tag1" class="form-control" style="font-family: monospace;">
+                                                </div>
+                                            </div>
+                                        
+                                            <div class="row mb-3">
+                                                <label class="col-form-label col-sm-3" for="fTag2">
+                                                    {{ show.tagName2 if show.tagName2.strip()!="" else "Tag #2" }}
+                                                </label>
+                                                <div class="col-9">
+                                                    <input type="text" id="fTag2" name="tag2" class="form-control" style="font-family: monospace;">
+                                                </div>
+                                            </div>
+                                        
+                                            <div class="row mb-3">
+                                                <label class="col-form-label col-sm-3" for="fTag3">
+                                                    {{ show.tagName3 if show.tagName3.strip()!="" else "Tag #3" }}
+                                                </label>
+                                                <div class="col-9">
+                                                    <input type="text" id="fTag3" name="tag3" class="form-control" style="font-family: monospace;">
+                                                </div>
+                                            </div>
+                                        
+                                            <div class="row mb-3">
+                                                <label class="col-form-label col-sm-3" for="fTag4">
+                                                    {{ show.tagName4 if show.tagName4.strip()!="" else "Tag #4" }}
+                                                </label>
+                                                <div class="col-9">
+                                                    <input type="text" id="fTag4" name="tag4" class="form-control" style="font-family: monospace;">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>

@@ -73,8 +73,14 @@ const lineModalHighlight = document.getElementById("fHighlight");
 const lineModalText = document.getElementById("fText");
 const lineModalJingle = document.getElementById("fJingle");
 const lineModalId = document.getElementById("fId");
+const lineModalTag1 = document.getElementById("fTag1");
+const lineModalTag2 = document.getElementById("fTag2");
+const lineModalTag3 = document.getElementById("fTag3");
+const lineModalTag4 = document.getElementById("fTag4");
 const lineModalInsertAfter = document.getElementById("fInsertAfter");
 const lineModalSubmit = document.getElementById("fSubmit");
+
+const lineModalTagsAccordion = document.getElementById("accordionLineTagsPan");
 
 const lineModalTypeContainer = document.getElementById("fTypeContainer");
 const lineModalNameContainer = document.getElementById("fNameContainer");
@@ -94,8 +100,12 @@ var genericToast = null;
  * @param {string} type 
  * @param {string} name 
  * @param {string} text 
+ * @param {string} tag1 
+ * @param {string} tag2 
+ * @param {string} tag3 
+ * @param {string} tag4 
  */
-async function openLineEditor(id=null, insertAfter=null, type=null, name=null, text=null) {
+async function openLineEditor(id=null, insertAfter=null, type=null, name=null, text=null, tag1=null, tag2=null, tag3=null, tag4=null) {
     let editMode = false;
     if(id!==null)
         editMode = true;
@@ -116,6 +126,19 @@ async function openLineEditor(id=null, insertAfter=null, type=null, name=null, t
             lineModalJingle.value = data.jingle;
             lineModalId.value = data.id;
             lineModalInsertAfter.value = "";
+            lineModalTag1.value = data.tag1;
+            lineModalTag2.value = data.tag2;
+            lineModalTag3.value = data.tag3;
+            lineModalTag4.value = data.tag4;
+
+            // On ouvre l'accordion des tags, si des données sont présentes
+            let bsCollapse = new bootstrap.Collapse(lineModalTagsAccordion, {
+                toggle: false
+            });
+            if(data.tag1!="" || data.tag2!="" || data.tag3!="" || data.tag4!="")
+                bsCollapse.show();
+            else // Si aucune donnée dans les tags, on ferme l'accordion
+                bsCollapse.hide();
 
             lineEditUpdateDisplay(lineModalType.value);
 
@@ -139,6 +162,16 @@ async function openLineEditor(id=null, insertAfter=null, type=null, name=null, t
         lineModalJingle.value = "";
         lineModalId.value = id ?? "";
         lineModalInsertAfter.value = insertAfter ?? "";
+        lineModalTag1.value = "";
+        lineModalTag2.value = "";
+        lineModalTag3.value = "";
+        lineModalTag4.value = "";
+
+        // On ferme l'accordion des tags, par défaut
+        let bsCollapse = new bootstrap.Collapse(lineModalTagsAccordion, {
+            toggle: false
+        });
+        bsCollapse.hide();
 
         lineEditUpdateDisplay(lineModalType.value);
 
@@ -571,22 +604,6 @@ function lineElementsRegisterEventListeners(elements) {
     lineDone.addEventListener("click", function(e) {
         e.preventDefault();
 
-        let checked = e.target.checked;
-        let linesToEdit = checkContinuousDone(lineID, checked);
-
-        if(checked && linesToEdit.length>0) {
-            if(!shiftPressed && !confirm("Certains éléments sont restés décochés plus haut dans le conducteur...\nÊtes-vous sûr de vouloir cocher celui-ci ?")) {
-                e.preventDefault();
-                return false;
-            }
-        }
-        if(!checked && linesToEdit.length>0) {
-            if(!shiftPressed && !confirm("Certains éléments sont restés cochés plus bas dans le conducteur...\nÊtes-vous sûr de vouloir décocher celui-ci ?")) {
-                e.preventDefault();
-                return false;
-            }
-        }
-
         lineSendEdit(lineID, null, null, null, e.target.checked, null);
     });
 
@@ -795,48 +812,6 @@ function jingleBroadcast(id) {
 
 
 /**
- * Vérifie si toutes les checkboxes jusqu'à une ligne donnée sont cochées
- * @param {string} lineTarget ID de la ligne à vérifier
- * @param {boolean} done Permet de vérifier si les cases sont toutes cochées depuis le début (true) ou décochées jusqu'à la fin (false)
- */
-function checkContinuousDone(lineTarget, done) {
-    let lines = condMainTable.querySelectorAll(".cond-line");
-
-    let lineFound = false;
-
-    let linesToEdit = [];
-
-    lines.forEach(lineElement => {
-        let checkbox = lineElement.querySelector(".cond-line-done-checkbox");
-        let checked = checkbox.checked;
-        let lineID = lineElement.dataset.id;
-        let lineType = lineElement.dataset.type;
-
-        if(lineID == lineTarget)
-            lineFound = true;
-
-        if(lineType=="classic" || lineType=="section") {
-
-            if(done && !lineFound) {
-                console.log(lineID, checked);
-                if(!checked)
-                    linesToEdit.push(lineID);
-            }
-
-            if(!done && lineFound) {
-                console.log(lineID, checked);
-                if(checked)
-                    linesToEdit.push(lineID);
-            }
-
-        }
-    });
-
-    return linesToEdit;
-}
-
-
-/**
  * Insert ou update le média automatiquement dans le bon tableau
  * @param {array} media Objet représentant le média
  * @param {boolean} autoDelete Si true, les médias non présents dans le paramètre "media" seront supprimés du DOM
@@ -911,8 +886,12 @@ function insertMediaInConductor(medias, autoDelete=false) {
  * @param {string} text Texte de la ligne
  * @param {boolean} done Définit si la ligne est finie ou non
  * @param {number} order Définit l'ordre de la ligne dans son conducteur
+ * @param {string} tag1 Contenu du tag 1 de la ligne
+ * @param {string} tag2 Contenu du tag 2 de la ligne
+ * @param {string} tag3 Contenu du tag 3 de la ligne
+ * @param {string} tag4 Contenu du tag 4 de la ligne
  */
-function lineSendEdit(id, type=null, name=null, text=null, done=null, order=null) {
+function lineSendEdit(id, type=null, name=null, text=null, done=null, order=null, tag1=null, tag2=null, tag3=null, tag4=null) {
     let data = {};
 
     if(type!==null) data.type = type;
@@ -920,6 +899,10 @@ function lineSendEdit(id, type=null, name=null, text=null, done=null, order=null
     if(text!==null) data.text = text;
     if(done!==null) data.done = done;
     if(order!==null) data.order = order;
+    if(tag1!==null) data.tag1 = tag1;
+    if(tag2!==null) data.tag2 = tag2;
+    if(tag3!==null) data.tag3 = tag3;
+    if(tag4!==null) data.tag4 = tag4;
     
     // Options de la requête
     var options = {
@@ -1525,7 +1508,11 @@ formEditLine.addEventListener("submit", function(e) {
         highlight: lineModalHighlight.checked,
         text: lineModalText.value,
         jingle: lineModalJingle.value,
-        insertAfter: lineModalInsertAfter.value
+        insertAfter: lineModalInsertAfter.value,
+        tag1: lineModalTag1.value,
+        tag2: lineModalTag2.value,
+        tag3: lineModalTag3.value,
+        tag4: lineModalTag4.value
     };
 
     // On récupère l'ID

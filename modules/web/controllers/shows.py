@@ -50,6 +50,12 @@ class FormShowEdit(FlaskForm):
     videoHeight = wtforms.IntegerField("Hauteur", description="Hauteur en pixels des vidéos transcodées pour cette émission.", validators=[validators.DataRequired(), validators.NumberRange(min=300, max=2160)])
     videoQuality = wtforms.FloatField("Qualité vidéo", description="Qualité du transcodage pour cette émission. Attention : plus la qualité est élevée, plus les vidéos seront lourdes.", validators=[validators.DataRequired(), validators.NumberRange(min=0.0, max=1.0)])
 
+    tagsNotes = wtforms.TextAreaField("Notes pour les tags", description="Vous pouvez laisser ici une note à destination des éditeurs des conducteurs concernant l'usage des tags des conducteurs.", validators=[])
+    tagName1 = wtforms.StringField("Nom du tag 1", description="Vous pouvez personnaliser le nom d'affichage du tag 1.", validators=[])
+    tagName2 = wtforms.StringField("Nom du tag 2", description="Vous pouvez personnaliser le nom d'affichage du tag 2.", validators=[])
+    tagName3 = wtforms.StringField("Nom du tag 3", description="Vous pouvez personnaliser le nom d'affichage du tag 3.", validators=[])
+    tagName4 = wtforms.StringField("Nom du tag 4", description="Vous pouvez personnaliser le nom d'affichage du tag 4.", validators=[])
+
     submit = wtforms.SubmitField("Valider")
 
 
@@ -93,9 +99,16 @@ def showEdit(guid=None):
         show.name = form.name.data
         show.description = form.description.data
         show.roles = roles
+
         show.videoWidth = form.videoWidth.data
         show.videoHeight = form.videoHeight.data
         show.videoQuality = max(0, min(1, form.videoQuality.data))
+
+        show.tagsNotes = form.tagsNotes.data
+        show.tagName1 = form.tagName1.data
+        show.tagName2 = form.tagName2.data
+        show.tagName3 = form.tagName3.data
+        show.tagName4 = form.tagName4.data
 
         # On supprime le logo en cours ?
         try:
