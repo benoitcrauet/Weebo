@@ -607,6 +607,11 @@ def api_conductorsLinesListInsert(cond_guid):
             # On envoie la liste des objets modifés en socket
             socketio.emit("conductor_command", conductorWebSocketBase(action="insert", conductor=cond_guid, data_line=modified_objects, data_media=None))
 
+            lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
+            lines_to_send = [model_to_dict(obj) for obj in lines]
+            # On envoie un reorder
+            socketio.emit("conductor_command", conductorWebSocketBase(action="reorder", conductor=cond_guid, data_line=lines_to_send, data_media=None))
+
             # Maintenant on liste les lignes et on affiche
             lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
             return jsonify([model_to_dict(obj) for obj in lines])
