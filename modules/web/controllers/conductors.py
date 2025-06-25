@@ -1312,11 +1312,15 @@ def showSummary(show_guid):
             virtualOrder += 1
         
         cleanedConductor = model_to_dict(conductor)
+        cleanedConductor["guests"] = conductor.guestsList
         del cleanedConductor["vdoEnable"]
         del cleanedConductor["vdoPassword"]
 
+        cleanedShow = model_to_dict(show)
+        cleanedShow["roles"] = show.rolesList
+
         output = {
-            "show": model_to_dict(show),
+            "show": cleanedShow,
             "activeConductor": cleanedConductor,
             "summary": summary,
             "nextHighlight": nextHighlight,

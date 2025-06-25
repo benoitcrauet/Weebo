@@ -173,20 +173,22 @@ class Conductor(Base):
     @property
     def guestsList(self):
         rawRoles = self.show.roles.split("\n")
-        roles = []
-        for role in rawRoles:
-            roles.append(role)
 
-        lines = self.guests.split("\n")
-        list = {}
+        guests = self.guests.split("\n")
+        list = []
+
         i = 0
-        for line in lines:
-            list[i] = {
-                "index": i,
-                "role": roles[i],
-                "name": line.strip(),
-                "defined": line.strip()!=""
-            }
+        for role in rawRoles:
+            guest = guests[i] if i<len(guests) else ""
+
+            list.append(
+                {
+                    "index": i,
+                    "role": role,
+                    "name": guest.strip(),
+                    "defined": guest.strip()!=""
+                }
+            )
             i += 1
 
         return list
