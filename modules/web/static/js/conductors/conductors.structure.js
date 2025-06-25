@@ -416,10 +416,10 @@ function lineSetDatas(element, line) {
     let order = line.order;
     let jingle = (line.jingle==undefined || line.jingle=="") ? false : line.jingle;
     let highlight = line.highlight;
-    let tag1 = line.tag1;
-    let tag2 = line.tag2;
-    let tag3 = line.tag3;
-    let tag4 = line.tag4;
+    let tag1 = line.tag1 ?? "";
+    let tag2 = line.tag2 ?? "";
+    let tag3 = line.tag3 ?? "";
+    let tag4 = line.tag4 ?? "";
 
     // On édite le tbody principal
     element.setAttribute("id", "cond-line-"+id);

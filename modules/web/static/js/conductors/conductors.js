@@ -126,10 +126,10 @@ async function openLineEditor(id=null, insertAfter=null, type=null, name=null, t
             lineModalJingle.value = data.jingle;
             lineModalId.value = data.id;
             lineModalInsertAfter.value = "";
-            lineModalTag1.value = data.tag1;
-            lineModalTag2.value = data.tag2;
-            lineModalTag3.value = data.tag3;
-            lineModalTag4.value = data.tag4;
+            lineModalTag1.value = data.tag1 ?? "";
+            lineModalTag2.value = data.tag2 ?? "";
+            lineModalTag3.value = data.tag3 ?? "";
+            lineModalTag4.value = data.tag4 ?? "";
 
             // On ouvre l'accordion des tags, si des données sont présentes
             let bsCollapse = new bootstrap.Collapse(lineModalTagsAccordion, {

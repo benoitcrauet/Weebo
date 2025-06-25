@@ -551,7 +551,7 @@ def api_conductorsLinesListInsert(cond_guid):
     if request.is_json:
         data = request.json
 
-        if "insertAfter" in data and "type" in data and "name" in data and "text" in data and "jingle" in data:
+        if "insertAfter" in data and "type" in data and "name" in data and "text" in data and "jingle" in data and "tag1" in data and "tag2" in data and "tag3" in data and "tag4" in data:
             # On récupère les lignes
             lines = session.query(Line).filter(Line.conductor_id == cond_guid).order_by(Line.order).all()
 
@@ -588,6 +588,10 @@ def api_conductorsLinesListInsert(cond_guid):
             newLine.order = newOrder
             newLine.conductor = conductor
             newLine.done = False
+            newLine.tag1 = data["tag1"]
+            newLine.tag2 = data["tag2"]
+            newLine.tag3 = data["tag3"]
+            newLine.tag4 = data["tag4"]
             session.add(newLine)
 
             session.flush()
