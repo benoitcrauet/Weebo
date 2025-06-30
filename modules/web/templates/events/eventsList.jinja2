@@ -286,7 +286,7 @@
     </style>
     <script type="text/javascript">
         const introScenesText = {{ show.introScenes | tojson | safe }};
-        const introScenes = introScenesText
+        const introScenes = (introScenesText ?? "")
             .split('\n') // Divise la chaîne en lignes
             .map(line => line.trim()) // Supprime les espaces en début et fin de chaque ligne
             .filter(line => line.length > 0); // Ignore les lignes vides
