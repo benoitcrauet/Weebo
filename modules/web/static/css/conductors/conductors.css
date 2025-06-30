@@ -259,7 +259,7 @@ body:not(.edit-mode) .cond-line[data-highlight=true] .cond-line-display:has(.con
 }
 
 
-#editLineFormModal, #editMediaFormModal, #vdoModal, #previewModal, #viewerModal {
+#editLineFormModal, #editMediaFormModal, #vdoModal, #previewModal, #viewerModal, #markerModal {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     -moz-backdrop-filter: blur(10px);
@@ -271,6 +271,12 @@ body:not(.edit-mode) .cond-line[data-highlight=true] .cond-line-display:has(.con
 @media screen and (max-width: 1000px) {
     .toolbar-button-label {
         display: none;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    #toolsbar-title {
+        display: none !important;
     }
 }
 

@@ -1,0 +1,47 @@
+<!-- Marker modal -->
+<div class="modal fade" id="markerModal" tabindex="-1" aria-labelledby="markerModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <form id="formMarker">
+
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="markerModalTitle">Créer un marqueur</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <p>
+                        Si vous souhaitez notifier ce moment dans les évènements de l'émission, créez un marqueur immédiatement !<br>
+                        Vous pouvez lier une courte description à votre marqueur si vous le souhaitez, pour faciliter la recherche.
+                    </p>
+
+                    <div class="container-fluid">
+
+                        <div class="row mb-3">
+                            <label class="col-form-label col-sm-3" for="hDescription">
+                                <b>Description</b>
+                            </label>
+                            <div class="col-9">
+                                <input type="text" id="hDescription" name="description" class="form-control">
+                                <span class="form-text">
+                                    Pour plus de clarté, vous pouvez écrire une brève description à votre marqueur, en quelques mots.
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="reset" id="hCancel" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="hSubmit">
+                        Créer un marqueur
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>

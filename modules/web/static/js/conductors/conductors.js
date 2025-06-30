@@ -8,6 +8,9 @@ const modalMediaQuery = "#editMediaFormModal";
 // QUery représentant le titre du modal d'édition des médias
 const modalMediaTitleQuery = "#editMediaFormModalTitle";
 
+// Query représentant le modal du formulaire d'édition des médias
+const modalMarkerQuery = "#markerModal";
+
 // Query représentant le tableau triable des conducteurs
 const conductorTableQuery = "#cond-main-table";
 // Query représentant le dragger des lignes de conducteurs
@@ -266,7 +269,6 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
 
         let data = await mediaGet(id)
         try {
-            console.log(data);
             mediaModalType.value = data.type;
             mediaModalName.value = data.name;
             mediaModalSource.value = data.source;
@@ -330,6 +332,24 @@ async function openMediaEditor(line, id=null, type=null, name=null, source=null,
     // On réactive le submit
     mediaModalSubmit.disabled = false;
     mediaModalCancel.disabled = false;
+}
+
+
+
+
+
+const formMarker = document.getElementById("formMarker");
+
+const markerModalDescription = document.getElementById("hDescription");
+
+const markerModalSubmit = document.getElementById("hSubmit");
+const markerModalCancel = document.getElementById("hCancel");
+/**
+ * Ouvre une modale de création de marqueur
+ */
+async function openMarkerEditor() {
+    // On affiche le modal du marqueur
+    markerModal.show();
 }
 
 
@@ -930,6 +950,43 @@ function lineSendEdit(id, type=null, name=null, text=null, done=null, order=null
         })
         .catch(error => {
             console.error('Erreur lors de la mise à jour du conducteur :', error);
+        });
+}
+
+
+
+/**
+ * Permet d'enregistrer une nouvelle marque sur l'émission en cours
+ */
+function newMark(description) {
+    let data = {};
+    data.description = description;
+    
+    // Options de la requête
+    var options = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    };
+
+    // URL de l'API
+    var url = "/api/show/"+currentShowID+"/mark";
+    
+    // Effectue la requête PATCH
+    fetch(url, options)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Erreur lors de la requête POST");
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("New data for "+id, data)
+        })
+        .catch(error => {
+            console.error("Erreur lors de l'enregistrement de la nouvelle marque", error);
         });
 }
 
@@ -1728,6 +1785,23 @@ formEditMedia.addEventListener("submit", function(e) {
         });
 });
 
+formMarker.addEventListener("submit", function(e) {
+    // On bloque le comportement par défaut du formulaire
+    e.preventDefault();
+
+    // On récupère la description
+    let description = markerModalDescription.value;
+    
+    // On envoie le marqueur au back-end
+    newMark(description);
+
+    // On efface le champ description
+    markerModalDescription.value = "";
+
+    // On ferme le modal
+    markerModal.hide();
+});
+
 
 // Au chargement...
 $(function() {
@@ -1737,8 +1811,19 @@ $(function() {
     // On instancie la modale du formulaire de médias
     mediaModal = new bootstrap.Modal(modalMediaQuery);
 
+    // On instancie la modale du formulaire de médias
+    markerModal = new bootstrap.Modal(modalMarkerQuery);
+
     // On récupère l'instance du toast générique
     genericToast = bootstrap.Toast.getOrCreateInstance(document.querySelector(genericToastQuery));
+
+
+
+    // Lors de l'affichage de markerModal...
+    document.querySelector(modalMarkerQuery).addEventListener("shown.bs.modal", () => {
+        markerModalDescription.value = "";
+        markerModalDescription.focus();
+    });
 
 
 

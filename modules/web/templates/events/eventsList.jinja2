@@ -19,44 +19,50 @@
         <p class="lead">Visionnez ici les différents évènements pour l'émission "{{ show.name }}".</p>
 
         <div id="filtersType" class="filter-group">
-            <div class="row">
+            <div class="row equal-width">
                 <h3>Types d'évènements</h3>
             </div>
             <div class="row">
-                <div class="col-2">
+                <div class="col">
                     <label>
                         <input type="checkbox" checked class="form-check-input" data-pattern="streaming\..+">
                         Streaming
                     </label>
                 </div>
-                <div class="col-2">
+                <div class="col">
                     <label>
                         <input type="checkbox" checked class="form-check-input" data-pattern="recording\..+">
                         Recording
                     </label>
                 </div>
-                <div class="col-2">
+                <div class="col">
                     <label>
                         <input type="checkbox" checked class="form-check-input" data-pattern="jingle\..+">
                         Jingles
                     </label>
                 </div>
-                <div class="col-2">
+                <div class="col">
                     <label>
                         <input type="checkbox" class="form-check-input" data-pattern="(media|web)\..+">
                         Médias
                     </label>
                 </div>
-                <div class="col-2">
+                <div class="col">
                     <label>
                         <input type="checkbox" class="form-check-input" data-pattern="scene\..+">
                         Scènes
                     </label>
                 </div>
-                <div class="col-2">
+                <div class="col">
                     <label>
                         <input type="checkbox" class="form-check-input" data-pattern="line\..+">
                         Lignes
+                    </label>
+                </div>
+                <div class="col">
+                    <label>
+                        <input type="checkbox" checked class="form-check-input" data-pattern="marker\..+">
+                        Marqueurs
                     </label>
                 </div>
             </div>
@@ -111,6 +117,9 @@
                                     {% set icon = "check-square-fill" %}
                                 {% elif e.type == "line.undone" %}
                                     {% set icon = "square" %}
+                                
+                                {% elif e.type == "marker.set" %}
+                                    {% set icon = "bookmark-fill" %}
                                 
                                 {% else %}
                                     {% set icon = "list-task"%}
@@ -250,6 +259,12 @@
         .event-item[data-type="scene.change"] .event-item-display {
             background-color: yellow;
             color: black;
+        }
+
+        .event-item[data-type="marker.set"] .event-item-display {
+            background-color: red;
+            color: white;
+            font-weight: bolder;
         }
 
         .event-item[data-type="media.start"] .event-item-description,

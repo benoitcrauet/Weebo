@@ -343,7 +343,7 @@ class Event(Base):
     
     @tagObject.setter
     def tagObject(self, value):
-        if type(value)=="dict":
+        if isinstance(value, dict):
             self.tag = json.dumps(value)
         else:
             self.tag = value

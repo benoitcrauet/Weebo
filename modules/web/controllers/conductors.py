@@ -2,7 +2,7 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
 from flask_wtf import FlaskForm
 from flask_cors import CORS
-from flask_login import login_required
+from flask_login import login_required, current_user
 import wtforms
 import wtforms.validators as validators
 from datetime import datetime, timedelta
@@ -495,6 +495,48 @@ def api_conductorsLineGet(line_guid):
     
     # On renvoie la ligne
     return jsonify(model_to_dict(line))
+
+
+@bp.route("/api/show/<string:show_guid>/mark", methods=["POST"])
+@login_required
+def api_conductorsSetMarker(show_guid):
+    # On check si la ligne existe
+    show = session.query(Show).filter(Show.id == show_guid).first()
+    if not show:
+        abort(404)
+    
+    if request.is_json:
+        data = request.json
+
+        if "description" in data:
+
+            description = data["description"]
+
+            eventDesc = f"Generic marker by {current_user.firstname} {current_user.lastname}.";
+            if(description.strip() != ""):
+                eventDesc = f"Marker by {current_user.firstname} {current_user.lastname}: \"{description.strip()}\"."
+            
+
+
+            # On crée l'évènement, on l'ajoute et on applique les modifications
+            newEvent = createNewEvent(show.id, "marker.set", eventDesc, {
+                "description": description,
+                "author": {
+                    "username": current_user.username,
+                    "firstname": current_user.firstname,
+                    "lastname": current_user.lastname
+                }
+            })
+            session.add(newEvent)
+            session.commit()
+            
+            # On renvoie la ligne
+            return jsonify(model_to_dict(newEvent))
+
+        else:
+            abort(422, description="Clés requises : description.")
+    else:
+        abort(400, description="La requête doit-être une requête JSON.")
 
 
 

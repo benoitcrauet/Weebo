@@ -19,6 +19,7 @@ const autoCheckTypes = [
     "streaming.start",
     "streaming.stop",
     "jingle.start",
+    "marker.set"
 ];
 
 // Mode de recalcul depuis la première scène rencontrée (intro)

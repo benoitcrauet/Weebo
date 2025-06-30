@@ -78,6 +78,7 @@
         {% include 'conductors/conductorView/toasts.jinja2' %}
         {% include 'conductors/conductorView/modals/editLine.jinja2' %}
         {% include 'conductors/conductorView/modals/editMedia.jinja2' %}
+        {% include 'conductors/conductorView/modals/mark.jinja2' %}
         {% include 'conductors/conductorView/modals/preview.jinja2' %}
         {% include 'conductors/conductorView/modals/viewer.jinja2' %}
         {% if conductor.vdoEnable %}
@@ -86,6 +87,10 @@
     </div>
 
     <script>
+        const userFirstname = {{ current_user.firstname | tojson }};
+        const userLastname = {{ current_user.lastname | tojson }};
+        const userLogin = {{ current_user.username | tojson }};
+
         const conductorType = "{{ conductor.type }}";
 
         let currentMedia = "{{ conductor.currentMedia }}";
