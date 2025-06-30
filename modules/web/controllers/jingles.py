@@ -278,7 +278,7 @@ def api_jingleLaunch(guid):
 
 
     # On crée un nouvel évènement
-    newEvent = createNewEvent(show.id, "jingle.start", "{}".format(media.name))
+    newEvent = createNewEvent(show.id, "jingle.start", "{}".format(media.name), model_to_dict(media))
     session.add(newEvent)
 
     # On met à jour la DB

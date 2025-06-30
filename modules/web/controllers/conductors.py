@@ -674,9 +674,9 @@ def api_conductorsLineEdit(line_guid):
         # On crée l'évènement si l'état "done" est différent
         if line.type=="classic" and line.done != oldDone:
             if line.done:
-                newEvent = createNewEvent(show_id, "line.done", "Line \"{}\" is done.".format(line.name))
+                newEvent = createNewEvent(show_id, "line.done", "Line \"{}\" is done.".format(line.name), model_to_dict(line))
             else:
-                newEvent = createNewEvent(show_id, "line.undone", "Line \"{}\" is undone.".format(line.name))
+                newEvent = createNewEvent(show_id, "line.undone", "Line \"{}\" is undone.".format(line.name), model_to_dict(line))
             # On ajoute l'évènement à la base
             session.add(newEvent)
         
@@ -1197,9 +1197,9 @@ def mediaBroadcast(cond_guid, media_guid):
 
         # On crée un nouvel évènement
         if media.type=="media":
-            newEvent = createNewEvent(conductor.show_id, "media.start", "Starting media \"{}\"".format(media.name))
+            newEvent = createNewEvent(conductor.show_id, "media.start", "Starting media \"{}\"".format(media.name), model_to_dict(media))
         elif media.type=="web":
-            newEvent = createNewEvent(conductor.show_id, "web.start", "Displaying web page \"{}\"".format(media.name))
+            newEvent = createNewEvent(conductor.show_id, "web.start", "Displaying web page \"{}\"".format(media.name), model_to_dict(media))
         
         session.add(newEvent)
 
@@ -1259,9 +1259,9 @@ def mediaStop(cond_guid, media_guid):
 
     # On crée un nouvel évènement
     if media.type=="media":
-        newEvent = createNewEvent(conductor.show_id, "media.stop", "Stopping media \"{}\"".format(media.name))
+        newEvent = createNewEvent(conductor.show_id, "media.stop", "Stopping media \"{}\"".format(media.name), model_to_dict(media))
     elif media.type=="web":
-        newEvent = createNewEvent(conductor.show_id, "web.stop", "Stopping web page \"{}\"".format(media.name))
+        newEvent = createNewEvent(conductor.show_id, "web.stop", "Stopping web page \"{}\"".format(media.name), model_to_dict(media))
     
     session.add(newEvent)
 

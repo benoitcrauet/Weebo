@@ -1,22 +1,16 @@
 import os
-from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify, flash
+from flask import Blueprint, render_template, request, redirect, url_for, abort, flash
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileAllowed
 from flask_cors import CORS
 from flask_login import login_required, logout_user, login_user, current_user
 import wtforms
 import wtforms.validators as validators
-import json
 from urllib.parse import urlparse
 
 from lib.socketio import SocketIOInstance
 from lib.db import session
 from lib.models import User
-from lib.guid import generate_guid
-from lib.config import config
-from lib.dict import model_to_dict
-from lib.events import createNewEvent
-from lib.users import for_admins, guest_required
+from lib.users import for_admins
 from lib.password import verify_password
 
 bp = Blueprint(os.path.splitext(os.path.basename(__file__))[0], __name__)

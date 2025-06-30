@@ -104,7 +104,7 @@ def setStatus(show_guid):
                         # On crée le nouvel évènement
                         eventType = "streaming.{}".format("start" if data["streaming"] else "stop")
                         eventDesc = "{} streaming".format("Start" if data["streaming"] else "Stop")
-                        newEvent = createNewEvent(show.id, eventType, eventDesc, {})
+                        newEvent = (show.id, eventType, eventDesc, {})
 
                         session.add(newEvent)
 
