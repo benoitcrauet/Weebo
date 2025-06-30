@@ -79,7 +79,7 @@ def setStatus(show_guid):
                         # On crée le nouvel évènement
                         eventType = "recording.{}".format("start" if data["recording"] else "stop")
                         eventDesc = "{} recording".format("Start" if data["recording"] else "Stop")
-                        newEvent = createNewEvent(show.id, eventType, eventDesc)
+                        newEvent = createNewEvent(show.id, eventType, eventDesc, {})
 
                         session.add(newEvent)
 
@@ -104,7 +104,7 @@ def setStatus(show_guid):
                         # On crée le nouvel évènement
                         eventType = "streaming.{}".format("start" if data["streaming"] else "stop")
                         eventDesc = "{} streaming".format("Start" if data["streaming"] else "Stop")
-                        newEvent = createNewEvent(show.id, eventType, eventDesc)
+                        newEvent = createNewEvent(show.id, eventType, eventDesc, {})
 
                         session.add(newEvent)
 
@@ -113,7 +113,9 @@ def setStatus(show_guid):
                 
                 elif "currentScene" in data and isinstance(data["currentScene"], str):
                     # On crée l'évènement
-                    newEvent = createNewEvent(show.id, "scene.change", "Switching to scene \"{}\"".format(data["currentScene"]))
+                    newEvent = createNewEvent(show.id, "scene.change", "Switching to scene \"{}\"".format(data["currentScene"]), {
+                        "scene": data["currentScene"]
+                    })
                     session.add(newEvent)
 
                 

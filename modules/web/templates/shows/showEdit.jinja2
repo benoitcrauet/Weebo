@@ -78,6 +78,14 @@
                 {% endif %}
 
                 <div class="mb-3 row">
+                    {{ form.introScenes.label(class="col-form-label col-sm-3") }}
+                    <div class="col-sm-9">
+                        {{ form.introScenes(class="form-control", rows=4) }}
+                        {% if form.introScenes.description %}<div class="form-text">{{ form.introScenes.description }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-3 row">
                     {{ form.roles.label(class="col-form-label col-sm-3") }}
                     <div class="col-sm-9">
                         {{ form.roles(class="form-control", rows=10) }}

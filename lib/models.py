@@ -10,6 +10,8 @@ from lib.guid import generate_guid
 from lib.config import config
 from lib.password import generate_password
 
+import json
+
 
 class User(UserMixin, Base):
     __tablename__ = "Users"
@@ -57,6 +59,7 @@ class Show(Base):
     description = Column(String)
     roles = Column(String)
     logo = Column(String)
+    introScenes = Column(String)
 
     tagsNotes = Column(String)
     tagName1 = Column(String)
@@ -323,9 +326,27 @@ class Event(Base):
     date = Column(DateTime)
     description = Column(String)
     type = Column(String)
+    tag = Column(String)
 
     show_id = Column(String, ForeignKey("Shows.id"), nullable=True)
     show = relationship("Show", back_populates="events")
+
+    @property
+    def tagObject(self):
+        if self.tag==None:
+            return None
+        try:
+            obj = json.loads(self.tag)
+            return obj
+        except:
+            return None
+    
+    @tagObject.setter
+    def tagObject(self, value):
+        if type(value)=="dict":
+            self.tag = json.dumps(value)
+        else:
+            self.tag = value
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -44,6 +44,7 @@ class FormShowEdit(FlaskForm):
     description = wtforms.StringField("Description", description="Une simple description, juste pour vous, pour vous y retrouver.", validators=[], render_kw={"maxlength": 150})
     logo = wtforms.FileField("Logo", description="Permet d'associer un logo à l'émission.", validators=[FileAllowed(["jpg","jpeg","png","webp"])])
     logo_delete = wtforms.BooleanField("Supprimer le logo actuel")
+    introScenes = wtforms.TextAreaField("Scènes d'intro", description="Vous pouvez écrire ici les noms des scènes d'introduction de votre émission (une par ligne). Ceci aide Weebo à comprendre quand votre émission commence réellement pour calculer les timecodes de votre direct.", validators=[])
     roles = wtforms.TextAreaField("Rôles", description="Définissez les différents rôles pour votre émission. Chaque rôle correspond à une caméra. N'inscrivez qu'un seul rôle par ligne.", validators=[])
 
     videoWidth = wtforms.IntegerField("Largeur", description="Largeur en pixels des vidéos transcodées pour cette émission.", validators=[validators.DataRequired(), validators.NumberRange(min=300, max=3840)])
@@ -99,6 +100,7 @@ def showEdit(guid=None):
         show.name = form.name.data
         show.description = form.description.data
         show.roles = roles
+        show.introScenes = form.introScenes.data
 
         show.videoWidth = form.videoWidth.data
         show.videoHeight = form.videoHeight.data

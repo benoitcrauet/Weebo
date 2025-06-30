@@ -6,12 +6,13 @@ from lib.db import session
 from lib.models import Event
 
 
-def createNewEvent(show_id, type, description):
+def createNewEvent(show_id, type, description, tagObject):
     # On crée le nouvel élément
     newEvent = Event()
     newEvent.show_id = show_id
     newEvent.type = type
     newEvent.description = description
+    newEvent.tagObject = tagObject
     newEvent.date = datetime.now()
 
     return newEvent

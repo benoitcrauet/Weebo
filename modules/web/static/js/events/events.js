@@ -73,6 +73,8 @@ function autoSelectLastBroadcast() {
         const id = element.dataset.id;
         // Le type
         const type = element.dataset.type;
+        // Le tag
+        const tag = getTag(element.dataset.tag, true);
 
         // Si c'est un début de stream...
         if(type=="streaming.start") {
@@ -93,11 +95,26 @@ function autoSelectLastBroadcast() {
         if(!streamingEnd) {
 
             if(streamingStart) {
-                if(!firstScene && type=="scene.change") {
-                    // C'est un changement de scène : on coche le premier uniquement
-                    idList.push(id);
+                if(firstScene!==true && type=="scene.change") {
+                    // On récupère le nom de scène
+                    const newScene = (typeof tag == "object" && tag.scene!==undefined) ? tag.scene : null;
 
-                    firstScene = true;
+                    // On défini si oui ou non cette scène est la première
+                    let isFirstScene = false;
+
+                    if(introScenes.length > 0) {
+                        if(!introScenes.includes(newScene))
+                            isFirstScene = true;
+                    }
+                    else
+                        isFirstScene = true;
+
+                    if(isFirstScene) {
+                        // C'est un changement de scène : on coche le premier uniquement
+                        idList.push(id);
+
+                        firstScene = true;
+                    }
                 }
             }
 
@@ -250,6 +267,23 @@ function timecodeToText(timecodes) {
     return output;
 }
 
+
+
+/**
+ * Fonction permettant de retourner un tag sous forme de tableau ou de string
+ */
+function getTag(tag, forceObject = false) {
+    try {
+        // Tenter de parser la chaîne JSON
+        const obj = JSON.parse(tag);
+        return obj;
+    } catch (e) {
+        if(forceObject===true)
+            return null;
+        else
+            return tag;
+    }
+}
 
 
 
