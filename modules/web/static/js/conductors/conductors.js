@@ -576,6 +576,8 @@ async function refreshAllConductor(callback=null) {
                 // On enregistre les eventListeners
                 lineElementsRegisterEventListeners(elements);
             }
+
+            restoreSectionCollapseStates();
         })
         .catch(error => {
             console.error('Erreur lors de la récupération du conducteur :', error);
@@ -651,12 +653,14 @@ function lineElementsRegisterEventListeners(elements) {
     });
 
     // Évènement quand on clique sur le bouton d'ajout de médias
-    if(activateMedias) {
+    if(activateMedias && elements.dataset.type !== "section") {
         const mediasInsert = elements.querySelector(".cond-medias-adder-link");
-        mediasInsert.addEventListener("click", function(e) {
-            e.preventDefault();
-            openMediaEditor(lineID);
-        });
+        if(mediasInsert) {
+            mediasInsert.addEventListener("click", function(e) {
+                e.preventDefault();
+                openMediaEditor(lineID);
+            });
+        }
     }
 
     // Évènement quand on clique sur le bouton de lancement du jingle
@@ -671,7 +675,16 @@ function lineElementsRegisterEventListeners(elements) {
             jingleBroadcast(jingleID);
     })
 
-
+    // Évènement quand on clique sur le bouton de repli de rubrique
+    const sectionToggle = elements.querySelector(".cond-section-toggle");
+    if(sectionToggle) {
+        sectionToggle.addEventListener("click", function(e) {
+            e.preventDefault();
+            const sectionID = this.dataset.sectionId;
+            if(!sectionID) return;
+            toggleSectionCollapse(sectionID);
+        });
+    }
 
     // On rend les médias de la ligne draggables
     $(elements).find(conductorMediasTableQuery).sortable({
@@ -687,6 +700,103 @@ function lineElementsRegisterEventListeners(elements) {
             mediasSendReorder(lineID, calculateMediasOrder(lineID));
         }
     });
+}
+
+function conductorSectionStorageKey() {
+    return "weebo_conductor_collapsed_sections_" + (currentConductorID || "");
+}
+
+function getCollapsedSections() {
+    try {
+        const raw = window.localStorage.getItem(conductorSectionStorageKey());
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveCollapsedSections(sections) {
+    try {
+        window.localStorage.setItem(conductorSectionStorageKey(), JSON.stringify(sections));
+    } catch (e) {
+        // ignore storage failures
+    }
+}
+
+function applySectionCollapsedState(sectionID, collapsed) {
+    const sectionLine = document.getElementById("cond-line-" + sectionID);
+    if(!sectionLine) return;
+
+    const sectionToggle = sectionLine.querySelector(".cond-section-toggle");
+    sectionLine.classList.toggle("cond-line-collapsed", collapsed);
+    if(sectionToggle) {
+        const icon = sectionToggle.querySelector("i");
+        if(icon) {
+            icon.classList.toggle("bi-caret-down-fill", !collapsed);
+            icon.classList.toggle("bi-caret-right-fill", collapsed);
+        }
+        sectionToggle.setAttribute("aria-expanded", String(!collapsed));
+    }
+
+    let nextLine = sectionLine.nextElementSibling;
+    while(nextLine) {
+        if(nextLine.classList && nextLine.classList.contains("cond-line")) {
+            if(nextLine.dataset.type === "section")
+                break;
+            nextLine.style.display = collapsed ? "none" : "";
+        }
+        nextLine = nextLine.nextElementSibling;
+    }
+}
+
+function restoreSectionCollapseStates() {
+    const collapsedSections = getCollapsedSections();
+    collapsedSections.forEach(sectionID => {
+        applySectionCollapsedState(sectionID, true);
+    });
+}
+
+function refreshSectionDisplayForEditMode() {
+    const editMode = document.body.classList.contains("edit-mode");
+    document.querySelectorAll(".cond-line[data-type=section]").forEach(sectionLine => {
+        let collapsed = sectionLine.classList.contains("cond-line-collapsed");
+        let nextLine = sectionLine.nextElementSibling;
+        while(nextLine) {
+            if(!nextLine.classList || !nextLine.classList.contains("cond-line")) break;
+            if(nextLine.dataset.type === "section") break;
+            nextLine.style.display = editMode ? "" : (collapsed ? "none" : "");
+            nextLine = nextLine.nextElementSibling;
+        }
+    });
+}
+
+function initEditModeSectionDisplayWatcher() {
+    const body = document.body;
+    if(!body) return;
+    const observer = new MutationObserver(mutations => {
+        for(const mutation of mutations) {
+            if(mutation.attributeName === "class") {
+                refreshSectionDisplayForEditMode();
+                break;
+            }
+        }
+    });
+    observer.observe(body, { attributes: true, attributeFilter: ["class"] });
+    refreshSectionDisplayForEditMode();
+}
+
+document.addEventListener("DOMContentLoaded", initEditModeSectionDisplayWatcher);
+
+function toggleSectionCollapse(sectionID) {
+    const collapsedSections = new Set(getCollapsedSections());
+    const currentlyCollapsed = collapsedSections.has(sectionID);
+    if(currentlyCollapsed)
+        collapsedSections.delete(sectionID);
+    else
+        collapsedSections.add(sectionID);
+
+    saveCollapsedSections(Array.from(collapsedSections));
+    applySectionCollapsedState(sectionID, !currentlyCollapsed);
 }
 
 /**

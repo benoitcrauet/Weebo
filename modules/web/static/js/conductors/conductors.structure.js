@@ -35,13 +35,35 @@ function lineStructure(integrateMedias=true) {
             i_tags.classList.add("cond-line-tags-icon");
             i_tags.setAttribute("title", "Cette ligne intègre des tags.");
 
-            td_done.append(checkbox_done, i_tags);
-        
+            button_toggle_section = document.createElement("button");
+            button_toggle_section.classList.add("cond-section-toggle");
+            button_toggle_section.setAttribute("type", "button");
+            button_toggle_section.setAttribute("title", "Replier/déplier cette rubrique");
+            button_toggle_section.style.display = "none";
+            button_toggle_section.setAttribute("aria-expanded", "true");
+
+            const icon_toggle_section = document.createElement("i");
+            icon_toggle_section.classList.add("bi", "bi-caret-down-fill");
+            button_toggle_section.append(icon_toggle_section);
+
+            const done_stack = document.createElement("div");
+            done_stack.classList.add("cond-line-done-stack");
+            done_stack.append(checkbox_done, i_tags);
+
+            const done_inner = document.createElement("div");
+            done_inner.classList.add("cond-line-done-inner");
+            done_inner.append(done_stack, button_toggle_section);
+
+            td_done.append(done_inner);
+
         td_content = document.createElement("td");
         td_content.classList.add("cond-line-content");
 
             h3_title = document.createElement("h3");
             h3_title.classList.add("cond-line-title");
+
+            span_title_text = document.createElement("span");
+            span_title_text.classList.add("cond-line-title-text");
 
             div_text = document.createElement("div");
             div_text.classList.add("cond-line-text");
@@ -51,12 +73,12 @@ function lineStructure(integrateMedias=true) {
 
             div_medias = document.createElement("div");
             div_medias.classList.add("cond-line-medias");
-            
             if(integrateMedias)
                 div_medias.append(mediasStructure());
 
+            h3_title.append(span_title_text);
             td_content.append(h3_title, div_text, div_desc, div_medias);
-        
+
         td_jingle = document.createElement("td");
         td_jingle.classList.add("cond-line-jingle");
         td_jingle.classList.add("text-center");
@@ -119,7 +141,7 @@ function lineStructure(integrateMedias=true) {
     tr_adder.classList.add("cond-insertion-adder");
 
         td_adder = document.createElement("td");
-        td_adder.setAttribute("colspan", "4");
+        td_adder.setAttribute("colspan", "5");
 
             a_adder = document.createElement("a");
             a_adder.classList.add("cond-insertion-adder-link");
@@ -295,25 +317,23 @@ function mediaLineStructure() {
             let progress = document.createElement("div");
             progress.classList.add("progress");
             progress.setAttribute("role", "progressbar");
+        progress.classList.add("cond-media-progress");
 
-                let progressBar = document.createElement("div");
-                progressBar.classList.add("progress-bar");
-                progressBar.classList.add("progress-bar-striped");
-                progressBar.classList.add("progress-bar-animated");
-                progressBar.classList.add("cond-media-progressbar");
-                progressBar.style.width = "0%";
+            let progressBar = document.createElement("div");
+            progressBar.classList.add("progress-bar");
+            progressBar.classList.add("progress-bar-striped");
+            progressBar.classList.add("progress-bar-animated");
+            progressBar.classList.add("cond-media-progressbar");
+            progressBar.style.width = "0%";
             
-            progress.append(progressBar)
+        progress.append(progressBar);
 
         td3.append(mediaName, progress);
-        
+
         let td4 = document.createElement("td");
         td4.classList.add("cond-medias-line-actions");
         td4.classList.add("text-end");
-
-
-            let actionsContainer = document.createElement("div");
-            actionsContainer.classList.add("actions-container");
+        td4.classList.add("vertical-align-middle");
 
                 let btnEdit = document.createElement("a");
                 btnEdit.classList.add("cond-medias-line-action-edit");
@@ -342,6 +362,9 @@ function mediaLineStructure() {
                     iDelete.classList.add("bi-trash3-fill");
 
                 btnDelete.append(iDelete);
+
+                let actionsContainer = document.createElement("div");
+                actionsContainer.classList.add("actions-container");
 
                 let btnCopy = document.createElement("a");
                 btnCopy.classList.add("cond-medias-line-action-copy");
@@ -436,7 +459,18 @@ function lineSetDatas(element, line) {
     element.dataset.hasTag = tag1!="" || tag2!="" || tag3!="" || tag4!="";
 
     // On édite le nom de la ligne
-    element.querySelector(".cond-line-title").innerText = name;
+    element.querySelector(".cond-line-title-text").innerText = name;
+
+    const sectionToggle = element.querySelector(".cond-section-toggle");
+    if(type=="section") {
+        sectionToggle.style.display = "inline-block";
+        sectionToggle.dataset.sectionId = id;
+        sectionToggle.setAttribute("aria-expanded", "true");
+    } else {
+        sectionToggle.style.display = "none";
+        sectionToggle.removeAttribute("data-section-id");
+        sectionToggle.removeAttribute("aria-expanded");
+    }
 
     // On édite le contenu de la ligne
     element.querySelector(".cond-line-text").innerHTML = nl2br(parseMarkdown(htmlspecialchars(text)));
@@ -514,8 +548,21 @@ function mediaLineSetDatas(element, media) {
     // On édite le nom
     element.querySelector(".cond-media-name-text").innerText = name;
 
-    // On édite la progression
-    element.querySelector(".cond-media-progressbar").style.width = Math.max(0, progress) + "%";
+    // On affiche la progressbar seulement pour les médias vidéo
+    const mediaProgress = element.querySelector(".cond-media-progress");
+    const mediaSpinner = element.querySelector(".cond-media-convert-spinner");
+    const isProcessingMedia = type === "media" && progress < 100;
+
+    if(type === "media") {
+        element.querySelector(".cond-media-progressbar").style.width = Math.max(0, progress) + "%";
+        mediaProgress.style.display = "block";
+    } else {
+        mediaProgress.style.display = "none";
+    }
+
+    if(mediaSpinner) {
+        mediaSpinner.style.display = isProcessingMedia ? "inline-block" : "none";
+    }
 
     // On édite la source
     element.querySelector(".cond-medias-line-credits").innerText = source;
