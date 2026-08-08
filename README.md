@@ -10,19 +10,19 @@ Weebo est une application web de gestion de conducteurs de production audio/vid�
 
 ## Installation
 
-1. Copier le fichier de configuration d'exemple :
+1. Copiez le fichier de configuration d'exemple :
 
 ```bash
 cp config.sample.yaml config.yaml
 ```
 
-2. Installer les dépendances :
+2. Installez les dépendances :
 
 ```bash
 python3 -m pip install -r requirements.txt
 ```
 
-3. Configurer `app.env` si nécessaire.
+3. Configurez `app.env` si nécessaire.
 
 ## Lancement de l'application
 
@@ -66,9 +66,9 @@ L'application expose des options CLI pour gérer la base de données et les comp
 
 ## Tester localement
 
-1. Copier la configuration et installer les dépendances comme ci-dessus.
-2. Lancer `python3 main.py`.
-3. Ouvrir le navigateur sur l'URL affichée par l'application (par défaut, Flask affichera l'hôte et le port).
+1. Copiez la configuration et installez les dépendances comme ci-dessus.
+2. Lancez `python3 main.py`.
+3. Ouvrez le navigateur sur l'URL affichée par l'application (par défaut, Flask affichera l'hôte et le port).
 
 ## Exécuter comme service
 
@@ -148,5 +148,5 @@ launchctl start com.weebo.weebo
 ## Notes
 
 - Le service démarre `main.py`, qui lance les modules web, vidéo et cleaner dans des threads.
-- Assure-toi que `config.yaml` est valide et accessible depuis le répertoire de travail.
-- Si l'application doit être utilisée en production, préfère déployer derrière un reverse proxy sécurisé.
+- Assurez-vous que `config.yaml` est valide et accessible depuis le répertoire de travail.
+- Si l'application doit être utilisée en production, préférez déployer derrière un reverse proxy sécurisé.
