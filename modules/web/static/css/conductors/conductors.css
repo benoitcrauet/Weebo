@@ -348,10 +348,14 @@ body.edit-mode .cond-line[data-type=section].cond-line-collapsed .cond-line-disp
         display: none;
     }
 
-.cond-line[data-jingle=false] .cond-line-jingle-start-button {
+.cond-line[data-jingle=false] .cond-line-jingle-start-button,
+.cond-line[data-jingle=false] .cond-line-jingle-start-button-alt {
     display: none;
 }
 
+body.edit-mode .cond-line-jingle-start-button-alt {
+    display: none !important;
+}
 
 .cond-line[data-highlight=true] td {
     background: white;

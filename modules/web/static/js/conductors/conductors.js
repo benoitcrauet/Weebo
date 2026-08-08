@@ -627,7 +627,12 @@ function lineElementsRegisterEventListeners(elements) {
     lineDone.addEventListener("click", function(e) {
         e.preventDefault();
 
-        lineSendEdit(lineID, null, null, null, e.target.checked, null);
+        const checked = e.target.checked;
+        if(shiftPressed) {
+            applyDoneToSection(elements, checked);
+        } else {
+            lineSendEdit(lineID, null, null, null, checked, null);
+        }
     });
 
     // Évènement quand on clique sur un bouton d'insertion
@@ -671,9 +676,28 @@ function lineElementsRegisterEventListeners(elements) {
         const jingleID = this.dataset.jingle;
 
         // On envoie une requête de lancement de jingle au serveur
-        if(shiftPressed || confirm("Êtes-vous sûr de vouloir lancer ce jingle ?"))
+        if(confirm("Êtes-vous sûr de vouloir lancer ce jingle ?"))
             jingleBroadcast(jingleID);
-    })
+    });
+
+    // Évènement quand on clique sur le bouton de lancement du jingle + cocher tout
+    const jingleButtonCheck = elements.querySelector(".cond-line-jingle-start-button-alt");
+    if(jingleButtonCheck) {
+        jingleButtonCheck.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            const jingleID = this.dataset.jingle;
+            const lineElement = this.closest(".cond-line");
+            const confirmationMessage = "Êtes-vous sûr de vouloir lancer ce jingle et marquer toutes les lignes précédentes comme faites ?";
+
+            if(shiftPressed || confirm(confirmationMessage)) {
+                if(lineElement) {
+                    checkPreviousLines(lineElement);
+                }
+                jingleBroadcast(jingleID);
+            }
+        });
+    }
 
     // Évènement quand on clique sur le bouton de repli de rubrique
     const sectionToggle = elements.querySelector(".cond-section-toggle");
@@ -786,6 +810,77 @@ function initEditModeSectionDisplayWatcher() {
 }
 
 document.addEventListener("DOMContentLoaded", initEditModeSectionDisplayWatcher);
+
+function checkPreviousLines(lineElement) {
+    const currentOrder = parseInt(lineElement.dataset.order, 10);
+    if(isNaN(currentOrder)) return;
+
+    document.querySelectorAll(".cond-line").forEach(line => {
+        const order = parseInt(line.dataset.order, 10);
+        if(!isNaN(order) && order < currentOrder) {
+            const checkbox = line.querySelector(".cond-line-done-checkbox");
+            if(checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+                const lineID = line.dataset.id;
+                if(lineID) {
+                    lineSendEdit(lineID, null, null, null, true, null);
+                }
+            }
+        }
+    });
+}
+
+function applyDoneToSection(lineElement, checked) {
+    const targetOrder = parseInt(lineElement.dataset.order, 10);
+    if(isNaN(targetOrder)) return;
+
+    const lines = Array.from(document.querySelectorAll(".cond-line")).sort((a, b) => {
+        const aOrder = parseInt(a.dataset.order, 10);
+        const bOrder = parseInt(b.dataset.order, 10);
+        return aOrder - bOrder;
+    });
+
+    const targetIndex = lines.findIndex(line => parseInt(line.dataset.order, 10) === targetOrder);
+    if(targetIndex === -1) return;
+
+    let startIndex = 0;
+    let endIndex = lines.length;
+
+    if(lineElement.dataset.type === "section") {
+        startIndex = targetIndex;
+        for(let i = targetIndex + 1; i < lines.length; i++) {
+            if(lines[i].dataset.type === "section") {
+                endIndex = i;
+                break;
+            }
+        }
+    } else {
+        for(let i = targetIndex - 1; i >= 0; i--) {
+            if(lines[i].dataset.type === "section") {
+                startIndex = i;
+                break;
+            }
+        }
+        for(let i = targetIndex + 1; i < lines.length; i++) {
+            if(lines[i].dataset.type === "section") {
+                endIndex = i;
+                break;
+            }
+        }
+    }
+
+    const linesToUpdate = lines.slice(startIndex, endIndex);
+    linesToUpdate.forEach(line => {
+        const checkbox = line.querySelector(".cond-line-done-checkbox");
+        if(checkbox) {
+            checkbox.checked = checked;
+            const lineID = line.dataset.id;
+            if(lineID) {
+                lineSendEdit(lineID, null, null, null, checked, null);
+            }
+        }
+    });
+}
 
 function toggleSectionCollapse(sectionID) {
     const collapsedSections = new Set(getCollapsedSections());

@@ -96,7 +96,20 @@ function lineStructure(integrateMedias=true) {
 
                 button_jingle.append(i_jingle);
 
-            td_jingle.append(button_jingle);
+            const button_jingle_check = document.createElement("a");
+            button_jingle_check.setAttribute("href", "#");
+            button_jingle_check.classList.add("cond-line-jingle-start-button-alt");
+            button_jingle_check.classList.add("btn");
+            button_jingle_check.classList.add("btn-warning");
+            button_jingle_check.setAttribute("title", "Lancer le jingle et cocher toutes les lignes précédentes")
+
+                const i_jingle_check = document.createElement("i");
+                i_jingle_check.classList.add("bi");
+                i_jingle_check.classList.add("bi-easel-fill");
+
+                button_jingle_check.append(i_jingle_check);
+
+            td_jingle.append(button_jingle, button_jingle_check);
 
         td_actions = document.createElement("td");
         td_actions.classList.add("cond-line-actions");
@@ -490,8 +503,22 @@ function lineSetDatas(element, line) {
     // On édite la checkbox
     element.querySelector(".cond-line-done-checkbox").checked = done;
 
-    // On envoie le jingle dans le bouton jingle
-    element.querySelector(".cond-line-jingle-start-button").dataset.jingle = jingle;
+    // On gère l'affichage des boutons de jingle
+    const jingleButton = element.querySelector(".cond-line-jingle-start-button");
+    const jingleButtonCheck = element.querySelector(".cond-line-jingle-start-button-alt");
+    if(jingle) {
+        jingleButton.dataset.jingle = jingle;
+        jingleButton.style.display = "";
+        if(jingleButtonCheck) {
+            jingleButtonCheck.dataset.jingle = jingle;
+            jingleButtonCheck.style.display = document.body.classList.contains("edit-mode") ? "none" : "";
+        }
+    } else {
+        jingleButton.style.display = "none";
+        if(jingleButtonCheck) {
+            jingleButtonCheck.style.display = "none";
+        }
+    }
 }
 
 
