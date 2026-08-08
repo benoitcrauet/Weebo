@@ -1,12 +1,13 @@
 import time
 import os
 import sys
+from datetime import datetime, timedelta
 from colorama import Fore, Back, Style
 
 from lib.config import config
 from lib.file import clean_media_dir
 from lib.db import session
-from lib.models import User
+from lib.models import User, Show, MediaChannel, WebChannel, Conductor, Line, Media, Event
 from lib.password import generate_password
 
 
@@ -216,4 +217,211 @@ def create_admin():
 
     else:
         print("❌ L'utilisateur admin existe déjà.")
+
+
+def generate_fake_data():
+    print("Génération des données factices de démonstration...")
+
+    existing = session.query(Show).filter(Show.name == "Émission de démonstration").first()
+    if existing:
+        print("Des données factices existent déjà. Aucun ajout effectué.")
+        return
+
+    today = datetime.now()
+
+    show = Show()
+    show.name = "Émission de démonstration"
+    show.description = "Une émission de démonstration avec des canaux, des conducteurs, des médias et des événements."
+    show.roles = "Présentateur\nInvité\nRéalisation"
+    show.tagsNotes = "Utilisez ces tags pour tester les conducteurs."
+    show.tagName1 = "Urgent"
+    show.tagName2 = "Jingle"
+    show.tagName3 = "Visuel"
+    show.tagName4 = "Interview"
+
+    media_channel_1 = MediaChannel(name="Écran principal", defaultEnable=True, show=show)
+    media_channel_2 = MediaChannel(name="Fond sonore", defaultEnable=False, show=show)
+    web_channel_1 = WebChannel(name="Page d'accueil", defaultEnable=True, show=show)
+    web_channel_2 = WebChannel(name="Statistiques", defaultEnable=False, show=show)
+
+    conductor = Conductor(
+        name="Conducteur de démonstration",
+        guests="Alice\nBob\nCharlie",
+        vdoEnable=True,
+        type="operational",
+        recording=False,
+        streaming=False,
+        year=today.year,
+        month=today.month,
+        day=today.day,
+        vdoPassword="demo1234",
+        show=show,
+    )
+
+    line_1 = Line(
+        name="Rubrique d'ouverture",
+        text="Bienvenue dans l'émission de démonstration.",
+        order=1,
+        done=False,
+        highlight=True,
+        type="section",
+        jingle="",
+        tag1="urgent",
+        conductor=conductor,
+    )
+    line_2 = Line(
+        name="Présentation de l'équipe",
+        text="Présentation des rôles et des intervenants du jour.",
+        order=2,
+        done=False,
+        highlight=False,
+        type="classic",
+        jingle="jingle_01",
+        tag2="présentation",
+        conductor=conductor,
+    )
+    line_3 = Line(
+        name="Transition vers l'interview",
+        text="Rubrique dédiée à l'arrivée de l'invité principal.",
+        order=3,
+        done=False,
+        highlight=True,
+        type="section",
+        jingle="",
+        conductor=conductor,
+    )
+    line_4 = Line(
+        name="Interview",
+        text="Entretien avec l'invité principal autour du thème du jour.",
+        order=4,
+        done=False,
+        highlight=False,
+        type="classic",
+        jingle="jingle_02",
+        tag2="interview",
+        conductor=conductor,
+    )
+    line_5 = Line(
+        name="Pause musicale",
+        text="Diffusion d'un extrait musical sélectionné pour l'émission.",
+        order=5,
+        done=False,
+        highlight=False,
+        type="classic",
+        jingle="jingle_03",
+        conductor=conductor,
+    )
+    line_6 = Line(
+        name="Rubrique finale",
+        text="Conclusion de l'émission et remerciements.",
+        order=6,
+        done=False,
+        highlight=True,
+        type="section",
+        jingle="",
+        conductor=conductor,
+    )
+    line_7 = Line(
+        name="Annonces et liens utiles",
+        text="Présentation des ressources et des prochains événements.",
+        order=7,
+        done=False,
+        highlight=False,
+        type="classic",
+        jingle="jingle_04",
+        conductor=conductor,
+    )
+
+    media_1 = Media(
+        order=1,
+        type="web",
+        name="Site de l'émission",
+        channel=web_channel_1.id,
+        path="",
+        tmb="",
+        source="https://example.com",
+        loop=False,
+        volume=1.0,
+        volumeAfterLoop=1.0,
+        line=line_2,
+        show=show,
+    )
+    media_2 = Media(
+        order=1,
+        type="media",
+        name="Vidéo de démonstration",
+        channel=media_channel_1.id,
+        path="demo.mp4",
+        tmb="demo.jpg",
+        source="",
+        loop=False,
+        volume=0.8,
+        volumeAfterLoop=0.8,
+        line=line_4,
+        show=show,
+    )
+    media_3 = Media(
+        order=2,
+        type="picture",
+        name="Image de couverture",
+        channel=media_channel_2.id,
+        path="demo.jpg",
+        tmb="demo_thumb.jpg",
+        source="",
+        loop=True,
+        volume=1.0,
+        volumeAfterLoop=1.0,
+        show=show,
+    )
+    media_4 = Media(
+        order=3,
+        type="web",
+        name="Liens de ressources",
+        channel=web_channel_2.id,
+        path="",
+        tmb="",
+        source="https://example.com/ressources",
+        loop=False,
+        volume=1.0,
+        volumeAfterLoop=1.0,
+        show=show,
+    )
+
+    event_1 = Event()
+    event_1.date = datetime.now()
+    event_1.description = "Début de l'émission"
+    event_1.type = "info"
+    event_1.tag = "{}"
+    event_1.show = show
+
+    event_2 = Event()
+    event_2.date = datetime.now() + timedelta(minutes=5)
+    event_2.description = "Interview lancée"
+    event_2.type = "marker"
+    event_2.tag = "{}"
+    event_2.show = show
+
+    session.add_all([
+        show,
+        media_channel_1,
+        media_channel_2,
+        web_channel_1,
+        web_channel_2,
+        conductor,
+        line_1,
+        line_2,
+        line_3,
+        media_1,
+        media_2,
+        media_3,
+        event_1,
+        event_2,
+    ])
+    session.commit()
+
+    print("✅ Données factices créées :")
+    print("  - émission de démonstration")
+    print("  - un conducteur avec des lignes et médias")
+    print("  - des canaux média et web")
+    print("  - des événements de démonstration")
 

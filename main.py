@@ -7,7 +7,7 @@ from colorama import Fore, Back, Style
 from lib.config import config
 from lib.welcome import welcome
 from lib.arguments import arguments
-from lib.console import reinit_database, reinit_user, create_admin
+from lib.console import reinit_database, reinit_user, create_admin, generate_fake_data
 
 def main():
 
@@ -32,6 +32,10 @@ def main():
 
     elif arguments.create_admin:
         create_admin()
+        exit(0)
+
+    elif arguments.generate_fake_data:
+        generate_fake_data()
         exit(0)
 
     # Pas de --reinit-database
