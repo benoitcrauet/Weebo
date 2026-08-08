@@ -37,6 +37,25 @@ python3 main.py
 - `config.yaml` doit exister dans le dossier racine.
 - `app.env` est lu automatiquement au démarrage.
 
+## Arguments de ligne de commande
+
+L'application expose des options CLI pour gérer la base de données et les comptes :
+
+- `python3 main.py --reinit-database`
+  - réinitialise totalement la base de données
+  - supprime le fichier SQLite et nettoie les répertoires `images`, `medias`, `tmp_medias`
+  - recrée les tables et génère un compte admin `admin`
+  - demande confirmation interactive avant d'agir
+
+- `python3 main.py --reinit-user <username>`
+  - réinitialise le mot de passe d'un utilisateur existant
+  - propose aussi d'activer le compte ou de le passer administrateur
+
+- `python3 main.py --create-admin`
+  - crée un compte admin si l'utilisateur `admin` n'existe pas encore
+
+> Ces commandes sont interactives et nécessitent une confirmation utilisateur.
+
 ## Structure rapide
 
 - `main.py` : point d'entrée principal qui démarre les modules `web`, `video` et `cleaner`.
