@@ -11,6 +11,7 @@ __pycache__/
 
 # Dossiers de virtualenv ou d'environnement virtuel
 venv/
+.venv/
 env/
 ENV/
 
