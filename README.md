@@ -54,7 +54,11 @@ L'application expose des options CLI pour gérer la base de données et les comp
 - `python3 main.py --create-admin`
   - crée un compte admin si l'utilisateur `admin` n'existe pas encore
 
-> Ces commandes sont interactives et nécessitent une confirmation utilisateur.
+- `python3 main.py --generate-fake-data`
+  - génère des données factices de démonstration dans la base
+  - crée une émission de démonstration, des canaux, un conducteur, des lignes, des médias et des événements
+
+> Les commandes de gestion sont interactives et nécessitent une confirmation utilisateur, sauf `--generate-fake-data`.
 
 ## Structure rapide
 
