@@ -1,8 +1,15 @@
-from moviepy.editor import VideoFileClip
-from proglog import ProgressBarLogger
+import json
 import math
 import os
+import shutil
+import struct
+import subprocess
 import time
+from io import BytesIO
+
+from PIL import Image
+from moviepy.editor import VideoFileClip
+from proglog import ProgressBarLogger
 
 from lib.picture import ResizeMaximal
 
@@ -19,14 +26,308 @@ class VideoLogger(ProgressBarLogger):
         for parameter, value in changes.items():
             # print(f'Parameter {parameter} is now {value}')
             pass
-    
+
     def bars_callback(self, bar, attr, value, old_value=None):
         # Appelé chaque fois que la progression du logger est mise à jour
         percentage = (value / self.bars[bar]['total']) * 100
-        
+
         if bar=="t" and attr=="index":
             self.prc = int(percentage)
             self.cbk(self.prc, self.lastUpdate)
+
+
+# ---------------------------------------------------------------------------
+# Détection automatique de la rotation (métadonnées d'orientation)
+# ---------------------------------------------------------------------------
+#
+# Les smartphones filment capteur en paysage et ajoutent un flag d'orientation :
+#   - vidéos récentes  : side_data "rotation" du flux vidéo (lisible via ffprobe).
+#     ATTENTION : ce champ utilise la convention OPPOSÉE au "sens horaire" ; un
+#     portrait iPhone y vaut -90 et demande une correction de +90° horaire.
+#     (Vérifié : l'auto-rotation ffmpeg de `rotation=-90` équivaut à
+#     `-vf transpose=1`, soit 90° dans le sens horaire.)
+#   - vidéos anciennes : tag QuickTime "rotate" (valeur positive = sens horaire).
+#   - sans ffprobe     : matrice d'affichage lue dans moov/trak/tkhd.
+#
+# detectRotation() renvoie TOUJOURS un angle normalisé "degrés à appliquer dans
+# le sens horaire pour redresser l'image" (0/90/180/270), cohérent avec le
+# paramètre `rotate` manuel de l'interface.
+
+
+def _quantizeAngle(angle):
+    """Ramène un angle quelconque au multiple de 90 le plus proche, dans [0, 360)."""
+    return (int(round(angle / 90.0)) * 90) % 360
+
+
+def _ffprobeExecutable():
+    """Chemin vers un binaire ffprobe utilisable, ou None."""
+    found = shutil.which("ffprobe")
+    if found:
+        return found
+    # ffprobe éventuellement fourni à côté du ffmpeg embarqué par imageio-ffmpeg
+    try:
+        import imageio_ffmpeg
+        ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        return None
+    candidate = ffmpeg.replace("ffmpeg", "ffprobe")
+    if candidate != ffmpeg and os.path.isfile(candidate):
+        return candidate
+    return None
+
+
+def _rotationFromFfprobe(path):
+    """Rotation (sens horaire, normalisée) lue via ffprobe, ou None."""
+    exe = _ffprobeExecutable()
+    if not exe:
+        return None
+    try:
+        proc = subprocess.run(
+            [
+                exe, "-v", "error",
+                "-select_streams", "v:0",
+                "-show_entries", "stream_side_data=rotation:stream_tags=rotate",
+                "-of", "json", path,
+            ],
+            capture_output=True, text=True, timeout=30,
+        )
+        payload = json.loads(proc.stdout or "{}")
+    except Exception:
+        return None
+
+    streams = payload.get("streams") or []
+    if not streams:
+        return None
+    stream = streams[0]
+
+    # 1. side_data "rotation" (prioritaire) — signe opposé à la convention horaire
+    for side_data in stream.get("side_data_list", []) or []:
+        if "rotation" in side_data:
+            try:
+                return _quantizeAngle(-float(side_data["rotation"]))
+            except (TypeError, ValueError):
+                pass
+
+    # 2. tag "rotate" hérité (valeur positive = sens horaire)
+    tags = stream.get("tags") or {}
+    if "rotate" in tags:
+        try:
+            return _quantizeAngle(float(tags["rotate"]))
+        except (TypeError, ValueError):
+            pass
+
+    return None
+
+
+def _iterBoxes(fh, start, end):
+    """Itère (type, contentStart, boxEnd) sur les boxes ISO-BMFF entre start et end."""
+    pos = start
+    while pos + 8 <= end:
+        fh.seek(pos)
+        header = fh.read(8)
+        if len(header) < 8:
+            return
+        size = int.from_bytes(header[0:4], "big")
+        boxtype = header[4:8]
+        content = pos + 8
+        if size == 1:
+            ext = fh.read(8)
+            if len(ext) < 8:
+                return
+            size = int.from_bytes(ext, "big")
+            content = pos + 16
+        elif size == 0:
+            size = end - pos
+        box_end = pos + size
+        if size < 8 or box_end > end:
+            return
+        yield boxtype, content, box_end
+        pos = box_end
+
+
+def _tkhdAngle(fh, start, end):
+    """Angle (sens horaire, normalisé) issu de la matrice d'affichage d'un box tkhd.
+
+    Renvoie None si la piste n'est pas visuelle (largeur/hauteur nulles, cas des
+    pistes audio) ou si la matrice est dégénérée.
+    """
+    fh.seek(start)
+    data = fh.read(end - start)
+    if len(data) < 4:
+        return None
+    version = data[0]
+    # Octets précédant la matrice, selon la version du box :
+    #   v1 : version+flags(4) ctime(8) mtime(8) track_id(4) reserved(4) duration(8) = 36
+    #   v0 : idem sur 32 bits                                                       = 24
+    # puis reserved(8) layer(2) alternate_group(2) volume(2) reserved(2)            = 16
+    head = 36 if version == 1 else 24
+    matrix_off = head + 16
+    if len(data) < matrix_off + 36 + 8:
+        return None
+    matrix = struct.unpack(">9i", data[matrix_off:matrix_off + 36])
+    width = struct.unpack(">I", data[matrix_off + 36:matrix_off + 40])[0]
+    height = struct.unpack(">I", data[matrix_off + 40:matrix_off + 44])[0]
+    if width == 0 or height == 0:
+        return None  # piste non visuelle (audio, texte, timecode…)
+    a = matrix[0] / 65536.0
+    b = matrix[1] / 65536.0
+    if a == 0 and b == 0:
+        return None
+    # ffmpeg définit rotation(side_data) = -atan2(b, a) ; la correction horaire
+    # est donc directement +atan2(b, a).
+    return _quantizeAngle(math.degrees(math.atan2(b, a)))
+
+
+def _rotationFromMp4(path):
+    """Rotation (sens horaire, normalisée) via un parcours manuel MP4/MOV, ou None."""
+    try:
+        with open(path, "rb") as fh:
+            fh.seek(0, os.SEEK_END)
+            file_end = fh.tell()
+            for btype, cstart, cend in _iterBoxes(fh, 0, file_end):
+                if btype != b"moov":
+                    continue
+                for mtype, mstart, mend in _iterBoxes(fh, cstart, cend):
+                    if mtype != b"trak":
+                        continue
+                    for ttype, tstart, tend in _iterBoxes(fh, mstart, mend):
+                        if ttype == b"tkhd":
+                            angle = _tkhdAngle(fh, tstart, tend)
+                            if angle is not None:
+                                return angle
+                return None
+    except Exception:
+        return None
+    return None
+
+
+def detectRotation(path):
+    """Détecte la rotation d'orientation d'une vidéo.
+
+    Cascade : ffprobe (système, ou embarqué via imageio-ffmpeg) puis, à défaut,
+    parcours manuel de la matrice d'affichage MP4/MOV (moins fiable, MP4/MOV
+    uniquement).
+
+    Args:
+        path (str): chemin du fichier vidéo.
+
+    Returns:
+        int: angle à appliquer dans le sens horaire pour redresser l'image
+             (0, 90, 180 ou 270). 0 si rien n'est détecté ou en cas d'erreur.
+    """
+    for detector in (_rotationFromFfprobe, _rotationFromMp4):
+        try:
+            angle = detector(path)
+        except Exception:
+            angle = None
+        if angle:
+            return angle
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Auto-rotation ffmpeg au décodage
+# ---------------------------------------------------------------------------
+#
+# moviepy 2.0.0.dev2 lit les vidéos en appelant `ffmpeg` SANS `-noautorotate`.
+# Selon la version de ffmpeg, les frames renvoyées à moviepy peuvent donc être
+# DÉJÀ réorientées d'après les métadonnées (mais redimensionnées aux dimensions
+# codées — donc écrasées). Comme on ne connaît pas la version de ffmpeg de la
+# machine d'exécution, on détecte ce comportement à chaud plutôt que de le
+# supposer : on compare une frame décodée avec et sans `-noautorotate`.
+
+
+def _ffmpegBinary():
+    """Le binaire ffmpeg utilisé par moviepy pour lire les vidéos."""
+    try:
+        from moviepy.config import FFMPEG_BINARY
+        if FFMPEG_BINARY and os.path.sep in str(FFMPEG_BINARY):
+            return FFMPEG_BINARY
+    except Exception:
+        pass
+    try:
+        import imageio_ffmpeg
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        return shutil.which("ffmpeg") or "ffmpeg"
+
+
+def _ffmpegAutorotates(path):
+    """True si le ffmpeg utilisé réoriente la vidéo au décodage.
+
+    Compare la première frame décodée avec et sans `-noautorotate`. Si ffmpeg est
+    trop ancien pour connaître `-noautorotate`, l'appel échoue et on renvoie
+    False (les ffmpeg anciens n'auto-pivotent pas) : on appliquera alors la
+    rotation nous-mêmes.
+    """
+    binary = _ffmpegBinary()
+
+    def firstFrame(extra):
+        proc = subprocess.run(
+            [binary, "-v", "error", *extra, "-i", path, "-frames:v", "1",
+             "-f", "image2pipe", "-vcodec", "png", "-"],
+            capture_output=True, timeout=30,
+        )
+        return proc.stdout
+
+    try:
+        withRotate = firstFrame([])
+        withoutRotate = firstFrame(["-noautorotate"])
+    except Exception:
+        return False
+    return bool(withRotate) and bool(withoutRotate) and withRotate != withoutRotate
+
+
+def _planRotation(input, rawWidth, rawHeight, manualRotate=0):
+    """Planifie le redressement d'une vidéo.
+
+    Args:
+        input (str): chemin du fichier source.
+        rawWidth, rawHeight (int): dimensions telles que rapportées par moviepy
+            (résolution CODÉE, avant rotation).
+        manualRotate (int): rotation explicite demandée par l'utilisateur
+            (0/90/180/270). Prioritaire sur la détection automatique.
+
+    Returns:
+        (residual, displayWidth, displayHeight):
+          - residual : rotation horaire (0/90/180/270) qu'il RESTE à appliquer
+            via moviepy, une fois retranchée l'éventuelle auto-rotation de
+            ffmpeg au décodage ;
+          - displayWidth/displayHeight : dimensions réellement affichées (pour
+            ResizeMaximal / `-vf scale`).
+    """
+    detected = detectRotation(input)
+
+    try:
+        manual = int(manualRotate)
+    except (ValueError, TypeError):
+        manual = 0
+    if manual not in (90, 180, 270):
+        manual = 0
+
+    # Choix explicite de l'utilisateur prioritaire, sinon métadonnées.
+    # NB : dans le pipeline actuel transcodeParams["rotate"] vaut 0 par défaut
+    # (cf. controllers/conductors.py) ; on n'a donc override que si non nul,
+    # sinon la détection automatique ne servirait jamais.
+    target = manual if manual else detected
+
+    # Rotation déjà appliquée par ffmpeg au moment où moviepy décode.
+    ffmpegApplied = 0
+    if detected:
+        try:
+            if _ffmpegAutorotates(input):
+                ffmpegApplied = detected
+        except Exception:
+            ffmpegApplied = 0
+
+    residual = (target - ffmpegApplied) % 360
+
+    if target in (90, 270):
+        displayWidth, displayHeight = rawHeight, rawWidth
+    else:
+        displayWidth, displayHeight = rawWidth, rawHeight
+
+    return residual, displayWidth, displayHeight
 
 
 """Converti une vidéo
@@ -49,18 +350,35 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={},
 
             # On récupère la durée
             videoDuration = video.duration
-        
-            # On récupère la taille actuelle
+
+            # On récupère la taille actuelle (résolution codée)
             currentSize = video.size
             currentWidth = currentSize[0]
             currentHeight = currentSize[1]
 
+            # --- Rotation ----------------------------------------------------
+            # On part de la rotation lue dans les métadonnées (vidéos smartphone
+            # stockées en paysage) ; un `rotate` manuel non nul la remplace.
+            # _planRotation() tient compte du fait que ffmpeg a pu déjà
+            # réorienter les frames au décodage : `residual` est ce qu'il reste
+            # à faire, et (displayWidth, displayHeight) sont les dimensions
+            # réellement affichées.
+            rotateResidual, displayWidth, displayHeight = _planRotation(
+                input, currentWidth, currentHeight, transcodeParams.get("rotate", 0)
+            )
+
             if maxborder != False:
-                # On calcule les nouvelles dimensions
-                newWidth, newHeight = ResizeMaximal(currentWidth, currentHeight, maxborder)
+                # On calcule les nouvelles dimensions (affichées)
+                newWidth, newHeight = ResizeMaximal(displayWidth, displayHeight, maxborder)
                 newSize = (newWidth, newHeight)
             else:
-                newSize = (currentWidth, currentHeight)
+                newSize = (displayWidth, displayHeight)
+            # `-vf scale` s'exécute côté ffmpeg APRÈS le .rotate() de moviepy
+            # (qui transforme les frames en amont du pipe, cf.
+            # moviepy/video/fx/rotate.py) : on lui passe donc directement les
+            # dimensions d'affichage, sans ré-inversion. Ce même scale corrige
+            # aussi l'aspect ratio quand ffmpeg a livré des frames déjà pivotées
+            # mais écrasées à la résolution codée.
 
             # On demande un extrait ?
             newBegin = 0
@@ -71,7 +389,7 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={},
                     cutBegin = 0
                 else:
                     cutBegin = int(transcodeParams["cutBegin"])
-                
+
                 if transcodeParams["cutEnd"]=="":
                     cutEnd = videoDuration
                 else:
@@ -80,29 +398,13 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={},
                 if cutBegin < cutEnd and cutBegin < videoDuration and cutEnd < videoDuration:
                     newBegin = cutBegin
                     newEnd = cutEnd
-            
-            # Si on a un rotate
-            rotateDeg = 0
-            if "rotate" in transcodeParams:
-                rotateParam = 0
-                try:
-                    rotateParam = int(transcodeParams["rotate"])
-                except Exception as e:
-                    pass
-                
-                if rotateParam==0 or rotateParam==90 or rotateParam==180 or rotateParam==270:
-                    rotateDeg = rotateParam
-            
+
             # On crée un extrait
             subclip = video.subclip(newBegin, newEnd)
 
             # On initialise le logger qui permettra de suivre l'avancement
             logger = VideoLogger()
             logger.setCbk(progressCallback)
-
-            # On échange width et height en cas de rotate de 90 et 270
-            if rotateDeg==90 or rotateDeg==270:
-                newSize = (newSize[1], newSize[0])
 
             # Personnaliser les options de l'encodeur FFmpeg
             ffmpeg_params = [
@@ -118,7 +420,7 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={},
             ];
 
             # Lancement du transcodage avec un redimensionnement
-            subclip.rotate(0-rotateDeg).write_videofile(output, codec="libvpx", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
+            subclip.rotate(0-rotateResidual).write_videofile(output, codec="libvpx", preset="superfast", ffmpeg_params=ffmpeg_params, logger=logger)
 
     except Exception as e:
         return e
@@ -128,7 +430,7 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={},
             subclip.close()
         except Exception as e:
             pass
-    
+
     return True
 
 
@@ -148,6 +450,15 @@ def getThumbnailPicture(input, output, maxborder):
 
             videoDuration = video.duration
 
+            # Rotation d'orientation éventuelle. Après transcodage la rotation
+            # est déjà « cuite » dans les pixels : detectRotation() renvoie alors
+            # 0 et rien n'est fait ici. Utile en revanche pour les fichiers bruts
+            # (jingles "raw" copiés sans transcodage).
+            currentWidth, currentHeight = video.size
+            rotateResidual, displayWidth, displayHeight = _planRotation(
+                input, currentWidth, currentHeight
+            )
+
             # On défini la période d'extraction
             if False and clipStart + clipDuration <= videoDuration:
                 sequenceStart = clipStart
@@ -159,15 +470,17 @@ def getThumbnailPicture(input, output, maxborder):
                 else:
                     sequenceStart = 0
                     sequenceEnd = videoDuration
-            
+
             # Extraction du clip
             clip = video.subclip(sequenceStart, sequenceEnd)
 
-            # On redimensionne le clip
-            currentSize = clip.size
-            currentWidth = currentSize[0]
-            currentHeight = currentSize[1]
-            newSize = ResizeMaximal(currentWidth, currentHeight, maxborder)
+            # On redresse le clip si nécessaire
+            if rotateResidual:
+                clip = clip.rotate(0-rotateResidual)
+
+            # On redimensionne le clip vers les dimensions AFFICHÉES (ce qui
+            # corrige aussi l'aspect ratio si ffmpeg a livré des frames écrasées)
+            newSize = ResizeMaximal(displayWidth, displayHeight, maxborder)
             clip = clip.resize(newSize)
 
             # On enregistre le GIF
@@ -184,4 +497,3 @@ def getThumbnailPicture(input, output, maxborder):
             pass
 
     return True
-
