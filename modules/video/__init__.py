@@ -12,7 +12,7 @@ import math
 from lib.db import session
 from lib.models import Media, Show, Line, Conductor
 from lib.config import config
-from lib.video import convertVideo, getThumbnailPicture
+from lib.video import convertVideoSafe, getThumbnailPicture
 
 
 dirTmpMedias = config["directories"]["mediasTmp"] # Temporary medias folder without last /
@@ -165,8 +165,11 @@ def main():
 
                                     videoConversion = True
                                 else:
-                                    # On lance la conversion
-                                    videoConversion = convertVideo(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, transcode["large"], progressCallback, transcode, transcode["quality"], config["transcoding"]["threads"])
+                                    # On lance la conversion dans un sous-processus
+                                    # isolé avec timeout (voir convertVideoSafe :
+                                    # ffmpeg peut se figer sans erreur sur un pipe).
+                                    transcodeTimeout = int(config["transcoding"].get("timeout", 3600))
+                                    videoConversion = convertVideoSafe(dirTmpMedias+"/"+filename, dirMedias+"/"+final_filename, transcode["large"], progressCallback, transcode, transcode["quality"], config["transcoding"]["threads"], timeout=transcodeTimeout)
 
                                 if videoConversion==True:
                                     print("        > ✅ Conversion succeeded for media ID {}.".format(media.id))

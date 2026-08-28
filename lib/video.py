@@ -1,7 +1,10 @@
 import json
 import math
+import multiprocessing
 import os
+import queue as _queue
 import shutil
+import signal
 import struct
 import subprocess
 import time
@@ -108,7 +111,11 @@ def _rotationFromFfprobe(path):
             except (TypeError, ValueError):
                 pass
 
-    # 2. tag "rotate" hérité (valeur positive = sens horaire)
+    # 2. tag "rotate" hérité (QuickTime / vieux Android). Convention admise :
+    #    valeur positive = sens horaire (identique à `-metadata:s:v rotate=`).
+    #    NB : non vérifié empiriquement ici (ffmpeg récent n'écrit plus ce tag) ;
+    #    si le signe est inversé pour ces fichiers, la rotation partira dans le
+    #    mauvais sens. Le side_data ci-dessus reste prioritaire.
     tags = stream.get("tags") or {}
     if "rotate" in tags:
         try:
@@ -286,7 +293,8 @@ def _planRotation(input, rawWidth, rawHeight, manualRotate=0):
         rawWidth, rawHeight (int): dimensions telles que rapportées par moviepy
             (résolution CODÉE, avant rotation).
         manualRotate (int): rotation explicite demandée par l'utilisateur
-            (0/90/180/270). Prioritaire sur la détection automatique.
+            (0/90/180/270). Si non nulle, elle définit l'orientation finale
+            voulue (elle ne s'ADDITIONNE pas à la rotation détectée).
 
     Returns:
         (residual, displayWidth, displayHeight):
@@ -305,7 +313,8 @@ def _planRotation(input, rawWidth, rawHeight, manualRotate=0):
     if manual not in (90, 180, 270):
         manual = 0
 
-    # Choix explicite de l'utilisateur prioritaire, sinon métadonnées.
+    # Orientation finale visée : le choix explicite de l'utilisateur s'il est
+    # non nul, sinon les métadonnées.
     # NB : dans le pipeline actuel transcodeParams["rotate"] vaut 0 par défaut
     # (cf. controllers/conductors.py) ; on n'a donc override que si non nul,
     # sinon la détection automatique ne servirait jamais.
@@ -320,6 +329,13 @@ def _planRotation(input, rawWidth, rawHeight, manualRotate=0):
         except Exception:
             ffmpegApplied = 0
 
+    # `residual` = ce qu'il reste à faire pour passer de l'état actuel des
+    # frames (déjà pivotées de `ffmpegApplied`) à l'orientation `target`.
+    # Cas dominants vérifiés : source sans métadonnée + rotate manuel
+    # (residual == manual), et métadonnée seule avec ffmpeg auto-rotate
+    # (residual == 0). Le cas combiné (métadonnée + rotate manuel différent
+    # ET ffmpeg auto-rotate) applique bien un delta cohérent mais n'a pas été
+    # testé sur fichier réel.
     residual = (target - ffmpegApplied) % 360
 
     if target in (90, 270):
@@ -433,6 +449,129 @@ def convertVideo(input, output, maxborder, progressCallback, transcodeParams={},
 
     return True
 
+
+# ---------------------------------------------------------------------------
+# Transcodage isolé (robustesse)
+# ---------------------------------------------------------------------------
+#
+# CHOIX DE ROBUSTESSE
+# -------------------
+# ffmpeg/libvpx peut se bloquer indéfiniment sur un pipe (deadlock
+# stdin/stdout) sans jamais renvoyer d'erreur : le thread vidéo se fige alors en
+# silence, media.progress reste bloqué et plus aucun média ne se transcode.
+# Un `Restart=on-failure` systemd n'aide pas (le process ne plante pas, il
+# pend). On exécute donc chaque conversion dans un SOUS-PROCESSUS qu'on peut
+# tuer au bout d'un `timeout` ; la logique de retry existante (media.passes)
+# reprend ensuite le fichier normalement.
+#
+# Contexte "spawn" imposé (et non "fork") : le thread vidéo tourne au milieu de
+# Flask / SQLAlchemy / socketio, un fork copierait des verrous dans un état
+# incohérent. Le sous-processus est placé dans son propre groupe de process
+# pour pouvoir tuer aussi le ffmpeg qu'il a lancé.
+
+
+def _transcodeChild(progressQueue, resultQueue, input, output, maxborder,
+                    transcodeParams, quality, threads):
+    try:
+        os.setpgrp()
+    except Exception:
+        pass
+
+    def childCallback(percent, lastUpdate):
+        try:
+            progressQueue.put(percent)
+        except Exception:
+            pass
+
+    try:
+        result = convertVideo(input, output, maxborder, childCallback,
+                              transcodeParams, quality, threads)
+        resultQueue.put(True if result is True else str(result))
+    except Exception as e:  # pragma: no cover - garde-fou
+        resultQueue.put("Erreur sous-processus de transcodage : {}".format(e))
+
+
+def _killProcessTree(proc, sig):
+    try:
+        os.killpg(os.getpgid(proc.pid), sig)
+    except Exception:
+        try:
+            proc.terminate() if sig == signal.SIGTERM else proc.kill()
+        except Exception:
+            pass
+
+
+def convertVideoSafe(input, output, maxborder, progressCallback,
+                     transcodeParams={}, quality=0.5, threads=1, timeout=3600):
+    """convertVideo() isolé dans un sous-processus avec timeout dur.
+
+    Même signature que convertVideo() plus `timeout` (secondes). Renvoie True en
+    cas de succès, sinon une chaîne décrivant l'erreur (ou le timeout).
+    """
+    ctx = multiprocessing.get_context("spawn")
+    progressQueue = ctx.Queue()
+    resultQueue = ctx.Queue()
+    proc = ctx.Process(
+        target=_transcodeChild,
+        args=(progressQueue, resultQueue, input, output, maxborder,
+              transcodeParams, quality, threads),
+        daemon=True,
+    )
+    proc.start()
+
+    lastUpdate = [0]
+    deadline = time.time() + timeout
+    result = None
+
+    while result is None:
+        # Timeout ? (vérifié à chaque tour, même sous un flux continu de
+        # messages de progression)
+        if time.time() > deadline:
+            _killProcessTree(proc, signal.SIGTERM)
+            proc.join(10)
+            if proc.is_alive():
+                _killProcessTree(proc, signal.SIGKILL)
+                proc.join(5)
+            result = "Timeout de transcodage ({}s) : sous-processus interrompu".format(timeout)
+            break
+
+        # Progression (bloquant court : cadence la boucle à ~1s)
+        try:
+            percent = progressQueue.get(timeout=1)
+            try:
+                progressCallback(percent, lastUpdate)
+            except Exception:
+                pass
+            continue
+        except _queue.Empty:
+            pass
+
+        # Résultat final ?
+        try:
+            result = resultQueue.get_nowait()
+            break
+        except _queue.Empty:
+            pass
+
+        # Process mort sans résultat ?
+        if not proc.is_alive():
+            try:
+                result = resultQueue.get(timeout=2)
+            except _queue.Empty:
+                result = "Le sous-processus de transcodage s'est arrêté sans résultat"
+            break
+
+    proc.join(5)
+    if proc.is_alive():
+        _killProcessTree(proc, signal.SIGKILL)
+
+    if result is True:
+        try:
+            progressCallback(100, lastUpdate)
+        except Exception:
+            pass
+        return True
+    return result if result is not None else "Transcodage échoué (raison inconnue)"
 
 
 """Converti une vidéo en gif

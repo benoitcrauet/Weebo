@@ -31,6 +31,9 @@ transcoding:
   maxRetry: 20
   # Nombre de threads à utiliser pour le transcodage
   threads: 1
+  # Durée max (secondes) d'un transcodage avant interruption forcée du
+  # sous-processus. Protège contre les blocages ffmpeg silencieux.
+  timeout: 3600
 
 
 # Paramètres de l'auto nettoyage
