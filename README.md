@@ -8,6 +8,41 @@ Weebo est une application web de gestion de conducteurs de production audio/vid�
 - `pip`
 - Un environnement virtuel recommandé
 
+## Prérequis système
+
+### ffmpeg / ffprobe
+
+Le transcodage des médias et la génération des miniatures reposent sur **ffmpeg**
+(qui fournit aussi **ffprobe**). Installez le paquet système :
+
+```bash
+# Debian / Ubuntu
+sudo apt install ffmpeg
+
+# Fedora / RHEL
+sudo dnf install ffmpeg
+
+# macOS (Homebrew)
+brew install ffmpeg
+```
+
+`ffprobe` sert notamment à détecter automatiquement la rotation des vidéos
+tournées au smartphone (fichiers stockés en paysage avec une métadonnée
+d'orientation, typiques des iPhone/Android). Sans `ffprobe`, Weebo se rabat sur
+un analyseur MP4/MOV en Python pur, moins fiable et limité à ces conteneurs.
+
+Un binaire ffmpeg minimal est fourni par la dépendance `imageio-ffmpeg` et sera
+utilisé en dernier recours, mais l'installation du paquet système reste
+recommandée (meilleure couverture des codecs, `ffprobe` inclus).
+
+### Photos HEIC / HEIF
+
+Weebo accepte les photos au format **HEIC/HEIF** (format par défaut des iPhone
+récents) grâce à la dépendance `pillow-heif` (installée via `requirements.txt`).
+Les photos sont décodées puis ré-enregistrées en WebP/PNG classiques côté
+serveur — aucun réglage supplémentaire n'est nécessaire. Si `pillow-heif` n'est
+pas installé, Weebo démarre quand même mais refuse les uploads `.heic`/`.heif`.
+
 ## Installation
 
 1. Copiez le fichier de configuration d'exemple :

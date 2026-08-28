@@ -9,10 +9,27 @@ from lib.welcome import welcome
 from lib.arguments import arguments
 from lib.console import reinit_database, reinit_user, create_admin, generate_fake_data
 
+
+def _register_heif():
+    """Active le décodage HEIC/HEIF dans PIL (photos iPhone récentes).
+
+    Optionnel : si pillow-heif n'est pas installé, Weebo fonctionne mais
+    refusera les uploads .heic/.heif.
+    """
+    try:
+        from pillow_heif import register_heif_opener
+        register_heif_opener()
+    except ImportError:
+        print("pillow-heif absent : les photos HEIC/HEIF ne seront pas acceptées.")
+
+
 def main():
 
     welcome()
     print()
+
+    # Support des photos HEIC/HEIF (à faire une seule fois, avant les threads)
+    _register_heif()
 
     # En cas d'absence de fichier config
     if not os.path.isfile("config.yaml"):

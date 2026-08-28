@@ -5,7 +5,7 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_login import login_required
 import wtforms
 import wtforms.validators as validators
-from PIL import Image
+from PIL import Image, ImageOps
 from io import BytesIO
 import math
 
@@ -42,7 +42,7 @@ class FormShowEdit(FlaskForm):
     id = wtforms.HiddenField("ID", validators=[])
     name = wtforms.StringField("Nom de l'émission", validators=[validators.DataRequired()], render_kw={"maxlength": 30})
     description = wtforms.StringField("Description", description="Une simple description, juste pour vous, pour vous y retrouver.", validators=[], render_kw={"maxlength": 150})
-    logo = wtforms.FileField("Logo", description="Permet d'associer un logo à l'émission.", validators=[FileAllowed(["jpg","jpeg","png","webp"])])
+    logo = wtforms.FileField("Logo", description="Permet d'associer un logo à l'émission.", validators=[FileAllowed(["jpg","jpeg","png","webp","heic","heif"])])
     logo_delete = wtforms.BooleanField("Supprimer le logo actuel")
     introScenes = wtforms.TextAreaField("Scènes d'intro", description="Vous pouvez écrire ici les noms des scènes d'introduction de votre émission (une par ligne). Ceci aide Weebo à comprendre quand votre émission commence réellement pour calculer les timecodes de votre direct.", validators=[])
     roles = wtforms.TextAreaField("Rôles", description="Définissez les différents rôles pour votre émission. Chaque rôle correspond à une caméra. N'inscrivez qu'un seul rôle par ligne.", validators=[])
@@ -130,6 +130,9 @@ def showEdit(guid=None):
                     logo_bytes = request.files["logo"].read()
                     if logo_bytes:
                         image = Image.open(BytesIO(logo_bytes))
+
+                        # On applique l'orientation EXIF avant tout traitement
+                        image = ImageOps.exif_transpose(image)
 
                         # On redimensionne l'image
                         w,h = image.size

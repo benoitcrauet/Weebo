@@ -5,6 +5,7 @@ flask-socketio
 Flask-WTF
 SQLAlchemy
 pillow==9.5.0
+pillow-heif==0.15.0  # dernière version compatible avec pillow 9.5
 flask-cors
 moviepy==2.0.0.dev2
 setuptools
