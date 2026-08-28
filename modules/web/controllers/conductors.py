@@ -914,7 +914,7 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
         filename = generate_guid()
         
         # On check les extensions
-        if extension=="jpg" or extension=="jpeg" or extension=="png" or extension=="bmp" or extension=="webp":
+        if extension in ("jpg", "jpeg", "png", "bmp", "webp", "heic", "heif"):
             try:
                 # On ouvre l'image
                 picture_bytes = file.read()
