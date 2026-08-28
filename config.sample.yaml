@@ -29,8 +29,11 @@ directories:
 transcoding:
   # Nombre d'essais max avant suppression du fichier
   maxRetry: 20
-  # Nombre de threads à utiliser pour le transcodage
+  # Nombre de threads ffmpeg utilisés PAR transcodage
   threads: 1
+  # Nombre de transcodages menés EN PARALLÈLE (défaut 3).
+  # Charge CPU approximative = concurrency x threads : ajustez en conséquence.
+  concurrency: 3
   # Durée max (secondes) d'un transcodage avant interruption forcée du
   # sous-processus. Protège contre les blocages ffmpeg silencieux.
   timeout: 3600
