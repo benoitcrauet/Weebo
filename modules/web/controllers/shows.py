@@ -5,7 +5,7 @@ from flask_wtf.file import FileField, FileRequired, FileAllowed
 from flask_login import login_required
 import wtforms
 import wtforms.validators as validators
-from PIL import Image
+from PIL import Image, ImageOps
 from io import BytesIO
 import math
 
@@ -130,6 +130,9 @@ def showEdit(guid=None):
                     logo_bytes = request.files["logo"].read()
                     if logo_bytes:
                         image = Image.open(BytesIO(logo_bytes))
+
+                        # On applique l'orientation EXIF avant tout traitement
+                        image = ImageOps.exif_transpose(image)
 
                         # On redimensionne l'image
                         w,h = image.size

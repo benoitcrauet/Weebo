@@ -10,7 +10,7 @@ from urllib.parse import urlencode
 import locale
 import json
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageOps
 import time
 
 from lib.socketio import SocketIOInstance
@@ -920,7 +920,11 @@ def api_conductorsLineMediaAdd(cond_guid, line_guid):
                 picture_bytes = file.read()
                 image = Image.open(BytesIO(picture_bytes))
 
-                # On pivote l'image
+                # On applique l'orientation EXIF (photos smartphone stockées
+                # « de travers » avec un tag Orientation)
+                image = ImageOps.exif_transpose(image)
+
+                # On pivote l'image (rotation manuelle demandée à l'upload)
                 image = image.rotate(0-transcode["rotate"], expand=True)
 
                 # On redimensionne l'image pour le main et pour la miniature
